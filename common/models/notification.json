@@ -17,6 +17,10 @@
       "type": "string",
       "required": true,
       "default": "new"
+    },
+    "userId": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],

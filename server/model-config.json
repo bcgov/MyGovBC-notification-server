@@ -14,7 +14,7 @@
     ]
   },
   "notification": {
-    "dataSource": null,
+    "dataSource": "imdb",
     "public": true
   }
 }
