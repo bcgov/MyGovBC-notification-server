@@ -13,4 +13,8 @@ module.exports = function (Notification) {
     ctx.query.where.userId = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname') || 'unknown'
     next()
   })
+  Notification.beforeRemote('create', function (ctx, unused, next) {
+    ctx.req.body.userId = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname') || 'unknown'
+    next()
+  })
 };
