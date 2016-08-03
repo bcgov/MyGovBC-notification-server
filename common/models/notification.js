@@ -14,7 +14,11 @@ module.exports = function (Notification) {
     next()
   })
   Notification.beforeRemote('create', function (ctx, unused, next) {
-    ctx.req.body.userId = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname') || 'unknown'
+    if (ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname')) {
+      var error = new Error('Unauthorized')
+      error.status = 401
+      return next(error)
+    }
     next()
   })
 };
