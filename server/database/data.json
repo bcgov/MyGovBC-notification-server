@@ -4,7 +4,7 @@
   },
   "models": {
     "notification": {
-      "1": "{\"subject\":\"string\",\"body\":\"string\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":1,\"serviceName\":\"Education\"}"
+      "1": "{\"subject\":\"Transcript\",\"body\":\"You can order transcript online.\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":1,\"serviceName\":\"Education\"}"
     }
   }
 }
