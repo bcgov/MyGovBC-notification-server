@@ -2,7 +2,7 @@
   "imdb": {
     "name": "imdb",
     "localStorage": "",
-    "file": "database/data.json",
+    "file": "server/database/data.json",
     "connector": "memory"
   }
 }
