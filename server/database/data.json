@@ -4,7 +4,7 @@
   },
   "models": {
     "notification": {
-      "1": "{\"subject\":\"string\",\"body\":\"string\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":1}"
+      "1": "{\"subject\":\"string\",\"body\":\"string\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":1,\"serviceId\":\"Education\"}"
     }
   }
 }

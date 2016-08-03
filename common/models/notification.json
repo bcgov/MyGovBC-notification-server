@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "hidden": [
+    "userId"
+  ],
   "properties": {
     "subject": {
       "type": "string",
@@ -21,9 +24,11 @@
     "userId": {
       "type": "string",
       "required": true
+    },
+    "serviceName": {
+      "type": "string"
     }
   },
-  "hidden": ["userId"],
   "validations": [],
   "relations": {},
   "acls": [],
