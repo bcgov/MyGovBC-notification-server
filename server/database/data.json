@@ -1,10 +1,11 @@
 {
   "ids": {
-    "notification": 2
+    "notification": 3
   },
   "models": {
     "notification": {
-      "1": "{\"subject\":\"Transcript\",\"body\":\"You can order transcript online.\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":1,\"serviceName\":\"Education\"}"
+      "1": "{\"subject\":\"Transcript\",\"body\":\"You can order transcript online.\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":1,\"serviceName\":\"Education\"}",
+      "2": "{\"subject\":\"widget\",\"body\":\"shiny\",\"state\":\"read\",\"userId\":\"unknown\",\"id\":2,\"serviceName\":\"My Shiny New Widget\"}"
     }
   }
 }
