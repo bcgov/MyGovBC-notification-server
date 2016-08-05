@@ -7,6 +7,7 @@ module.exports = function (Notification) {
   //Notification.disableRemoteMethod('create', isStatic)
   Notification.disableRemoteMethod('count', isStatic)
   Notification.disableRemoteMethod('upsert', isStatic)
+  Notification.disableRemoteMethod('deleteById', true)
   Notification.observe('access', function (ctx, next) {
     var httpCtx = require('loopback').getCurrentContext();
     ctx.query.where = ctx.query.where || {}
@@ -41,4 +42,11 @@ module.exports = function (Notification) {
     }
     next()
   })
-};
+
+  Notification.prototype.deleteById = function(callback) {
+    this.state = 'deleted'
+    Notification.replaceById( this.id, this, function (err, res) {
+      callback(err, 1)
+    })
+  }
+}

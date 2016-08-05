@@ -63,24 +63,6 @@ paths:
           schema:
             $ref: '#/definitions/notification'
       deprecated: false
-    delete:
-      tags:
-        - notification
-      summary: Delete a model instance by id from the data source.
-      operationId: notification.deleteById
-      parameters:
-        - name: id
-          in: path
-          description: Model id
-          required: true
-          type: string
-          format: JSON
-      responses:
-        '200':
-          description: Request was successful
-          schema:
-            type: object
-      deprecated: false
     put:
       tags:
         - notification
@@ -104,6 +86,25 @@ paths:
           description: Request was successful
           schema:
             $ref: '#/definitions/notification'
+      deprecated: false
+    delete:
+      tags:
+        - notification
+      summary: delete a notification by Id
+      operationId: notification.prototype.deleteById
+      parameters:
+        - name: id
+          in: path
+          description: PersistedModel id
+          required: true
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            description: Count
+            type: object
       deprecated: false
 definitions:
   notification:
