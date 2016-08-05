@@ -4,7 +4,7 @@
   },
   "models": {
     "notification": {
-      "1": "{\"subject\":\"Transcript\",\"body\":\"You can order transcript online.\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":1,\"serviceName\":\"Education\"}",
+      "1": "{\"subject\":\"Transcript\",\"body\":\"You can order transcript online.\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":1,\"serviceName\":\"Education\",\"validTill\":\"2016-08-04T21:38:10.983Z\"}",
       "2": "{\"subject\":\"widget\",\"body\":\"shiny\",\"state\":\"new\",\"userId\":\"unknown\",\"id\":2,\"serviceName\":\"My Shiny New Widget\"}"
     }
   }

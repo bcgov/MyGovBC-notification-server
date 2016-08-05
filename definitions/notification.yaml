@@ -108,16 +108,16 @@ paths:
 definitions:
   notification:
     properties:
-      subject:
-        type: string
-      body:
+      serviceName:
         type: string
       state:
         default: new
         type: string
-      userId:
+      subject:
         type: string
-      serviceName:
+      body:
+        type: string
+      userId:
         type: string
       created:
         default: $now
@@ -136,9 +136,9 @@ definitions:
         type: number
         format: double
     required:
-      - subject
+      - serviceName
       - state
-      - userId
+      - subject
     additionalProperties: false
   x-any:
     properties: {}

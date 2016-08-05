@@ -7,6 +7,15 @@
   },
   "hidden": [],
   "properties": {
+    "serviceName": {
+      "type": "string",
+      "required": true
+    },
+    "state": {
+      "type": "string",
+      "required": true,
+      "default": "new"
+    },
     "subject": {
       "type": "string",
       "required": true
@@ -14,16 +23,7 @@
     "body": {
       "type": "string"
     },
-    "state": {
-      "type": "string",
-      "required": true,
-      "default": "new"
-    },
     "userId": {
-      "type": "string",
-      "required": true
-    },
-    "serviceName": {
       "type": "string"
     },
     "created": {
