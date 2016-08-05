@@ -27,6 +27,10 @@
     },
     "serviceName": {
       "type": "string"
+    },
+    "created": {
+      "type": "date",
+      "default": "$now"
     }
   },
   "validations": [],

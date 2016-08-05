@@ -1,0 +1,185 @@
+swagger: '2.0'
+
+info:
+  x-ibm-name: notification
+  version: 1.0.0
+  title: notification
+
+schemes:
+  - https
+host: $(catalog.host)
+basePath: /api
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+securityDefinitions:
+ clientIdHeader:
+   type: apiKey
+   in: header
+   name: X-IBM-Client-Id
+ clientSecretHeader:
+   in: "header"
+   name: "X-IBM-Client-Secret"
+   type: "apiKey"
+
+
+security:
+ -
+   clientIdHeader: []
+   clientSecretHeader: []
+
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  catalogs:
+    apic-dev:
+      properties:
+        runtime-url: $(TARGET_URL)
+    sb:
+      properties:
+        runtime-url: 'http://localhost:4001'
+  assembly:
+    execute:
+      - invoke:
+          target-url: $(runtime-url)$(request.path)$(request.search)
+
+paths:
+  /notifications:
+    post:
+      tags:
+        - notification
+      summary: Create a new instance of the model and persist it into the data source.
+      operationId: notification.create
+      parameters:
+        - name: data
+          in: body
+          description: Model instance data
+          required: false
+          schema:
+            $ref: '#/definitions/notification'
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            $ref: '#/definitions/notification'
+      deprecated: false
+    get:
+      tags:
+        - notification
+      summary: Find all instances of the model matched by filter from the data source.
+      operationId: notification.find
+      parameters:
+        - name: filter
+          in: query
+          description: 'Filter defining fields, where, include, order, offset, and limit'
+          required: false
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/notification'
+      deprecated: false
+  '/notifications/{id}':
+    get:
+      tags:
+        - notification
+      summary: Find a model instance by id from the data source.
+      operationId: notification.findById
+      parameters:
+        - name: id
+          in: path
+          description: Model id
+          required: true
+          type: string
+          format: JSON
+        - name: filter
+          in: query
+          description: Filter defining fields and include
+          required: false
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            $ref: '#/definitions/notification'
+      deprecated: false
+    delete:
+      tags:
+        - notification
+      summary: Delete a model instance by id from the data source.
+      operationId: notification.deleteById
+      parameters:
+        - name: id
+          in: path
+          description: Model id
+          required: true
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            type: object
+      deprecated: false
+    put:
+      tags:
+        - notification
+      summary: Update attributes for a model instance and persist it into the data source.
+      operationId: notification.prototype.updateAttributes
+      parameters:
+        - name: data
+          in: body
+          description: An object of model property name/value pairs
+          required: false
+          schema:
+            $ref: '#/definitions/notification'
+        - name: id
+          in: path
+          description: PersistedModel id
+          required: true
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            $ref: '#/definitions/notification'
+      deprecated: false
+
+
+definitions:
+  notification:
+    properties:
+      subject:
+        type: string
+      body:
+        type: string
+      state:
+        default: new
+        type: string
+      serviceName:
+        type: string
+      created:
+        default: $now
+        type: string
+        format: date
+      id:
+        type: number
+        format: double
+    required:
+      - subject
+      - state
+    additionalProperties: false
+  x-any:
+    properties: {}
+
