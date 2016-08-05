@@ -123,9 +123,15 @@ definitions:
         default: $now
         type: string
         format: date
-      type:
+      channel:
         default: inApp
         type: string
+      isBroadcast:
+        default: false
+        type: boolean
+      validTill:
+        type: string
+        format: date
       id:
         type: number
         format: double

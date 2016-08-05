@@ -30,9 +30,16 @@
       "type": "date",
       "default": "$now"
     },
-    "type": {
+    "channel": {
       "type": "string",
       "default": "inApp"
+    },
+    "isBroadcast": {
+      "type": "boolean",
+      "default": false
+    },
+    "validTill": {
+      "type": "date"
     }
   },
   "validations": [],
