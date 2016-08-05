@@ -26,10 +26,16 @@ module.exports = function (Notification) {
     if (!res) {
       return
     }
+    var httpCtx = require('loopback').getCurrentContext()
+    var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname') || 'unknown'
     ctx.result = res.filter(function (e, i) {
-      if (!e.validTill) return true
-      if (Date.parse(e.validTill) > new Date()) return true
-      return false
+      if (e.validTill && Date.parse(e.validTill) < new Date()) {
+        return false
+      }
+      if (e.deletedBy && e.deletedBy.indexOf(currUser) >= 0) {
+        return false
+      }
+      return true
     })
     next()
   })
@@ -43,9 +49,19 @@ module.exports = function (Notification) {
     next()
   })
 
-  Notification.prototype.deleteById = function(callback) {
-    this.state = 'deleted'
-    Notification.replaceById( this.id, this, function (err, res) {
+  Notification.prototype.deleteById = function (callback) {
+    if (this.isBroadcast) {
+      this.deletedBy = this.deletedBy || []
+      var httpCtx = require('loopback').getCurrentContext()
+      var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname') || 'unknown'
+      if (this.deletedBy.indexOf(currUser) < 0) {
+        this.deletedBy.push(currUser)
+      }
+    }
+    else {
+      this.state = 'deleted'
+    }
+    Notification.replaceById(this.id, this, function (err, res) {
       callback(err, 1)
     })
   }
