@@ -1,53 +1,3 @@
-swagger: '2.0'
-
-info:
-  x-ibm-name: notification
-  version: 1.0.0
-  title: notification
-
-schemes:
-  - https
-host: $(catalog.host)
-basePath: /api
-
-consumes:
-  - application/json
-produces:
-  - application/json
-
-securityDefinitions:
- clientIdHeader:
-   type: apiKey
-   in: header
-   name: X-IBM-Client-Id
- clientSecretHeader:
-   in: "header"
-   name: "X-IBM-Client-Secret"
-   type: "apiKey"
-
-
-security:
- -
-   clientIdHeader: []
-   clientSecretHeader: []
-
-x-ibm-configuration:
-  testable: true
-  enforced: true
-  cors:
-    enabled: true
-  catalogs:
-    apic-dev:
-      properties:
-        runtime-url: $(TARGET_URL)
-    sb:
-      properties:
-        runtime-url: 'http://localhost:4001'
-  assembly:
-    execute:
-      - invoke:
-          target-url: $(runtime-url)$(request.path)$(request.search)
-
 paths:
   /notifications:
     post:
@@ -155,8 +105,6 @@ paths:
           schema:
             $ref: '#/definitions/notification'
       deprecated: false
-
-
 definitions:
   notification:
     properties:
@@ -167,19 +115,65 @@ definitions:
       state:
         default: new
         type: string
+      userId:
+        type: string
       serviceName:
         type: string
       created:
         default: $now
         type: string
         format: date
+      type:
+        default: inApp
+        type: string
       id:
         type: number
         format: double
     required:
       - subject
       - state
+      - userId
     additionalProperties: false
   x-any:
     properties: {}
-
+swagger: '2.0'
+info:
+  x-ibm-name: notification
+  version: 1.0.0
+  title: notification
+schemes:
+  - https
+host: $(catalog.host)
+basePath: /api
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  clientIdHeader:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+  clientSecretHeader:
+    in: header
+    name: X-IBM-Client-Secret
+    type: apiKey
+security:
+  - clientIdHeader: []
+    clientSecretHeader: []
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  catalogs:
+    apic-dev:
+      properties:
+        runtime-url: $(TARGET_URL)
+    sb:
+      properties:
+        runtime-url: 'http://localhost:4001'
+  assembly:
+    execute:
+      - invoke:
+          target-url: $(runtime-url)$(request.path)$(request.search)

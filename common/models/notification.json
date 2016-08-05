@@ -5,9 +5,7 @@
   "options": {
     "validateUpsert": true
   },
-  "hidden": [
-    "userId"
-  ],
+  "hidden": [],
   "properties": {
     "subject": {
       "type": "string",
@@ -31,6 +29,10 @@
     "created": {
       "type": "date",
       "default": "$now"
+    },
+    "type": {
+      "type": "string",
+      "default": "inApp"
     }
   },
   "validations": [],
