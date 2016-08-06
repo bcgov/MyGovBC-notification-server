@@ -49,6 +49,29 @@ module.exports = function (Notification) {
     next()
   })
 
+  Notification.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
+    // only allow changing state
+    ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
+    if (ctx.instance.isBroadcast) {
+      var httpCtx = require('loopback').getCurrentContext()
+      var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname') || 'unknown'
+      if (ctx.args.data.state === 'read') {
+        ctx.args.data.readBy = instance.readBy || []
+        if (ctx.args.data.readBy.indexOf(currUser) <= 0) {
+          ctx.args.data.readBy.push(currUser)
+        }
+      }
+      if (ctx.args.data.state === 'deleted') {
+        ctx.args.data.deletedBy = instance.deletedBy || []
+        if (ctx.args.data.deletedBy.indexOf(currUser) <= 0) {
+          ctx.args.data.deletedBy.push(currUser)
+        }
+      }
+      delete ctx.args.data.state
+    }
+    next()
+  })
+
   Notification.prototype.deleteById = function (callback) {
     if (this.isBroadcast) {
       this.deletedBy = this.deletedBy || []
