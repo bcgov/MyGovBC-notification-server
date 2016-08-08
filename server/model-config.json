@@ -16,5 +16,9 @@
   "notification": {
     "dataSource": "imdb",
     "public": true
+  },
+  "subscription": {
+    "dataSource": "imdb",
+    "public": true
   }
 }

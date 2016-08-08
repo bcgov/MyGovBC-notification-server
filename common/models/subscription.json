@@ -1,0 +1,36 @@
+{
+  "name": "subscription",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "serviceName": {
+      "type": "string",
+      "required": true
+    },
+    "userId": {
+      "type": "string",
+      "required": true
+    },
+    "channel": {
+      "type": "string",
+      "required": true,
+      "default": "email"
+    },
+    "state": {
+      "type": "string",
+      "required": true,
+      "default": "unconfirmed"
+    },
+    "confirmationCode": {
+      "type": "string",
+      "default": "state"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
