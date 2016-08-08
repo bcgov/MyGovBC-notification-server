@@ -1,12 +1,12 @@
 module.exports = function (Notification) {
-  var isStatic = true
-  Notification.disableRemoteMethod('findOne', isStatic)
-  Notification.disableRemoteMethod('createChangeStream', isStatic)
-  Notification.disableRemoteMethod('exists', isStatic)
-  Notification.disableRemoteMethod('updateAll', isStatic)
-  //Notification.disableRemoteMethod('create', isStatic)
-  Notification.disableRemoteMethod('count', isStatic)
-  Notification.disableRemoteMethod('upsert', isStatic)
+  Notification.disableRemoteMethod('findOne', true)
+  Notification.disableRemoteMethod('findById', true)
+  Notification.disableRemoteMethod('createChangeStream', true)
+  Notification.disableRemoteMethod('exists', true)
+  Notification.disableRemoteMethod('updateAll', true)
+  //Notification.disableRemoteMethod('create', true)
+  Notification.disableRemoteMethod('count', true)
+  Notification.disableRemoteMethod('upsert', true)
   Notification.disableRemoteMethod('deleteById', true)
   Notification.observe('access', function (ctx, next) {
     var httpCtx = require('loopback').getCurrentContext();
