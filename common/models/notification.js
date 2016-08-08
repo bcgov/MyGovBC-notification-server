@@ -28,15 +28,20 @@ module.exports = function (Notification) {
     }
     var httpCtx = require('loopback').getCurrentContext()
     var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname') || 'unknown'
-    ctx.result = res.filter(function (e, i) {
+    ctx.result = res.reduce(function (p, e, i) {
       if (e.validTill && Date.parse(e.validTill) < new Date()) {
-        return false
+        return p
       }
       if (e.deletedBy && e.deletedBy.indexOf(currUser) >= 0) {
-        return false
+        return p
       }
-      return true
-    })
+      if (e.isBroadcast && e.readBy && e.readBy.indexOf(currUser) >= 0) {
+        e.state = 'read'
+        e.readBy = null
+      }
+      p.push(e)
+      return p
+    }, [])
     next()
   })
 
@@ -50,27 +55,30 @@ module.exports = function (Notification) {
   })
 
   Notification.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
-    // only allow changing state
-    ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
-    if (ctx.instance.isBroadcast) {
-      var httpCtx = require('loopback').getCurrentContext()
-      var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname') || 'unknown'
-      if (ctx.args.data.state === 'read') {
-        ctx.args.data.readBy = instance.readBy || []
-        if (ctx.args.data.readBy.indexOf(currUser) <= 0) {
-          ctx.args.data.readBy.push(currUser)
+      // only allow changing state
+      ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
+      if (ctx.instance.isBroadcast) {
+        var httpCtx = require('loopback').getCurrentContext()
+        var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname') || 'unknown'
+        switch (ctx.args.data.state) {
+          case 'read':
+            ctx.args.data.readBy = instance.readBy || []
+            if (ctx.args.data.readBy.indexOf(currUser) <= 0) {
+              ctx.args.data.readBy.push(currUser)
+            }
+            break
+          case 'deleted':
+            ctx.args.data.deletedBy = instance.deletedBy || []
+            if (ctx.args.data.deletedBy.indexOf(currUser) <= 0) {
+              ctx.args.data.deletedBy.push(currUser)
+            }
+            break
         }
+        delete ctx.args.data.state
       }
-      if (ctx.args.data.state === 'deleted') {
-        ctx.args.data.deletedBy = instance.deletedBy || []
-        if (ctx.args.data.deletedBy.indexOf(currUser) <= 0) {
-          ctx.args.data.deletedBy.push(currUser)
-        }
-      }
-      delete ctx.args.data.state
+      next()
     }
-    next()
-  })
+  )
 
   Notification.prototype.deleteById = function (callback) {
     if (this.isBroadcast) {
