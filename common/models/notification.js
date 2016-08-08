@@ -17,7 +17,7 @@ module.exports = function (Notification) {
         isBroadcast: true
       })
       ctx.query.where.or.push({
-        userId: httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
+        channelId: httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
       })
     }
     next()

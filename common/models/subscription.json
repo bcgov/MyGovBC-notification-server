@@ -10,14 +10,14 @@
       "type": "string",
       "required": true
     },
-    "userId": {
-      "type": "string",
-      "required": true
-    },
     "channel": {
       "type": "string",
       "required": true,
       "default": "email"
+    },
+    "channelId": {
+      "type": "string",
+      "required": true
     },
     "state": {
       "type": "string",
@@ -27,6 +27,9 @@
     "confirmationCode": {
       "type": "string",
       "default": "state"
+    },
+    "userId": {
+      "type": "string"
     }
   },
   "validations": [],

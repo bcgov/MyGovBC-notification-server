@@ -106,6 +106,94 @@ paths:
             description: Count
             type: object
       deprecated: false
+  /subscriptions:
+    post:
+      tags:
+        - subscription
+      summary: Create a new instance of the model and persist it into the data source.
+      operationId: subscription.create
+      parameters:
+        - name: data
+          in: body
+          description: Model instance data
+          required: false
+          schema:
+            $ref: '#/definitions/subscription'
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            $ref: '#/definitions/subscription'
+      deprecated: false
+    get:
+      tags:
+        - subscription
+      summary: Find all instances of the model matched by filter from the data source.
+      operationId: subscription.find
+      parameters:
+        - name: filter
+          in: query
+          description: 'Filter defining fields, where, include, order, offset, and limit'
+          required: false
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/subscription'
+      deprecated: false
+  '/subscriptions/{id}':
+    get:
+      tags:
+        - subscription
+      summary: Find a model instance by id from the data source.
+      operationId: subscription.findById
+      parameters:
+        - name: id
+          in: path
+          description: Model id
+          required: true
+          type: string
+          format: JSON
+        - name: filter
+          in: query
+          description: Filter defining fields and include
+          required: false
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            $ref: '#/definitions/subscription'
+      deprecated: false
+    put:
+      tags:
+        - subscription
+      summary: Update attributes for a model instance and persist it into the data source.
+      operationId: subscription.prototype.updateAttributes
+      parameters:
+        - name: data
+          in: body
+          description: An object of model property name/value pairs
+          required: false
+          schema:
+            $ref: '#/definitions/subscription'
+        - name: id
+          in: path
+          description: PersistedModel id
+          required: true
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            $ref: '#/definitions/subscription'
+      deprecated: false
 definitions:
   notification:
     properties:
@@ -143,6 +231,33 @@ definitions:
     additionalProperties: false
   x-any:
     properties: {}
+  subscription:
+    properties:
+      serviceName:
+        type: string
+      userId:
+        type: string
+      channel:
+        default: email
+        type: string
+      state:
+        default: unconfirmed
+        type: string
+      confirmationCode:
+        default: state
+        type: string
+      channelId:
+        type: string
+      id:
+        type: number
+        format: double
+    required:
+      - serviceName
+      - userId
+      - channel
+      - state
+      - channelId
+    additionalProperties: false
 swagger: '2.0'
 info:
   x-ibm-name: notification
