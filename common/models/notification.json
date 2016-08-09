@@ -16,15 +16,13 @@
       "required": true,
       "default": "new"
     },
-    "subject": {
-      "type": "string",
-      "required": true
-    },
-    "body": {
-      "type": "string"
-    },
     "channelId": {
       "type": "string"
+    },
+    "message": {
+      "type": "object",
+      "required": true,
+      "default": "{}"
     },
     "created": {
       "type": "date",

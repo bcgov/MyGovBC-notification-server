@@ -39,30 +39,6 @@ paths:
               $ref: '#/definitions/notification'
       deprecated: false
   '/notifications/{id}':
-    get:
-      tags:
-        - notification
-      summary: Find a model instance by id from the data source.
-      operationId: notification.findById
-      parameters:
-        - name: id
-          in: path
-          description: Model id
-          required: true
-          type: string
-          format: JSON
-        - name: filter
-          in: query
-          description: Filter defining fields and include
-          required: false
-          type: string
-          format: JSON
-      responses:
-        '200':
-          description: Request was successful
-          schema:
-            $ref: '#/definitions/notification'
-      deprecated: false
     put:
       tags:
         - notification
@@ -146,30 +122,6 @@ paths:
               $ref: '#/definitions/subscription'
       deprecated: false
   '/subscriptions/{id}':
-    get:
-      tags:
-        - subscription
-      summary: Find a model instance by id from the data source.
-      operationId: subscription.findById
-      parameters:
-        - name: id
-          in: path
-          description: Model id
-          required: true
-          type: string
-          format: JSON
-        - name: filter
-          in: query
-          description: Filter defining fields and include
-          required: false
-          type: string
-          format: JSON
-      responses:
-        '200':
-          description: Request was successful
-          schema:
-            $ref: '#/definitions/subscription'
-      deprecated: false
     put:
       tags:
         - subscription
@@ -202,12 +154,11 @@ definitions:
       state:
         default: new
         type: string
-      subject:
+      channelId:
         type: string
-      body:
-        type: string
-      userId:
-        type: string
+      message:
+        default: '{}'
+        type: object
       created:
         default: $now
         type: string
@@ -227,7 +178,7 @@ definitions:
     required:
       - serviceName
       - state
-      - subject
+      - message
     additionalProperties: false
   x-any:
     properties: {}
@@ -235,10 +186,10 @@ definitions:
     properties:
       serviceName:
         type: string
-      userId:
-        type: string
       channel:
         default: email
+        type: string
+      channelId:
         type: string
       state:
         default: unconfirmed
@@ -246,17 +197,16 @@ definitions:
       confirmationCode:
         default: state
         type: string
-      channelId:
+      userId:
         type: string
       id:
         type: number
         format: double
     required:
       - serviceName
-      - userId
       - channel
-      - state
       - channelId
+      - state
     additionalProperties: false
 swagger: '2.0'
 info:
