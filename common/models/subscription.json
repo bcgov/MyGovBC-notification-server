@@ -25,8 +25,7 @@
       "default": "unconfirmed"
     },
     "confirmationCode": {
-      "type": "string",
-      "default": "state"
+      "type": "string"
     },
     "userId": {
       "type": "string"
