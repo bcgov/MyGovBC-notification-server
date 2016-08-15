@@ -12,7 +12,7 @@ module.exports = function (Subscription) {
     var u = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
     if (u) {
       ctx.query.where = ctx.query.where || {}
-      ctx.query.where.channelId = u
+      ctx.query.where.userId = u
     }
     next()
   })
@@ -35,4 +35,13 @@ module.exports = function (Subscription) {
     })
   })
 
+  Subscription.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
+      var httpCtx = require('loopback').getCurrentContext()
+      var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
+      if (currUser) {
+        ctx.args.data.userId = currUser
+      }
+      next()
+    }
+  )
 }
