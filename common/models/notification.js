@@ -8,6 +8,7 @@ module.exports = function (Notification) {
   Notification.disableRemoteMethod('count', true)
   Notification.disableRemoteMethod('upsert', true)
   Notification.disableRemoteMethod('deleteById', true)
+
   Notification.observe('access', function (ctx, next) {
     var httpCtx = require('loopback').getCurrentContext();
     ctx.query.where = ctx.query.where || {}
@@ -22,6 +23,7 @@ module.exports = function (Notification) {
     }
     next()
   })
+
   Notification.afterRemote('find', function (ctx, res, next) {
     if (!res) {
       return
