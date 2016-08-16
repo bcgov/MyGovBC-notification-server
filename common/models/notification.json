@@ -43,5 +43,25 @@
   "validations": [],
   "relations": {},
   "acls": [],
-  "methods": {}
+  "methods": {
+    "deleteById": {
+      "isStatic": false,
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "object",
+          "root": true,
+          "description": "Count"
+        }
+      ],
+      "description": "delete a notification by Id",
+      "http": [
+        {
+          "path": "/",
+          "verb": "delete"
+        }
+      ]
+    }
+  }
 }
