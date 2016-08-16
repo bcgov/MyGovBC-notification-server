@@ -24,8 +24,8 @@
       "required": true,
       "default": "unconfirmed"
     },
-    "confirmationCode": {
-      "type": "string"
+    "confirmationRequest": {
+      "type": "object"
     },
     "userId": {
       "type": "string"
