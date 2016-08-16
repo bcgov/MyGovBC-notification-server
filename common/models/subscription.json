@@ -29,10 +29,34 @@
     },
     "userId": {
       "type": "string"
+    },
+    "created": {
+      "type": "date",
+      "default": "$now"
     }
   },
   "validations": [],
   "relations": {},
   "acls": [],
-  "methods": {}
+  "methods": {
+    "deleteById": {
+      "isStatic": false,
+      "accepts": [],
+      "returns": [
+        {
+          "arg": "count",
+          "type": "number",
+          "root": true,
+          "description": "number of records affected"
+        }
+      ],
+      "description": "delete a subscription by id",
+      "http": [
+        {
+          "path": "/",
+          "verb": "delete"
+        }
+      ]
+    }
+  }
 }

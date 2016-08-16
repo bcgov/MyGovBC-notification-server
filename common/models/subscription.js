@@ -6,6 +6,7 @@ module.exports = function (Subscription) {
   Subscription.disableRemoteMethod('updateAll', true)
   Subscription.disableRemoteMethod('count', true)
   Subscription.disableRemoteMethod('upsert', true)
+  Subscription.disableRemoteMethod('deleteById', true)
 
   Subscription.observe('access', function (ctx, next) {
     var httpCtx = require('loopback').getCurrentContext()
@@ -13,6 +14,7 @@ module.exports = function (Subscription) {
     if (u) {
       ctx.query.where = ctx.query.where || {}
       ctx.query.where.userId = u
+      ctx.query.where.state = {neq: 'deleted'}
     }
     next()
   })
@@ -44,4 +46,11 @@ module.exports = function (Subscription) {
       next()
     }
   )
+
+  Subscription.prototype.deleteById = function (callback) {
+    this.state = 'deleted'
+    Subscription.replaceById(this.id, this, function (err, res) {
+      callback(err, 1)
+    })
+  }
 }

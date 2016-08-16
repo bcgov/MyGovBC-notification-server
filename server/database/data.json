@@ -10,7 +10,7 @@
       "3": "{\"id\":3,\"serviceName\":\"Education\",\"state\":\"new\",\"message\":{\"subject\":\"Transcript\",\"body\":\"You can order transcript online.\"},\"channelId\":\"f-w\",\"created\":\"2016-08-05T23:10:01.081Z\",\"channel\":\"inApp\",\"isBroadcast\":false,\"validTill\":\"2016-09-04T21:38:10.983Z\"}"
     },
     "subscription": {
-      "1": "{\"serviceName\":\"Education\",\"channel\":\"email\",\"channelId\":\"a@b.com\",\"state\":\"unconfirmed\",\"confirmationCode\":\"state\",\"userId\":\"unknown\",\"id\":1}"
+      "1": "{\"id\":1,\"serviceName\":\"Education\",\"channel\":\"email\",\"channelId\":\"a@b.com\",\"state\":\"unconfirmed\",\"confirmationCode\":\"state\",\"userId\":\"unknown\",\"created\":\"2016-08-16T18:23:15.966Z\"}"
     }
   }
 }

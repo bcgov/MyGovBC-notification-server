@@ -63,25 +63,6 @@ paths:
           schema:
             $ref: '#/definitions/notification'
       deprecated: false
-    delete:
-      tags:
-        - notification
-      summary: delete a notification by Id
-      operationId: notification.prototype.deleteById
-      parameters:
-        - name: id
-          in: path
-          description: PersistedModel id
-          required: true
-          type: string
-          format: JSON
-      responses:
-        '200':
-          description: Request was successful
-          schema:
-            description: Count
-            type: object
-      deprecated: false
   /subscriptions:
     post:
       tags:
@@ -122,6 +103,26 @@ paths:
               $ref: '#/definitions/subscription'
       deprecated: false
   '/subscriptions/{id}':
+    delete:
+      tags:
+        - subscription
+      summary: delete a subscription by id
+      operationId: subscription.prototype.deleteById
+      parameters:
+        - name: id
+          in: path
+          description: PersistedModel id
+          required: true
+          type: string
+          format: JSON
+      responses:
+        '200':
+          description: Request was successful
+          schema:
+            description: number of records affected
+            type: number
+            format: double
+      deprecated: false
     put:
       tags:
         - subscription
@@ -195,10 +196,13 @@ definitions:
         default: unconfirmed
         type: string
       confirmationCode:
-        default: state
         type: string
       userId:
         type: string
+      created:
+        default: $now
+        type: string
+        format: date
       id:
         type: number
         format: double
