@@ -22,7 +22,37 @@ module.exports = function (Subscription) {
   Subscription.beforeRemote('create', function (ctx, unused, next) {
     var u = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname') || 'unknown'
     ctx.args.data.userId = u
-    next()
+    if (!ctx.args.data.confirmationRequest) {
+      return next()
+    }
+
+    // if contains confirmationRequest, send it
+    var nodemailer = require('nodemailer')
+    var transporter = nodemailer.createTransport('direct:?name=localhost')
+    if (ctx.args.data.confirmationRequest.confirmationCodeRegex) {
+      var RandExp = require('randexp')
+      var confirmationCodeRegex = new RegExp(ctx.args.data.confirmationRequest.confirmationCodeRegex)
+      ctx.args.data.confirmationRequest.confirmationCode = new RandExp(confirmationCodeRegex).gen()
+    }
+    var mailSubject = ctx.args.data.confirmationRequest.subject && ctx.args.data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, ctx.args.data.confirmationRequest.confirmationCode)
+    var mailTextBody = ctx.args.data.confirmationRequest.textBody && ctx.args.data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, ctx.args.data.confirmationRequest.confirmationCode)
+    var mailHtmlBody = ctx.args.data.confirmationRequest.htmlBody && ctx.args.data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, ctx.args.data.confirmationRequest.confirmationCode)
+    var mailOptions = {
+      from: ctx.args.data.confirmationRequest.from,
+      to: ctx.args.data.channelId,
+      subject: mailSubject,
+      text: mailTextBody,
+      html: mailHtmlBody
+    }
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error)
+      }
+      else {
+        console.log('Message sent: ' + info.response)
+      }
+      next()
+    })
   })
 
   Subscription.beforeRemote('deleteById', function (ctx, unused, next) {
