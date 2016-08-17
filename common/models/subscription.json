@@ -57,6 +57,35 @@
           "verb": "delete"
         }
       ]
+    },
+    "verify": {
+      "isStatic": false,
+      "accepts": [
+        {
+          "arg": "confirmationCode",
+          "type": "string",
+          "required": true,
+          "description": "confirmation code",
+          "http": {
+            "source": "query"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "string",
+          "root": true,
+          "description": "result"
+        }
+      ],
+      "description": "verify confirmation code",
+      "http": [
+        {
+          "path": "/verify",
+          "verb": "get"
+        }
+      ]
     }
   }
 }

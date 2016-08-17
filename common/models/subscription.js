@@ -97,4 +97,13 @@ module.exports = function (Subscription) {
       callback(err, 1)
     })
   }
+
+  Subscription.prototype.verify = function (confirmationCode, callback) {
+    var error
+    if (confirmationCode !== this.confirmationRequest.confirmationCode) {
+      error = new Error('Unauthorized')
+      error.status = 401
+    }
+    callback(error, "OK")
+  }
 }
