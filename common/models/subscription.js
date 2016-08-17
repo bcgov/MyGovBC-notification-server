@@ -103,7 +103,13 @@ module.exports = function (Subscription) {
     if (confirmationCode !== this.confirmationRequest.confirmationCode) {
       error = new Error('Unauthorized')
       error.status = 401
+      return callback(error, "OK")
     }
-    callback(error, "OK")
+    else {
+      this.state = 'confirmed'
+      Subscription.replaceById(this.id, this, function (err, res) {
+        return callback(err, "OK")
+      })
+    }
   }
 }
