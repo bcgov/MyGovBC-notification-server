@@ -34,7 +34,7 @@ module.exports = function (Subscription) {
       next()
     }
     var u = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname')
-    if (!u) {
+    if (u) {
       if (data instanceof Array) {
         data.forEach(function (e) {
           e.confirmationRequest = undefined
