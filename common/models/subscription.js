@@ -39,7 +39,8 @@ module.exports = function (Subscription) {
         data.forEach(function (e) {
           e.confirmationRequest = undefined
         })
-s      }
+        s
+      }
       else {
         data.confirmationRequest = undefined
       }
@@ -99,8 +100,7 @@ s      }
   })
 
   Subscription.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
-      var httpCtx = require('loopback').getCurrentContext()
-      var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
+      var currUser = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname')
       if (currUser) {
         ctx.args.data.userId = currUser
       }
