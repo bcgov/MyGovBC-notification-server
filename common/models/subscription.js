@@ -71,8 +71,10 @@ module.exports = function (Subscription) {
   }
 
   Subscription.beforeRemote('create', function (ctx, unused, next) {
-    var u = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname') || 'unknown'
-    ctx.args.data.userId = u
+    var u = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname')
+    if (u) {
+      ctx.args.data.userId = u
+    }
     if (!ctx.args.data.confirmationRequest) {
       return next()
     }
@@ -107,6 +109,7 @@ module.exports = function (Subscription) {
       if (!ctx.args.data.confirmationRequest) {
         return next()
       }
+      ctx.args.data.state = 'unconfirmed'
       sendConfirmationRequest(ctx.args.data, function (error, info) {
         if (error) {
           console.log(error)
