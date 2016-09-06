@@ -56,6 +56,28 @@ module.exports = function (Notification) {
     next()
   })
 
+  Notification.afterRemote('create', function (ctx, res, next) {
+    // send non-inApp notifications immediately
+    switch (res.channel) {
+      case 'email':
+        sendEmailNotification(res, function (errSend) {
+          if (errSend) {
+            res.state = 'error'
+          }
+          else {
+            res.state = 'sent'
+          }
+          res.save(function (errSave) {
+            next(errSend || errSave)
+          })
+        })
+        break
+      default:
+        next()
+        break
+    }
+  })
+
   Notification.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
       // only allow changing state
       ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
@@ -97,5 +119,31 @@ module.exports = function (Notification) {
     Notification.replaceById(this.id, this, function (err, res) {
       callback(err, 1)
     })
+  }
+
+  Notification.sendEmail = function (from, to, subject, textBody, htmlBody, cb) {
+    var nodemailer = require('nodemailer')
+    var transporter = nodemailer.createTransport('direct:?name=localhost')
+    var mailOptions = {
+      from: from,
+      to: to,
+      subject: subject,
+      text: textBody,
+      html: htmlBody
+    }
+    transporter.sendMail(mailOptions, cb)
+  }
+
+  function sendEmailNotification(data, cb) {
+    switch (data.isBroadcast) {
+      case false:
+        Notification.sendEmail(data.message.from || 'unknown@unknown.com'
+          , data.channelId, data.message.subject
+          , data.message.textBody, data.message.htmlBody, cb)
+        break
+      case true:
+        // todo: handle broadcast email
+        break
+    }
   }
 }

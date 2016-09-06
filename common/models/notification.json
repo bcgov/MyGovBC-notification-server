@@ -22,7 +22,7 @@
     "message": {
       "type": "object",
       "required": true,
-      "default": "{}"
+      "default": {}
     },
     "created": {
       "type": "date",
