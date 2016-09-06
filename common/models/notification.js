@@ -123,13 +123,7 @@ module.exports = function (Notification) {
 
   Notification.sendEmail = function (from, to, subject, textBody, htmlBody, cb) {
     var nodemailer = require('nodemailer')
-    var smtpConfig = {
-      host: 'apps.smtp.gov.bc.ca',
-      port: 25,
-      ignoreTLS: true,
-      secure: false,
-    }
-    var transporter = nodemailer.createTransport(smtpConfig)
+    var transporter = nodemailer.createTransport(Notification.app.get('smtp'))
     var mailOptions = {
       from: from,
       to: to,

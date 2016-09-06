@@ -23,5 +23,11 @@
       "disableStackTrace": false
     }
   },
-  "legacyExplorer": false
+  "legacyExplorer": false,
+  "smtp": {
+    "host": "localhost",
+    "port": 25,
+    "ignoreTLS": true,
+    "secure": false
+  }
 }
