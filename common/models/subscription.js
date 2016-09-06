@@ -27,7 +27,7 @@ module.exports = function (Subscription) {
   /**
    * hide confirmation request field, especially confirmation code
    */
-  Subscription.afterRemote('*', function () {
+  Subscription.afterRemote('**', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (arguments.length <= 2) {
@@ -97,6 +97,9 @@ module.exports = function (Subscription) {
   })
 
   Subscription.afterRemote('create', function (ctx, res, next) {
+    if (!ctx.args.data.confirmationRequest) {
+      return next()
+    }
     handleConfirmationRequest(res, function (handleConfirmationRequestError, info) {
       res.save(function (saveError) {
         next(handleConfirmationRequestError || saveError)
@@ -129,18 +132,20 @@ module.exports = function (Subscription) {
         }
         ctx.args.data.state = 'unconfirmed'
       }
-      if (!ctx.args.data.confirmationRequest) {
-        // this can only come from admin channel
-        return next()
-      }
-      handleConfirmationRequest(ctx.args.data, function (error, info) {
-        if (error) {
-          console.log(error)
-        }
-        next()
-      })
+      // this can only come from admin channel
+      return next()
     }
   )
+  Subscription.afterRemote('prototype.updateAttributes', function (ctx, instance, next) {
+    if (!ctx.args.data.confirmationRequest) {
+      return next()
+    }
+    handleConfirmationRequest(instance, function (handleConfirmationRequestError, info) {
+      instance.save(function (saveError) {
+        next(handleConfirmationRequestError || saveError)
+      })
+    })
+  })
 
   Subscription.prototype.deleteById = function (callback) {
     this.state = 'deleted'
