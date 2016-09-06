@@ -22,6 +22,7 @@ A general purpose notification subscription API Server supporting multi-channel 
   
 ## Assumptions
 * For in-app notifcations, the application has to be protected by SiteMinder
+
 ## Installation
     git clone https://github.com/bcgov/MyGovBC-notification-server.git
     cd MyGovBC-notification-server
