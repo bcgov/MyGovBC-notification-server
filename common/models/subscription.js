@@ -74,19 +74,11 @@ module.exports = function (Subscription) {
     if (!data.confirmationRequest.sendRequest) {
       cb(null, null)
     }
-    var nodemailer = require('nodemailer')
-    var transporter = nodemailer.createTransport('direct:?name=localhost')
     var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
     var mailTextBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
     var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-    var mailOptions = {
-      from: data.confirmationRequest.from,
-      to: data.channelId,
-      subject: mailSubject,
-      text: mailTextBody,
-      html: mailHtmlBody
-    }
-    transporter.sendMail(mailOptions, cb)
+    Subscription.app.models.Notification.sendEmail(data.confirmationRequest.from, data.channelId, mailSubject
+      , mailTextBody, mailHtmlBody, cb)
   }
 
   Subscription.beforeRemote('create', function (ctx, unused, next) {
@@ -100,17 +92,18 @@ module.exports = function (Subscription) {
         return next(error)
       }
     }
-    if (!ctx.args.data.confirmationRequest) {
-      // this can only come from admin channel
-      return next()
-    }
-    handleConfirmationRequest(ctx.args.data, function (error, info) {
-      if (error) {
-        console.log(error)
-      }
-      next()
+    // this can only come from admin channel
+    return next()
+  })
+
+  Subscription.afterRemote('create', function (ctx, res, next) {
+    handleConfirmationRequest(res, function (handleConfirmationRequestError, info) {
+      res.save(function (saveError) {
+        next(handleConfirmationRequestError || saveError)
+      })
     })
   })
+
 
   Subscription.beforeRemote('deleteById', function (ctx, unused, next) {
     var u = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname') || 'unknown'
