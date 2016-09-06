@@ -4,7 +4,7 @@ NotifiyBC
 A general purpose notification subscription API Server supporting multi-channel deliveries. The application is designed for MyGovBC but can be used independently. 
 
 ##Features
-### Notification
+### notification
 * Support both in-app pull notifications and push notifications
 * Support both uni-cast and broadcast messages
 * Deliver push notifications to confirmed subscription channels:
@@ -14,7 +14,7 @@ A general purpose notification subscription API Server supporting multi-channel 
   * support message states - read, deleted
   * deleted messages are not deleted immediately for auditing and recovery purposes
  
-### Subscription
+### subscription
 * Verify the ownership of push notifciation subscription channel:
   * generates confirmation code based on a regex input
   * send confirmation request to unconfirmed subscription channel
