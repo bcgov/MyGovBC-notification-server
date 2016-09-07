@@ -20,8 +20,12 @@ A general purpose notification subscription API Server supporting multi-channel 
   * send confirmation request to unconfirmed subscription channel
   * verify confirmation code
   
-## Assumptions
-* For in-app notifcations, the application has to be protected by SiteMinder
+## Assumptions and Runtime Requirements
+* Internet connection
+* Git
+* Node.js@^4.2.0
+* For in-app notifcations, both *NotifyBC* API server and client-facing front-end web app have to be protected by SiteMinder
+
 
 ## Installation
     git clone https://github.com/bcgov/MyGovBC-notification-server.git
