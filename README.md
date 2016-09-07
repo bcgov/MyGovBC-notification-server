@@ -45,7 +45,7 @@ If successful, you will see following output
 
 ## Configuration
 ### smtp
-By default *NotifiyBC* uses smtp server on localhost as configured in */server/config.json*. To change, instead of updating */server/config.json*, create file */server/config.local.json* containing
+By default *NotifyBC* uses smtp server on localhost as configured in */server/config.json*. To change, instead of updating */server/config.json*, create file */server/config.local.json* containing
 
     {
       "smtp": {
