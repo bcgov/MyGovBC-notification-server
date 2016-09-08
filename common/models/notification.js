@@ -29,21 +29,23 @@ module.exports = function (Notification) {
       return
     }
     var httpCtx = require('loopback').getCurrentContext()
-    var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname') || 'unknown'
-    ctx.result = res.reduce(function (p, e, i) {
-      if (e.validTill && Date.parse(e.validTill) < new Date()) {
+    var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
+    if (currUser) {
+      ctx.result = res.reduce(function (p, e, i) {
+        if (e.validTill && Date.parse(e.validTill) < new Date()) {
+          return p
+        }
+        if (e.deletedBy && e.deletedBy.indexOf(currUser) >= 0) {
+          return p
+        }
+        if (e.isBroadcast && e.readBy && e.readBy.indexOf(currUser) >= 0) {
+          e.state = 'read'
+          e.readBy = null
+        }
+        p.push(e)
         return p
-      }
-      if (e.deletedBy && e.deletedBy.indexOf(currUser) >= 0) {
-        return p
-      }
-      if (e.isBroadcast && e.readBy && e.readBy.indexOf(currUser) >= 0) {
-        e.state = 'read'
-        e.readBy = null
-      }
-      p.push(e)
-      return p
-    }, [])
+      }, [])
+    }
     next()
   })
 
