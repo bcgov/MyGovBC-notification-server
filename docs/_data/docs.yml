@@ -9,8 +9,9 @@
 
 - title: API
   docs:
-  - assets
-  - migrations
+  - api-overview
+  - api-subscriptions
+  - api-notifications
 
 - title: Customization
   docs:

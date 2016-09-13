@@ -13,23 +13,37 @@ overview: true
 <section class="features">
   <div class="grid">
     <div class="unit one-third">
-      <h2>Simple</h2>
+      <h2>Versatile</h2>
       <p>
-        No more databases, comment moderation, or pesky updates to install—just <em>your content</em>.
+      <ul>
+        <li>Authenticated or anonymous subscriptions</li>
+        <li>Push and in-app pull notifications</li>
+        <li>Email and SMS push notification channels</li>
+        <li>Unicast and broadcast message types</li>
+      </ul>
       </p>
       <a href="{{ site.baseurl }}/docs/usage/">How NotifyBC works &rarr;</a>
     </div>
     <div class="unit one-third">
-      <h2>Static</h2>
-      <p><a href="https://daringfireball.net/projects/markdown/">Markdown</a> (or <a href="http://redcloth.org/textile">Textile</a>), <a href="https://github.com/Shopify/liquid/wiki">Liquid</a>, HTML <span class="amp">&amp;</span> CSS go in. Static sites come out ready for deployment.</p>
-      <a href="{{ site.baseurl }}/docs/templates/">NotifyBC template guide &rarr;</a>
+      <h2>Non-intrusive</h2>
+      <p>
+      <ul>
+        <li>Loose coupling: interacts with user browser or other server components through RESTful API.
+        </li>
+        <li>Handles backend common business logic only. Imposes no frontend UI so you can
+          design UI native to your web site to capture user subscriptions or display in-app notifications.
+        </li>
+      </ul>
+      </p>
+      <a href="{{ site.baseurl }}/docs/api-overview/">Explore the API &rarr;</a>
     </div>
     <div class="unit one-third">
-      <h2>Blog-aware</h2>
+      <h2>Microservice</h2>
       <p>
-        Permalinks, categories, pages, posts, and custom layouts are all first-class citizens here.
+        Containerized deployment to PAAS such as OpenShift. No need for complex enterprise-wide shared service. Better
+        meet privacy mandates.
       </p>
-      <a href="http://import.jekyllrb.com">Migrate your blog &rarr;</a>
+      <a href="{{ site.baseurl }}/docs/deployment-methods/"> Deployment Methods &rarr;</a>
     </div>
     <div class="clear"></div>
   </div>
@@ -42,33 +56,28 @@ overview: true
     <div class="unit golden-large code">
       <p class="title">Quick-start Instructions</p>
       <div class="shell">
-        <p class="line">
+        <p class="line" style="white-space:nowrap">
           <span class="path">~</span>
           <span class="prompt">$</span>
-          <span class="command">gem install jekyll bundler</span>
-        </p>
-        <p class="line">
-          <span class="path">~</span>
-          <span class="prompt">$</span>
-          <span class="command">jekyll new my-awesome-site</span>
+          <span class="command" style="white-space:normal">git clone https://github.com/bcgov/MyGovBC-notification-server.git notifyBC</span>
         </p>
         <p class="line">
           <span class="path">~</span>
           <span class="prompt">$</span>
-          <span class="command">cd my-awesome-site</span>
+          <span class="command">cd notifyBC</span>
         </p>
         <p class="line">
-          <span class="path">~/my-awesome-site</span>
+          <span class="path">~/notifyBC</span>
           <span class="prompt">$</span>
-          <span class="command">bundle install</span>
+          <span class="command">npm install</span>
         </p>
         <p class="line">
-          <span class="path">~/my-awesome-site</span>
+          <span class="path">~/notifyBC</span>
           <span class="prompt">$</span>
-          <span class="command">bundle exec jekyll serve</span>
+          <span class="command">npm start</span>
         </p>
         <p class="line">
-          <span class="output"># => Now browse to http://localhost:4000</span>
+          <span class="output"># => Now browse to <a href="http://localhost:3000/explorer" target="_blank">http://localhost:3000/explorer</a></span>
         </p>
       </div>
     </div>

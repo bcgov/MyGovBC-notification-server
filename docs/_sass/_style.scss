@@ -325,7 +325,10 @@ footer {
       user-select: none;
     }
 
-    .command { color: #f0e68c; }
+    .command {
+      color: #f0e68c;
+      vertical-align: top;
+    }
 
     .output { color: #888; }
   }
