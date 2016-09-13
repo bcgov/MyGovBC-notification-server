@@ -17,7 +17,7 @@ Use the source, Luke.
 
 Add **NotifyBC** to almost any query, and you'll find just what you need.
 
-### [bcgov/MyGovBC-notification-server](https://github.com/bcgov/MyGovBC-notification-server/issues)
+### [Outstanding issues and requests](https://github.com/bcgov/MyGovBC-notification-server/issues)
 
 Search through the issues on the main NotifyBC development. Think you've
 found a bug? File a new issue.

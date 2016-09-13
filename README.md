@@ -1,7 +1,8 @@
 NotifyBC
 ===========
 
-A general purpose notification subscription API Server supporting multi-channel delivery. The application is designed for MyGovBC but can be used independently. 
+A general purpose notification subscription API Server supporting multi-channel delivery. The application is designed for MyGovBC but can be used independently. Check out [full documentation](https://bcgov.github.io/MyGovBC-notification-server/).
+
 
 ##Features
 ### notification
@@ -55,7 +56,6 @@ By default *NotifyBC* uses smtp server on localhost as configured in */server/co
         "secure": false
       }
     }
-
 
 ## License
 
