@@ -90,7 +90,7 @@ written out to `<dest>/awesome/some_subdir/some_doc/index.html`.
   <h5>Don't forget to add YAML for processing</h5>
   <p>
   Files in collections that do not have front matter are treated as
-  <a href="/docs/static-files">static files</a> and simply copied to their
+  <a href="{{ site.baseurl }}/docs/static-files">static files</a> and simply copied to their
   output location without processing.
   </p>
 </div>
@@ -134,7 +134,7 @@ written out to `<dest>/awesome/some_subdir/some_doc/index.html`.
         <p><code>title</code></p>
       </td>
       <td>
-        <p>The document's lowercase title (as defined in its <a href="/docs/frontmatter/">front matter</a>), with every sequence of spaces and non-alphanumeric characters replaced by a hyphen. If the document does not define a title in its <a href="/docs/frontmatter/">front matter</a>, this is equivalent to <code>name</code>.</p>
+        <p>The document's lowercase title (as defined in its <a href="{{ site.baseurl }}/docs/frontmatter/">front matter</a>), with every sequence of spaces and non-alphanumeric characters replaced by a hyphen. If the document does not define a title in its <a href="{{ site.baseurl }}/docs/frontmatter/">front matter</a>, this is equivalent to <code>name</code>.</p>
       </td>
     </tr>
     <tr>
