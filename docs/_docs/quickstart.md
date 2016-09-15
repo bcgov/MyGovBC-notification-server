@@ -4,4 +4,18 @@ title: Quick-start guide
 permalink: /docs/quickstart/
 ---
 
-tbd
+For the impatient, here's how to get a boilerplate NotifyBC instance up and running if you have git and node.js installed:
+
+```sh
+~ $ git clone \
+https://github.com/bcgov/MyGovBC-notification-server.git \
+notifyBC
+~ $ cd notifyBC
+~/notifyBC $ npm install
+~/notifyBC $ npm start
+# => Now browse to http://localhost:3000/explorer
+```
+
+
+If you're running into problems, check out full [installation](../installation/) guide.
+
