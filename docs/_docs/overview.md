@@ -9,7 +9,7 @@ NotifyBC is a general purpose notification subscription API Server supporting mu
 NotifyBC is designed initially for MyGovBC but can be used independently.
 
 ## Features
-NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure webapps implementing notification feature. A NotifyBC server instance supports multiple notification services.  A service is a topic of interest that user wants to receive updates. It serves as the partition of notification messages and user subscriptions. A user may subscribe to a service in multiple push delivery channels allowed. In-app pull notification doesn't require subscription as it's not intrusive to user.
+NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure webapps implementing notification feature. A NotifyBC server instance supports multiple notification services.  A service is a topic of interest that user wants to receive updates. It is used as the partition of notification messages and user subscriptions. A user may subscribe to a service in multiple push delivery channels allowed. In-app pull notification doesn't require subscription as it's not intrusive to user.
 
 ### notification
 * Support both in-app pull notifications and push notifications
@@ -35,11 +35,13 @@ NotifyBC, designed to be a microservice, doesn't use ACL to secure API calls. In
 * If the request bears SiteMinder header, it is a user request;
 * (planned) If the source ip is in the admin ip list, it's an admin request.  
 
-An admin request carries full power whereas user request has limited access. For example, a user request is not allowed to 
+An admin request carries full authorization whereas user request has limited access. For example, a user request is not allowed to 
 
 * send message 
 * bypass the delivery channel confirmation process when subscribing to a service
 * retrieve in-app notifications that is not targeted to the current user
+
+The result of an API call to the same end point may differ depending on if the request is made by admin or user. For example, the call *GET /notifications* without a filter will return all notifications to all users for an admin request, but only non-deleted, non-expired in-app notifications targeted to the current user when the request comes from user browser.
 
 The way NotifyBC interacts with other components is diagrammed below.
 ![architecture diagram]({{site.baseurl}}/img/architecture.png)
