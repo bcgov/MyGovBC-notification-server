@@ -9,7 +9,7 @@ NotifyBC is a general purpose notification subscription API Server supporting mu
 NotifyBC is designed initially for MyGovBC but can be used independently.
 
 ## Features
-A NotifyBC instance supports multiple notification services offered by an organization or program area.  A service can be regarded as a topic of interest and is used to partition notification messages and user subscriptions. A user may subscribe to a service in multiple delivery channels. 
+A NotifyBC instance supports multiple notification services offered by an organization or program area.  A service can be regarded as a topic of interest and is used to partition notification messages and user subscriptions. A user may subscribe to a service in multiple push delivery channels allowed. In-app pull notification doesn't require subscription as it's not intrusive.
 
 ### notification
 * Support both in-app pull notifications and push notifications
