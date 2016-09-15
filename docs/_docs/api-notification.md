@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Notification API
-permalink: /docs/api-notifications/
+permalink: /docs/api-notification/
 ---
 
 tbd

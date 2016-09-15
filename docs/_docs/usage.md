@@ -16,4 +16,4 @@ After [installing](../installation) NotifyBC, you can start exploring the functi
     "http://localhost:3000/ext/api/notifications"
 ```
 
-Consult the [API docs](../api-overview/) for valid input while you are exploring the APIs. Once you are familiar with the APIs, you can start writing code to call the APIs from either user browser or from a server application.  
+Consult the [API docs](../api-overview/) for valid inputs and expected outcome while you are exploring the APIs. Once you are familiar with the APIs, you can start writing code to call the APIs from either user browser or from a server application.  

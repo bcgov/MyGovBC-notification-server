@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Subscription API
-permalink: /docs/api-subscriptions/
+permalink: /docs/api-subscription/
 ---
 
 tbd

@@ -10,8 +10,8 @@
 - title: API
   docs:
   - api-overview
-  - api-subscriptions
-  - api-notifications
+  - api-subscription
+  - api-notification
 
 - title: Deployment
   docs:
