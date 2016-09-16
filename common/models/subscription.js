@@ -43,7 +43,6 @@ module.exports = function (Subscription) {
         data.forEach(function (e) {
           e.confirmationRequest = undefined
         })
-        s
       }
       else {
         data.confirmationRequest = undefined

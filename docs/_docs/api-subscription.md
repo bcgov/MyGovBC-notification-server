@@ -51,7 +51,7 @@ The API operates on following subscription data model schema:
   <tr>
     <td>
       <p class="name">state</p>
-      <p class="description">state of subscription. Valid values: unconfirmed, confirmed, unsubscribed</p>
+      <p class="description">state of subscription. Valid values: unconfirmed, confirmed, deleted</p>
     </td>
     <td>
       <table>
@@ -144,3 +144,26 @@ The API operates on following subscription data model schema:
     </td>
   </tr>
 </table>
+
+## GET Subscriptions
+```
+GET /subscriptions
+```
+* inputs: 
+  * filter
+    * required: false
+    * type: object
+    * defining fields, where, include, order, offset, and limit
+* outputs
+  * for admin requests, returns unabridged subscription data matching the filter
+  * for user requests, in addition to filter, following constraints are also imposed: 
+    * only non-deleted subscriptions 
+    * only subscriptions created by the user 
+    * the *confirmationRequest* field is removed. 
+
+## Create a Subscription
+
+## Update a Subscription
+
+## Verify a Confirmation Code
+
