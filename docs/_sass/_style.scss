@@ -791,6 +791,13 @@ article {
     margin: auto;
   }
 
+  table {
+    .name {
+      font-weight: bold;
+      font-size: larger;
+    }
+  }
+
 }
 
 h5, h6 {
