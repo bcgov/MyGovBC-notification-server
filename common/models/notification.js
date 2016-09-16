@@ -18,7 +18,7 @@ module.exports = function (Notification) {
         isBroadcast: true
       })
       ctx.query.where.or.push({
-        channelId: httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
+        userChannelId: httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
       })
     }
     next()
@@ -140,7 +140,7 @@ module.exports = function (Notification) {
     switch (data.isBroadcast) {
       case false:
         Notification.sendEmail(data.message.from || 'unknown@unknown.com'
-          , data.channelId, data.message.subject
+          , data.userChannelId, data.message.subject
           , data.message.textBody, data.message.htmlBody, cb)
         break
       case true:

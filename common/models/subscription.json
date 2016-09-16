@@ -15,7 +15,7 @@
       "required": true,
       "default": "email"
     },
-    "channelId": {
+    "userChannelId": {
       "type": "string",
       "required": true
     },
@@ -25,7 +25,8 @@
       "default": "unconfirmed"
     },
     "confirmationRequest": {
-      "type": "object"
+      "type": "object",
+      "description": "Contains email template, a boolean field to indicate whether to send confirmation message, confirmation code regex or encrypted confirmation code"
     },
     "userId": {
       "type": "string"

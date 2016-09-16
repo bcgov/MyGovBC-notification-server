@@ -155,7 +155,7 @@ definitions:
       state:
         default: new
         type: string
-      channelId:
+      userChannelId:
         type: string
       message:
         default: '{}'
@@ -190,7 +190,7 @@ definitions:
       channel:
         default: email
         type: string
-      channelId:
+      userChannelId:
         type: string
       state:
         default: unconfirmed
@@ -209,7 +209,7 @@ definitions:
     required:
       - serviceName
       - channel
-      - channelId
+      - userChannelId
       - state
     additionalProperties: false
 swagger: '2.0'

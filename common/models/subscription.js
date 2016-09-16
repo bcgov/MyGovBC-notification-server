@@ -68,7 +68,7 @@ module.exports = function (Subscription) {
         return cb(ex, null)
       }
       var decryptedData = decrypted.split(' ')
-      data.channelId = decryptedData[0]
+      data.userChannelId = decryptedData[0]
       data.confirmationRequest.confirmationCode = decryptedData[1]
     }
     if (!data.confirmationRequest.sendRequest) {
@@ -77,7 +77,7 @@ module.exports = function (Subscription) {
     var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
     var mailTextBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
     var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-    Subscription.app.models.Notification.sendEmail(data.confirmationRequest.from, data.channelId, mailSubject
+    Subscription.app.models.Notification.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject
       , mailTextBody, mailHtmlBody, cb)
   }
 

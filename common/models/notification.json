@@ -16,7 +16,7 @@
       "required": true,
       "default": "new"
     },
-    "channelId": {
+    "userChannelId": {
       "type": "string"
     },
     "message": {
