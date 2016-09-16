@@ -57,7 +57,7 @@ module.exports = function (Subscription) {
       var confirmationCodeRegex = new RegExp(data.confirmationRequest.confirmationCodeRegex)
       data.confirmationRequest.confirmationCode = new RandExp(confirmationCodeRegex).gen()
     }
-    if (data.confirmationRequest.confirmationCodeEncrypted) {
+    else if (data.confirmationRequest.confirmationCodeEncrypted) {
       var key = rsa.key
       var decrypted
       try {
