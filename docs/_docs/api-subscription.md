@@ -26,7 +26,7 @@ The API operates on following subscription data model schema:
   <tr>
     <td>
       <p class="name">channel</p>
-      <p class="description">name of the delivery channel</p>
+      <p class="description">name of the delivery channel. Valid values: email, sms.</p>
     </td>
     <td>
       <table>
@@ -89,7 +89,52 @@ The API operates on following subscription data model schema:
   <tr>
     <td>
       <p class="name">confirmationRequest</p>
-      <p class="description">an object containing these fields</p>
+      <div class="description">an object containing these child fields
+        <ul>
+          <li>
+            <div class="name">
+              confirmationCodeRegex
+            </div> 
+            <ul>
+              <li>type: string</li>
+              <li>regular expression used to generate confirmation code
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="name">
+              confirmationCodeEncrypted
+            </div> 
+            <ul>
+              <li>type: string</li>
+              <li>encrypted confirmation code
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="name">
+              sendRequest
+            </div> 
+            <ul>
+              <li>type: boolean</li>
+              <li>
+                whether to send confirmation request
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="name">
+              from, subject, textBody, htmlBody
+            </div> 
+            <ul>
+              <li>type: string</li>
+              <li>
+                these are email template fields used for sending email confirmation request. If confirmationRequest.sendRequest is true and channel is email, then these fields should be supplied in order to send confirmation email.
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
     </td>
     <td>
       <table>
