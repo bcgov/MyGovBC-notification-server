@@ -5,11 +5,23 @@ permalink: /docs/api-subscription/
 ---
 
 ## Model Schema
-The API operates on following subscription data model schema: 
+The API operates on following subscription data model fields: 
 <table>
   <tr>
     <th>Name</th>
     <th>Attributes</th>
+  </tr>
+  <tr>
+    <td>
+      <p class="name">id</p>
+      <p class="description">subscription id</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>number</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
+      </table>
+    </td>
   </tr>
   <tr>
     <td>
@@ -149,19 +161,30 @@ The API operates on following subscription data model schema:
 ```
 GET /subscriptions
 ```
-* inputs: 
-  * filter
+* inputs 
+  * a filter defining fields, where, include, order, offset, and limit
+    * parameter name: filter
     * required: false
-    * type: object
-    * defining fields, where, include, order, offset, and limit
+    * parameter type: query
+    * data type: object
 * outputs
   * for admin requests, returns unabridged subscription data matching the filter
-  * for user requests, in addition to filter, following constraints are also imposed: 
+  * for user requests, in addition to filter, following constraints are imposed: 
     * only non-deleted subscriptions 
     * only subscriptions created by the user 
     * the *confirmationRequest* field is removed. 
 
 ## Create a Subscription
+```
+POST /subscriptions
+```
+* inputs
+  * an object containing subscription data model fields. At a minimum all required fields that don't have a default value must be supplied. Id field should be omitted since it's auto-generated.
+    * parameter name: data
+    * required: true
+    * parameter type: body
+    * data type: object
+* outputs
 
 ## Update a Subscription
 
