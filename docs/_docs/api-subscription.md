@@ -158,7 +158,7 @@ The API operates on following subscription data model fields:
   </tr>
 </table>
 
-## GET Subscriptions
+## Get Subscriptions
 ```
 GET /subscriptions
 ```
