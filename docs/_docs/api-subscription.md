@@ -221,11 +221,52 @@ This API is used for changing user channel id (such as email address) and resend
 * outcome
 
   NotifyBC processes the request similarly as creating a subscription except during input validation it imposes following extra constraints to user request  
-  1. only fields *userChannelId*, *state* and *confirmationRequest* can be updated     
-  2. when changing *userChannelId*, *confirmationRequest* must also be supplied
+  * only fields *userChannelId*, *state* and *confirmationRequest* can be updated     
+  * when changing *userChannelId*, *confirmationRequest* must also be supplied
 
      
 ## Delete a Subscription (un-subscribing)
+```
+DELETE /subscriptions/{id}
+```
+* inputs
+  * subscription id
+    * parameter name: id
+    * required: true
+    * parameter type: path
+    * data type: string
+* outcome
 
+  NotifyBC performs following actions in sequence
+  
+  1. the subscription identified by *id* is retrieved
+  2. for user request, the *userId* of the subscription is checked against current request user, if not match, error is returned; otherwise
+  3. the field *state* is set to *deleted*
+  4. the subscription is saved back to database
+  5. returns 1 (number of records deleted) unless  error occurs when saving to database
+  
 ## Verify a Confirmation Code
+```
+GET /subscriptions/{id}/verify
+```
+* inputs
+  * subscription id
+    * parameter name: id
+    * required: true
+    * parameter type: path
+    * data type: string
+  * confirmation code
+    * parameter name: confirmationCode
+    * required: true
+    * parameter type: query
+    * data type: string
+* outcome
 
+  NotifyBC performs following actions in sequence
+  
+  1. the subscription identified by *id* is retrieved
+  2. for user request, the *userId* of the subscription is checked against current request user, if not match, error is returned; otherwise
+  3. input parameter *confirmationCode* is checked against *confirmationRequest.confirmationCode*. If not match, error is returned; otherwise
+  4. *state* is set to *confirmed*
+  5. the subscription is saved back to database
+  6. returns HTTP status code 200 for success unless error occurs during saving
