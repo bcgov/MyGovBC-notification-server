@@ -144,4 +144,49 @@ The API operates on following notification data model fields:
       </table>
     </td>
   </tr>
+  <tr>
+    <td>
+      <p class="name">readBy</p>
+      <p class="description">this is an internal field to track the list of users who have read an inApp broadcast message. It's not visible to a user request.</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>array</td></tr>
+        <tr><td>internal</td><td>true</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <p class="name">deletedBy</p>
+      <p class="description">this is an internal field to track the list of users who have marked an inApp broadcast message as deleted. It's not visible to a user request.</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>array</td></tr>
+        <tr><td>internal</td><td>true</td></tr>
+      </table>
+    </td>
+  </tr>
 </table>
+
+
+## Get Notifications
+```
+GET /notifications
+```
+* inputs 
+  * a filter defining fields, where, include, order, offset, and limit
+    * parameter name: filter
+    * required: false
+    * parameter type: query
+    * data type: object
+* outcome
+  * for admin requests, returns unabridged notification data matching the filter
+  * for user requests, in addition to filter, following constraints are imposed on the returned data set 
+    * only inApp notifications 
+    * only non-deleted notifications. For broadcast notification, non-deleted means not marked by current user as deleted
+    * only non-expired notifications
+    * for unicast notifications, only the ones targeted to current user
+    * if current user is in *readBy*, then the *state* is changed to *read*
+    * the internal field *readBy* and *deletedBy* are removed
