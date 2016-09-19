@@ -7,7 +7,17 @@
       <h1>
         <a href="{{ site.baseurl }}/">
           <span class="sr-only">NotifyBC</span>
-          <img src="{{ site.baseurl }}/img/logo-2x.png" width="249" height="115" alt="NotifyBC Logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="300" viewBox="0 0 150 55">
+            <defs>
+              <filter id="halo" x="0" y="0">
+                <feGaussianBlur result="blurOut" in="SourceGraphic" stdDeviation="3"/>
+                <feBlend in="SourceGraphic" in2="blurOut" mode="normal"/>
+              </filter>
+            </defs>
+            <text filter="url(#halo)" y="40" font-family="Arial" font-size="32" fill="white" font-weight="bold">
+              &nbsp;NotifyBC
+            </text>
+          </svg>
         </a>
       </h1>
     </div>
