@@ -182,11 +182,34 @@ GET /notifications
     * parameter type: query
     * data type: object
 * outcome
-  * for admin requests, returns unabridged notification data matching the filter
-  * for user requests, in addition to filter, following constraints are imposed on the returned data set 
+  * for admin requests, returns unabridged array of notification data matching the filter
+  * for user requests, in addition to filter, following constraints are imposed on the returned array 
     * only inApp notifications 
     * only non-deleted notifications. For broadcast notification, non-deleted means not marked by current user as deleted
     * only non-expired notifications
     * for unicast notifications, only the ones targeted to current user
     * if current user is in *readBy*, then the *state* is changed to *read*
     * the internal field *readBy* and *deletedBy* are removed
+
+## Create a Notification
+```
+POST /notifications
+```
+* inputs
+  * an object containing notification data model fields. At a minimum all required fields that don't have a default value must be supplied. Id field should be omitted since it's auto-generated. The API explorer only created an empty object for field *message* but you should populate the child fields according to [model schema](#model-schema)
+    * parameter name: data
+    * required: true
+    * parameter type: body
+    * data type: object
+* outcome
+
+  NotifyBC performs following actions in sequence
+  
+  1. if it's a user request, error is returned
+  2. inputs are validated. If validation fails, error is returned
+  3. the notification request is saved to database. 
+  4. for push notification, the notification is sent
+  5. the state of push notification is updated to *sent* or *error* depending on sending status
+  6. the updated notification is saved back to database
+  7. the saved record is returned unless there is an error saving to database, in which case error is returned
+  

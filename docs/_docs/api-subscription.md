@@ -169,8 +169,8 @@ GET /subscriptions
     * parameter type: query
     * data type: object
 * outcome
-  * for admin requests, returns unabridged subscription data matching the filter
-  * for user requests, in addition to filter, following constraints are imposed on the returned data set 
+  * for admin requests, returns unabridged array of subscription data matching the filter
+  * for user requests, in addition to filter, following constraints are imposed on the returned array
     * only non-deleted subscriptions 
     * only subscriptions created by the user 
     * the *confirmationRequest* field is removed. 
