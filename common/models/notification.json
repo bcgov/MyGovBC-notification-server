@@ -30,6 +30,7 @@
     },
     "channel": {
       "type": "string",
+      "required": true,
       "default": "inApp"
     },
     "isBroadcast": {
