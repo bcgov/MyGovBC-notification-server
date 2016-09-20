@@ -4,7 +4,7 @@ title: Installation
 permalink: /docs/installation/
 ---
 
-*NotifyBC* can be installed from source code or by deploying a Docker container. To setup a development environment in order to contribute to *NotifyBC*, installing from source code is recommended. For small-scale production deployment or for the purpose of evaluation, both methods will do. For prouduction deployment that requires horizontal scaling, deploying the docker container to PAAS such as OpenShift and running on a MongoDB cluster is recommended. 
+*NotifyBC* can be installed from source code or by deploying a Docker container. To setup a development environment in order to contribute to *NotifyBC*, installing from source code is recommended. For small-scale production deployment or for the purpose of evaluation, both methods will do. For large-scale production deployment that requires horizontal scalability, deploying the docker container to PAAS such as OpenShift and running on a MongoDB cluster is recommended. 
 
 ## Installing *NotifyBC* from Source
 
