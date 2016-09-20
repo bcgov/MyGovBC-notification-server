@@ -4,9 +4,9 @@ title: Installation
 permalink: /docs/installation/
 ---
 
-*NotifyBC* can be installed manually or by deploying a Docker container.
+*NotifyBC* can be installed from source code or by deploying a Docker container. To setup a development environment in order to contribute to *NotifyBC*, installing from source code is recommended. For small-scale production deployment or for the purpose of evaluation, both methods will do. For prouduction deployment that requires horizontal scaling, deploying the docker container to PAAS such as OpenShift and running on a MongoDB cluster is recommended. 
 
-## Manual Installation
+## Installing *NotifyBC* from Source
 
 ### System Requirements
 * Software
@@ -49,3 +49,7 @@ Browse your REST API at http://localhost:3000/explorer
 ```
 
 Now browse to <a href="http://localhost:3000/explorer" target="_blank">http://localhost:3000/explorer</a> the page displays StrongLoop API Explorer.
+
+## Deploying NotifyBC Docker Container
+
+## Installing NotifyBC Docs Website 
