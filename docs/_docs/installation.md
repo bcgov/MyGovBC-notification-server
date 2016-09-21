@@ -51,5 +51,34 @@ Browse your REST API at http://localhost:3000/explorer
 Now browse to <a href="http://localhost:3000/explorer" target="_blank">http://localhost:3000/explorer</a> the page displays StrongLoop API Explorer.
 
 ## Deploying NotifyBC Docker Container
+tbd
 
-## Installing NotifyBC Docs Website 
+## Installing NotifyBC Docs Local Website (Optional)
+If you want to contribute to *NotifyBC* docs beyond simple fix ups, you can install [Jekyll](https://jekyllrb.com/) through Ruby bundler and render the [web site](https://bcgov.github.io/MyGovBC-notification-server) locally:
+
+1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
+2. Run
+
+```sh
+cd /docs
+gem install bundler
+bundle install
+bundle exec jekyll serve 
+```
+
+If everything goes well, you will get output:
+
+```
+Configuration file: .../notifyBC/docs/_config.yml
+            Source: .../notifyBC/docs
+       Destination: .../notifyBC/docs/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating... 
+                    done in 3.971 seconds.
+ Auto-regeneration: enabled for '.../notifyBC/docs'
+Configuration file: .../notifyBC/docs/_config.yml
+    Server address: http://127.0.0.1:4000/MyGovBC-notification-server/
+  Server running... press ctrl-c to stop.
+```
+
+You can now browse to the local docs site <a href="http://127.0.0.1:4000/MyGovBC-notification-server/" target="_blank">http://127.0.0.1:4000/MyGovBC-notification-server/</a>
