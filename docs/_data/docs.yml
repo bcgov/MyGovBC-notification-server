@@ -13,13 +13,10 @@
   - api-subscription
   - api-notification
 
-- title: Deployment
-  docs:
-  - deployment-methods
-  - continuous-integration
 
 - title: Miscellaneous
   docs:
+  - continuous-integration
   - troubleshooting
   - resources
 
