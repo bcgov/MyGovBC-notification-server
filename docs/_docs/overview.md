@@ -55,6 +55,6 @@ The way NotifyBC interacts with other components is diagrammed below.
 NotifyBC is created on Node.js [LoopBack](https://loopback.io/). Contributors to source code of NotifyBC should be familiar with LoopBack. [LoopBack Docs](https://docs.strongloop.com/display/public/LB/LoopBack) serves a good complement to this documentation.
 
 <div class="note">
-  <h5>ProTips™: Familiarize LoopBack</h5>
+  <h5>ProTips™ familiarize LoopBack</h5>
   <p>Most of NotifyBC code was writen according to LoopBack docs, especially section <a href="https://docs.strongloop.com/display/public/LB/Adding+logic+to+models">adding logic to models</a>.</p>
 </div>
