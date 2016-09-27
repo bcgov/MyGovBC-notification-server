@@ -6,7 +6,7 @@ permalink: /docs/configuration/
 Most configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). NotifyBC added following additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](https://docs.strongloop.com/display/public/LB/config.json#config.json-Environment-specificsettings) such as */server/config.local.json*.  
 
 ## smtp
-By default *NotifyBC* bypasses SMTP relay and connects [directly](https://github.com/nodemailer/nodemailer#set-up-smtp) to recipients MX. You can setup SMTP relay by adding following entry to */server/config.local.json*
+By default *NotifyBC* bypasses SMTP relay and connects [directly](https://github.com/nodemailer/nodemailer#set-up-smtp) to recipients MX. You can setup SMTP relay by adding following *smtp* config object to */server/config.local.json*
 
 ```json
 {
@@ -18,6 +18,7 @@ By default *NotifyBC* bypasses SMTP relay and connects [directly](https://github
   }
 }
 ```
+Check out [Nodemailer](https://github.com/nodemailer/nodemailer#set-up-smtp) for other config options that you can define in *smtp* object.
 
 ## RSA Keys
 When NotifyBC starts up, it checks if two files containing a RSA key pair exists: */server/id_rsa* and *server/id_rsa.pub*. If not it will generate the files. This RSA key pair is used to exchange confidential information with trusted third parties through user's browser. For an example of use case, see [Subscription API](../api-subscription/). To make it work, send the public key file *server/id_rsa.pub* to the trusted third party. 
