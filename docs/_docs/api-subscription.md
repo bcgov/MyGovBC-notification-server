@@ -10,7 +10,7 @@ The subscription API encapsulates the backend workflow of user subscription and 
  
 Equipped with the confirmation code and a message template, NotifyBC can now send out confirmation request to unconfirmed subscription channel. At a minimum this confirmation request should contain the confirmation code. When user receives the message, he/she echos the confirmation code back to a NotifyBC provided API to verify against saved record. If match, the state of the subscription request is changed to confirmed.
 
-For admin requests, NotifyBC can still perform the above confirmation process. But admin request also has the privilege to set the subscription state to confirmed, therefore skipping confirmation. 
+For admin requests, NotifyBC can still perform the above confirmation process. But admin request has full CRUD privilege, including set the subscription state to confirmed, therefore skipping confirmation. 
 
 ## Model Schema
 The API operates on following subscription data model fields: 
