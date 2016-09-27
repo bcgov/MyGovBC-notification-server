@@ -54,7 +54,7 @@ Now browse to <a href="http://localhost:3000/explorer" target="_blank">http://lo
 tbd
 
 ## Install Docs Website (Optional)
-If you want to contribute to *NotifyBC* docs beyond simple fix ups, you can install [Jekyll](https://jekyllrb.com/) through Ruby bundler and render the [web site](https://bcgov.github.io/MyGovBC-notification-server) locally:
+If you want to contribute to *NotifyBC* docs beyond simple fix ups, you can install [Jekyll](https://jekyllrb.com/) through Ruby bundler and render this web site locally:
 
 1. Install [Ruby](https://www.ruby-lang.org/en/documentation/installation/)
 2. Run
