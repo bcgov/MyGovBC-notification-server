@@ -5,25 +5,27 @@ permalink: /docs/api-notification/
 ---
 The notification API encapsulates the backend workflow of staging and dispatching a message to targeted user after receiving the message from event source. 
 
-When a notification is created by event source server application, the message is saved to database prior to responding to API caller. In addition, for push notification, the message is delivered immediately, i.e. the API call is synchronous. For in-app pull notification, the message, which by default is in state *new*, can be retrieved by browser user request. A user request can only get the list of in-app messages targeted to the current user. A user request can then change the message state to *read* or *deleted* depending on user action. A deleted message cannot be retrieved subsequently by user requests, but the state can be updated given the correct *id*. 
+ Depending on whether an API call comes from user browser as a user request or from an authorized server application as an admin request, NotifyBC applies different permissions. Admin request allows full CRUD operations. An authenticated user request, on the other hand, are only allowed to get a list of in-app pull notifications targeted to the current user and changing the state of the notifications. An unauthenticated user request can not access any  API.
+ 
+When a notification is created by the event source server application, the message is saved to database prior to responding to API caller. In addition, for push notification, the message is delivered immediately, i.e. the API call is synchronous. For in-app pull notification, the message, which by default is in state *new*, can be retrieved later on by browser user request. A user request can only get the list of in-app messages targeted to the current user. A user request can then change the message state to *read* or *deleted* depending on user action. A deleted message cannot be retrieved subsequently by user requests, but the state can be updated given the correct *id*. 
 <div class="note info">
   <h5><i>Deleted</i> message is still kept in database.</h5>
-  <p><i>NotifyBC</i> provides API for deleting a notification. This API only marks the <i>state</i> field as deleted rather than deleting the record from database for the purpose of auditing and recovery.</p>
+  <p><i>NotifyBC</i> provides API for deleting a notification. For the purpose of auditing and recovery, this API only marks the <i>state</i> field as deleted rather than deleting the record from database.</p>
 </div>
 <div class="note">
   <h5>ProTips™ undo in-app notification deletion within a session</h5>
-  <p>Because "deleted" message is still kept in database, you can implement undo feature for in-app notification. The recovery applies to message deleted within the current session. In order for it to work, you need to keep a copy of the message id prior to deletion. To undo, call <a href="#update-a-notification">update</a> API to set desired state. </p>
+  <p>Because "deleted" message is still kept in database, you can implement undo feature for in-app notification as long as the message id is retained prior to deletion within the current session. To undo, call <a href="#update-a-notification">update</a> API to set desired state. </p>
 </div>
 
 In-app pull notification also supports message expiration by setting a date in field *validTill*. An expired message cannot be retrieved by user requests. 
  
-A message, regardless of push or pull, can be unicast or broadcast. A unicast message is intended for an individual user whereas a broadcast message is intended for all confirmed subscribers of a service. A unicast message must have field *userChannelId* populated. A broadcast message must set *isBroadcast* to true and leave *userChannelId* empty.
+A message, regardless of push or pull, can be unicast or broadcast. A unicast message is intended for an individual user whereas a broadcast message is intended for all confirmed subscribers of a service. A unicast message must have field *userChannelId* populated. The value of *userChannelId* is channel dependent. In the case of email for example, this would be user's email address. A broadcast message must set *isBroadcast* to true and leave *userChannelId* empty.
 
 <div class="note info">
   <h5>Why field <i>isBroadcast</i>?</h5>
   <p>Unicast and broadcast message can be distinguished by whether field <i>userChannelId</i> is empty or not alone. So why the extra field <i>isBroadcast</i>? This is in order to prevent inadvertent marking a unicast message broadcast by omitting <i>userChannelId</i> or populating  it with empty value. The precaution is necessary because in-app notifications may contain personalized and confidential information.</p>
 </div>
-*NotifyBC* ensures the state of an in-app broadcast message is isolated by user, so that for example, a message read by one user is still new to another user. To achieve this, *NotifyBC* maintains two internal fields of array type - *readBy* and *deletedBy*. When a user request updates the *state* field of an in-app broadcast message to *read* or *deleted*, instead of altering the *state* field, *NotifyBC* appends the current user to *readBy* or *deletedBy* list. When user request retrieving in-app messages, the *state* field of the broadcast message in HTTP response is updated based on whether the user exists in field *readBy* and *deletedBy*. The record in database, however, is unchanged. Neither *deletedBy* nor *readBy* are visible to user request.
+*NotifyBC* ensures the state of an in-app broadcast message is isolated by user, so that for example, a message read by one user is still new to another user. To achieve this, *NotifyBC* maintains two internal fields of array type - *readBy* and *deletedBy*. When a user request updates the *state* field of an in-app broadcast message to *read* or *deleted*, instead of altering the *state* field, *NotifyBC* appends the current user to *readBy* or *deletedBy* list. When user request retrieving in-app messages, the *state* field of the broadcast message in HTTP response is updated based on whether the user exists in field *deletedBy* and *readBy*. If existing in both fields, *deletedBy* takes precedence (the message therefore is not returned). The record in database, meanwhile, is unchanged. Neither field *deletedBy* nor *readBy* is visible to user request.
 
 
 ## Model Schema
