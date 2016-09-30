@@ -237,7 +237,7 @@ POST /notifications
 
 * example
 
-  To send a unicast email push notification, copy and paste following json object to the data value box in API explorer and click *Try it out!* button:
+  To send a unicast email push notification, copy and paste following json object to the data value box in API explorer, change email addresses as needed, and click *Try it out!* button:
   
   ```
   {
@@ -252,7 +252,7 @@ POST /notifications
   }
   ```
 
-  As the result, *foo@bar.com* should receive an email notification, and following json object is returned to caller upon sending the email:
+  As the result, *foo@bar.com* should receive an email notification, and following json object is returned to caller upon sending the email successfully:
   
   ```
   {
