@@ -14,11 +14,11 @@
     ]
   },
   "notification": {
-    "dataSource": "imdb",
+    "dataSource": "db",
     "public": true
   },
   "subscription": {
-    "dataSource": "imdb",
+    "dataSource": "db",
     "public": true
   }
 }

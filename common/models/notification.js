@@ -28,8 +28,7 @@ module.exports = function (Notification) {
     if (!res) {
       return
     }
-    var httpCtx = require('loopback').getCurrentContext()
-    var currUser = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
+    var currUser = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname')
     if (currUser) {
       ctx.result = res.reduce(function (p, e, i) {
         if (e.validTill && Date.parse(e.validTill) < new Date()) {
