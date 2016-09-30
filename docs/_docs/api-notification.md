@@ -234,7 +234,43 @@ POST /notifications
   5. the state of push notification is updated to *sent* or *error* depending on sending status
   6. the updated notification is saved back to database
   7. the saved record is returned unless there is an error saving to database, in which case error is returned
+
+* example
+
+  To send a unicast email push notification, copy and paste following json object to the data value box in API explorer and click *Try it out!* button:
   
+  ```
+  {
+    "serviceName": "education",
+    "userChannelId": "foo@bar.com",
+    "message": {
+      "from": "no_reply@bar.com",
+      "subject": "test",
+      "textBody": "This is a test"
+    },
+    "channel": "email"
+  }
+  ```
+
+  As the result, *foo@bar.com* should receive an email notification, and following json object is returned to caller upon sending the email:
+  
+  ```
+  {
+    "serviceName": "education",
+    "state": "sent",
+    "userChannelId": "foo@bar.com",
+    "message": {
+      "from": "no_reply@bar.com",
+      "subject": "test",
+      "textBody": "This is a test"
+    },
+    "created": "2016-09-30T20:37:06.011Z",
+    "channel": "email",
+    "isBroadcast": false,
+    "id": "57eeccf23427b61a4820775e"
+  }
+  ```
+
 ## Update a Notification
 ```
 PUT /notifications/{id}
