@@ -13,8 +13,8 @@ module.exports = function (Subscription) {
   Subscription.disableRemoteMethod('deleteById', true)
 
   Subscription.observe('access', function (ctx, next) {
-    var httpCtx = require('loopback').getCurrentContext()
-    var u = httpCtx.active.http.req.get('sm_user') || httpCtx.active.http.req.get('smgov_userdisplayname')
+    var httpCtx = require('loopback').getCurrentContext().active.http
+    var u = Subscription.app.models.Notification.getCurrentUser(httpCtx)
     if (u) {
       ctx.query.where = ctx.query.where || {}
       ctx.query.where.userId = u
@@ -37,7 +37,7 @@ module.exports = function (Subscription) {
     if (!data) {
       next()
     }
-    var u = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname')
+    var u = Subscription.app.models.Notification.getCurrentUser(ctx)
     if (u) {
       if (data instanceof Array) {
         data.forEach(function (e) {
@@ -81,7 +81,7 @@ module.exports = function (Subscription) {
   }
 
   Subscription.beforeRemote('create', function (ctx, unused, next) {
-    var u = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname')
+    var u = Subscription.app.models.Notification.getCurrentUser(ctx)
     if (u) {
       ctx.args.data.userId = u
       if (!ctx.args.data.confirmationRequest) {
@@ -108,7 +108,7 @@ module.exports = function (Subscription) {
 
 
   Subscription.beforeRemote('deleteById', function (ctx, unused, next) {
-    var u = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname') || 'unknown'
+    var u = Subscription.app.models.Notification.getCurrentUser(ctx) || 'unknown'
     Subscription.findById(ctx.args.id, null, null, function (err, data) {
       if (data.userId === u) {
         return next()
@@ -120,7 +120,7 @@ module.exports = function (Subscription) {
   })
 
   Subscription.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
-      var currUser = ctx.req.get('sm_user') || ctx.req.get('smgov_userdisplayname')
+      var currUser = Subscription.app.models.Notification.getCurrentUser(ctx)
       if (currUser) {
         ctx.args.data.userId = currUser
         if (!ctx.args.data.confirmationRequest) {

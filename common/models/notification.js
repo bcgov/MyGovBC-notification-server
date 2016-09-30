@@ -12,7 +12,7 @@ module.exports = function (Notification) {
   Notification.observe('access', function (ctx, next) {
     var httpCtx = require('loopback').getCurrentContext().active.http
     ctx.query.where = ctx.query.where || {}
-    var currUser = getCurrentUser(httpCtx)
+    var currUser = Notification.getCurrentUser(httpCtx)
     if (currUser) {
       ctx.query.where.or = []
       ctx.query.where.or.push({
@@ -22,7 +22,7 @@ module.exports = function (Notification) {
         userChannelId: currUser
       })
     }
-    else if (!isAdminReq(httpCtx)) {
+    else if (!Notification.isAdminReq(httpCtx)) {
       var error = new Error('Unauthorized')
       error.status = 401
       return next(error)
@@ -34,7 +34,7 @@ module.exports = function (Notification) {
     if (!res) {
       return
     }
-    var currUser = getCurrentUser(ctx)
+    var currUser = Notification.getCurrentUser(ctx)
     if (currUser) {
       ctx.result = res.reduce(function (p, e, i) {
         if (e.validTill && Date.parse(e.validTill) < new Date()) {
@@ -55,7 +55,7 @@ module.exports = function (Notification) {
   })
 
   Notification.beforeRemote('create', function (ctx, unused, next) {
-    if (!isAdminReq(ctx)) {
+    if (!Notification.isAdminReq(ctx)) {
       var error = new Error('Unauthorized')
       error.status = 401
       return next(error)
@@ -87,12 +87,12 @@ module.exports = function (Notification) {
 
   Notification.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
       // only allow changing state for non-admin requests
-      if (!isAdminReq(ctx)) {
+      if (!Notification.isAdminReq(ctx)) {
         ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
       }
       if (ctx.instance.isBroadcast) {
         var httpCtx = require('loopback').getCurrentContext().active.http
-        var currUser = getCurrentUser(httpCtx) || 'unknown'
+        var currUser = Notification.getCurrentUser(httpCtx) || 'unknown'
         switch (ctx.args.data.state) {
           case 'read':
             ctx.args.data.readBy = instance.readBy || []
@@ -117,7 +117,7 @@ module.exports = function (Notification) {
     if (this.isBroadcast) {
       this.deletedBy = this.deletedBy || []
       var httpCtx = require('loopback').getCurrentContext().active.http
-      var currUser = getCurrentUser(httpCtx) || 'unknown'
+      var currUser = Notification.getCurrentUser(httpCtx) || 'unknown'
       if (this.deletedBy.indexOf(currUser) < 0) {
         this.deletedBy.push(currUser)
       }
@@ -156,12 +156,12 @@ module.exports = function (Notification) {
     }
   }
 
-  function getCurrentUser(httpCtx) {
+  Notification.getCurrentUser = function (httpCtx) {
     return httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname')
   }
 
-  function isAdminReq(httpCtx) {
-    var currUser = getCurrentUser(httpCtx)
+  Notification.isAdminReq = function (httpCtx) {
+    var currUser = Notification.getCurrentUser(httpCtx)
     return currUser ? false : true
   }
 }
