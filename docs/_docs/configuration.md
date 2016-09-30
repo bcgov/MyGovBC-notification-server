@@ -20,6 +20,18 @@ By default *NotifyBC* bypasses SMTP relay and connects [directly](https://github
 ```
 Check out [Nodemailer](https://github.com/nodemailer/nodemailer#set-up-smtp) for other config options that you can define in *smtp* object.
 
+## Admin IP List
+By [design](../overview/#architecture), NotifyBC classifies incoming requests into admin and user types. By default, the classification is based on the presence of SiteMinder header alone. In order to support user subscription from an anonymous website, an admin ip list can be used to make the distinction. To enable, add following object to */server/config.local.json* containing a list of admin ip addresses.
+
+```
+{
+  "adminIps": [
+    "127.0.0.1",
+    "192.168.0.2"
+  ]
+}
+```
+
 ## Database
 By default NotifyBC uses in-memory database backed up by file in */server/database/data.json*. To use MongoDB, which is highly recommended for production deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
 

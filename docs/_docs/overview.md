@@ -33,7 +33,7 @@ NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure
 NotifyBC, designed to be a microservice, doesn't use ACL to secure API calls. Instead, it classifies incoming requests into admin and user types according to following criteria:
 
 * If the request bears SiteMinder header, it is a user request;
-* (planned) If the source ip is in the admin ip list, it's an admin request.  
+* If the source ip is in the admin ip list, it's an admin request.  
 
 An admin request carries full authorization whereas user request has limited access. For example, a user request is not allowed to 
 

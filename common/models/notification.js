@@ -162,6 +162,11 @@ module.exports = function (Notification) {
 
   Notification.isAdminReq = function (httpCtx) {
     var currUser = Notification.getCurrentUser(httpCtx)
-    return currUser ? false : true
+    var isAdminReq = currUser ? false : true
+    var adminIps = Notification.app.get('adminIps')
+    if (adminIps) {
+      isAdminReq &= adminIps.indexOf(httpCtx.req.ip) >= 0
+    }
+    return isAdminReq
   }
 }
