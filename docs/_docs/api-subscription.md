@@ -213,6 +213,45 @@ POST /subscriptions
   7. the updated subscription request is saved to database 
   8. The subscription data, including auto-generated id, is returned as response unless there is error when sending confirmation request or saving to database. For user request, the field *confirmationRequest* is removed prior to sending the response.
   
+* example
+
+  To subscribe a user to service *education*, copy and paste following json object to the data value box in API explorer, change email addresses as needed, and click *Try it out!* button:
+  
+  ```
+  {
+    "serviceName": "education",
+    "channel": "email",
+    "userChannelId": "foo@bar.com",
+    "confirmationRequest": {
+      "confirmationCodeRegex": "\\d{5}",
+      "sendRequest": true,
+      "from": "no_reply@bar.com",
+      "subject": "confirmation",
+      "textBody": "Enter {confirmation_code} on screen"
+    }
+  }
+  ```
+
+  As the result, *foo@bar.com* should receive an email confirmation request with place holder *{confirmation_code}* replaced by a randomly generated 5 digit string, and following json object is returned to caller upon sending the email successfully for admin request; for non-admin request, the field *confirmationRequest* is removed from response.
+  
+  ```
+  {
+    "serviceName": "education",
+    "channel": "email",
+    "userChannelId": "foo@bar.com",
+    "state": "unconfirmed",
+    "confirmationRequest": {
+      "confirmationCodeRegex": "\\d{5}",
+      "sendRequest": true,
+      "from": "no_reply@bar.com",
+      "subject": "confirmation",
+      "textBody": "Enter {confirmation_code} on screen",
+      "confirmationCode": "45304"
+    },
+    "created": "2016-10-03T17:35:40.202Z",
+    "id": "57f296ec7eead50554c61de7"
+  }
+  ```
 
 ## Update a Subscription
 ```
