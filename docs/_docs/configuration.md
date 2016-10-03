@@ -32,6 +32,16 @@ By [design](../overview/#architecture), NotifyBC classifies incoming requests in
 }
 ```
 
+## Broadcast Notification Task Concurrency
+When handling a broadcast push notification, NotifyBC sends messages concurrently to improve performance. The configuration object *broadcastNotificationTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
+
+```
+{
+  "broadcastNotificationTaskConcurrency": 200
+}
+```
+
+
 ## Database
 By default NotifyBC uses in-memory database backed up by file in */server/database/data.json*. To use MongoDB, which is highly recommended for production deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
 

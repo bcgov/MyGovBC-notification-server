@@ -1,3 +1,4 @@
+var parallelLimit = require('async/parallelLimit')
 module.exports = function (Notification) {
   Notification.disableRemoteMethod('findOne', true)
   Notification.disableRemoteMethod('findById', true)
@@ -79,6 +80,10 @@ module.exports = function (Notification) {
           })
         })
         break
+      case 'sms':
+        // todo: handle sms notifications
+        next()
+        break
       default:
         next()
         break
@@ -158,10 +163,25 @@ module.exports = function (Notification) {
             channel: data.channel
           }
         }, function (err, subscribers) {
-          subscribers.forEach(function (e, i) {
-            Notification.sendEmail(data.message.from || 'unknown@unknown.com'
-              , e.userChannelId, data.message.subject
-              , data.message.textBody, data.message.htmlBody, cb)
+          var tasks = subscribers.map(function (e, i) {
+            return function (cb) {
+              Notification.sendEmail(data.message.from || 'unknown@unknown.com'
+                , e.userChannelId, data.message.subject
+                , data.message.textBody, data.message.htmlBody, function (err, info) {
+                  if (err) {
+                    data.sendErroToUsers = data.sendErroToUsers || []
+                    try {
+                      data.sendErroToUsers.push(info.envelope.to[0])
+                    }
+                    catch (ex) {
+                    }
+                  }
+                  cb(null)
+                })
+            }
+          })
+          parallelLimit(tasks, Notification.app.get('broadcastNotificationTaskConcurrency') || 100, function (err, res) {
+            cb(err)
           })
         })
         break
