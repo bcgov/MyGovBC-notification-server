@@ -215,7 +215,7 @@ POST /subscriptions
   
 * example
 
-  To subscribe a user to service *education*, copy and paste following json object to the data value box in API explorer, change email addresses as needed, and click *Try it out!* button:
+  To subscribe a user to service *education* and have NotifyBC to generate the confirmation code, copy and paste following json object to the data value box in API explorer, change email addresses as needed, and click *Try it out!* button:
   
   ```
   {
@@ -232,7 +232,7 @@ POST /subscriptions
   }
   ```
 
-  As the result, *foo@bar.com* should receive an email confirmation request with place holder *{confirmation_code}* replaced by a randomly generated 5 digit string, and following json object is returned to caller upon sending the email successfully for admin request; for non-admin request, the field *confirmationRequest* is removed from response.
+  As the result, *foo@bar.com* should receive an email confirmation request with place holder *{confirmation_code}* replaced by a randomly generated 5 digit string, and following json object is returned to caller upon sending the email successfully for admin request:
   
   ```
   {
@@ -253,6 +253,20 @@ POST /subscriptions
   }
   ```
 
+  For non-admin request, the field *confirmationRequest* is removed from response, and field *userId* is populated from SiteMinder header:
+
+  ```
+  {
+    "serviceName": "education",
+    "channel": "email",
+    "userChannelId": "foo@bar.com",
+    "state": "unconfirmed",
+    "userId": "<user_id>",
+    "created": "2016-10-03T18:17:09.778Z",
+    "id": "57f2a0a5b1aa0e2d5009eced"
+  }
+  ```
+  
 ## Update a Subscription
 ```
 PUT /subscriptions/{id}
