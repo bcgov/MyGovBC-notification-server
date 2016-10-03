@@ -23,6 +23,21 @@ module.exports = function (Subscription) {
     next()
   })
 
+  Subscription.beforeRemote('find', function () {
+    var ctx = arguments[0]
+    var next = arguments[arguments.length - 1]
+    if (Subscription.app.models.Notification.isAdminReq(ctx)) {
+      return next()
+    }
+    var u = Subscription.app.models.Notification.getCurrentUser(ctx)
+    if (u) {
+      return next()
+    }
+    // anonymous user requests are not allowed to read subscriptions
+    var error = new Error('Unauthorized')
+    error.status = 401
+    return next(error)
+  })
 
   /**
    * hide confirmation request field, especially confirmation code
