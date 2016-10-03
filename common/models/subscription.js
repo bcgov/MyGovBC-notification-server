@@ -13,7 +13,7 @@ module.exports = function (Subscription) {
   Subscription.disableRemoteMethod('deleteById', true)
 
   Subscription.observe('access', function (ctx, next) {
-    var httpCtx = require('loopback').getCurrentContext().active.http
+    var httpCtx = require('loopback').getCurrentContext() && require('loopback').getCurrentContext().active.http
     var u = Subscription.app.models.Notification.getCurrentUser(httpCtx)
     if (u) {
       ctx.query.where = ctx.query.where || {}

@@ -151,13 +151,25 @@ module.exports = function (Notification) {
           , data.message.textBody, data.message.htmlBody, cb)
         break
       case true:
-        // todo: handle broadcast email
+        Notification.app.models.Subscription.find({
+          where: {
+            serviceName: data.serviceName,
+            state: 'confirmed',
+            channel: data.channel
+          }
+        }, function (err, subscribers) {
+          subscribers.forEach(function (e, i) {
+            Notification.sendEmail(data.message.from || 'unknown@unknown.com'
+              , e.userChannelId, data.message.subject
+              , data.message.textBody, data.message.htmlBody, cb)
+          })
+        })
         break
     }
   }
 
   Notification.getCurrentUser = function (httpCtx) {
-    return httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname')
+    return httpCtx && (httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname'))
   }
 
   Notification.isAdminReq = function (httpCtx) {
