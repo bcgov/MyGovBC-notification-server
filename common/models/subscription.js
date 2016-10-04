@@ -1,6 +1,7 @@
 const path = require('path')
 var rsaPath = path.resolve(__dirname, '../../server/boot/rsa.js')
 var rsa = require(rsaPath)
+var RandExp = require('randexp')
 
 module.exports = function (Subscription) {
   Subscription.disableRemoteMethod('findOne', true)
@@ -67,12 +68,7 @@ module.exports = function (Subscription) {
   })
 
   function handleConfirmationRequest(data, cb) {
-    if (data.confirmationRequest.confirmationCodeRegex) {
-      var RandExp = require('randexp')
-      var confirmationCodeRegex = new RegExp(data.confirmationRequest.confirmationCodeRegex)
-      data.confirmationRequest.confirmationCode = new RandExp(confirmationCodeRegex).gen()
-    }
-    else if (data.confirmationRequest.confirmationCodeEncrypted) {
+    if (data.confirmationRequest.confirmationCodeEncrypted) {
       var key = rsa.key
       var decrypted
       try {
@@ -84,6 +80,18 @@ module.exports = function (Subscription) {
       var decryptedData = decrypted.split(' ')
       data.userChannelId = decryptedData[0]
       data.confirmationRequest.confirmationCode = decryptedData[1]
+    }
+    else {
+      data.confirmationRequest.confirmationCode = ''
+      if (data.confirmationRequest.confirmationCodeRegex) {
+        var confirmationCodeRegex = new RegExp(data.confirmationRequest.confirmationCodeRegex)
+        data.confirmationRequest.confirmationCode += new RandExp(confirmationCodeRegex).gen()
+      }
+      var confirmationCodeSuffixRegexStr = Subscription.app.get('confirmationCodeSuffixRegex')
+      if (confirmationCodeSuffixRegexStr) {
+        var confirmationCodeSuffixRegex = new RegExp(confirmationCodeSuffixRegexStr)
+        data.confirmationRequest.confirmationCode += new RandExp(confirmationCodeSuffixRegex).gen()
+      }
     }
     if (!data.confirmationRequest.sendRequest) {
       cb(null, null)

@@ -27,5 +27,6 @@
   "smtp": {
     "direct": true,
     "name": "localhost"
-  }
+  },
+  "confirmationCodeSuffixRegex": "\\d{5}"
 }

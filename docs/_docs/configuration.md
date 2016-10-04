@@ -41,6 +41,15 @@ When handling a broadcast push notification, NotifyBC sends messages concurrentl
 }
 ```
 
+## Confirmation Code Suffix RegEx
+A subscription request can be submitted from user browser as a user request. This subscription request may contain a regular expression in field *confirmationRequest.confirmationCodeRegex* to instruct NotifyBC to generate the confirmation code from the RegEx. Because a user request could be spoofed, measurement has be imposed on server side to ensure minimum randomness of the generated confirmation code.    Configuration *confirmationCodeSuffixRegex*, which by default is a RegEx to generate 5 random digits, provides the mitigation. The confirmation code is thus a concatenation of random strings generated from RegEx *confirmationRequest.confirmationCodeRegex* in request field and *confirmationCodeSuffixRegex* in config. To change *confirmationCodeSuffixRegex*, add following object to */server/config.local.json* with a value of a RegEx in escaped string format (the example yields a 6 random digits):
+
+```
+{
+  "confirmationCodeSuffixRegex": "\\d{6}"
+}
+```
+
 
 ## Database
 By default NotifyBC uses in-memory database backed up by file in */server/database/data.json*. To use MongoDB, which is highly recommended for production deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
