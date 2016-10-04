@@ -24,8 +24,8 @@ module.exports = function (Notification) {
       })
     }
     else if (!Notification.isAdminReq(httpCtx)) {
-      var error = new Error('Unauthorized')
-      error.status = 401
+      var error = new Error('Forbidden')
+      error.status = 403
       return next(error)
     }
     next()
@@ -57,8 +57,8 @@ module.exports = function (Notification) {
 
   Notification.beforeRemote('create', function (ctx, unused, next) {
     if (!Notification.isAdminReq(ctx)) {
-      var error = new Error('Unauthorized')
-      error.status = 401
+      var error = new Error('Forbidden')
+      error.status = 403
       return next(error)
     }
 
@@ -66,6 +66,7 @@ module.exports = function (Notification) {
     if (data.channel === 'inApp' || data.skipSubscriptionConfirmationCheck || !data.userChannelId) {
       return next()
     }
+    // validate userChannelId of a unicast push notification against subscription data
     Notification.app.models.Subscription.find({
       where: {
         serviceName: data.serviceName,
@@ -77,7 +78,7 @@ module.exports = function (Notification) {
     }, function (err, subscribers) {
       if (err || subscribers.length === 0) {
         var error = new Error('invalid userChannelId')
-        error.status = 401
+        error.status = 403
         return next(error)
       }
       else {

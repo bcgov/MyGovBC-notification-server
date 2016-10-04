@@ -35,8 +35,8 @@ module.exports = function (Subscription) {
       return next()
     }
     // anonymous user requests are not allowed to read subscriptions
-    var error = new Error('Unauthorized')
-    error.status = 401
+    var error = new Error('Forbidden')
+    error.status = 403
     return next(error)
   })
 
@@ -109,8 +109,8 @@ module.exports = function (Subscription) {
       ctx.args.data.userId = u
       if (!ctx.args.data.confirmationRequest) {
         // online channel must have confirmationRequest
-        var error = new Error('Unauthorized')
-        error.status = 401
+        var error = new Error('Forbidden')
+        error.status = 403
         return next(error)
       }
     }
@@ -136,8 +136,8 @@ module.exports = function (Subscription) {
       if (data.userId === u) {
         return next()
       }
-      var error = new Error('Unauthorized')
-      error.status = 401
+      var error = new Error('Forbidden')
+      error.status = 403
       next(error)
     })
   })
@@ -148,8 +148,8 @@ module.exports = function (Subscription) {
         ctx.args.data.userId = currUser
         if (!ctx.args.data.confirmationRequest) {
           // online channel must have confirmationRequest
-          var error = new Error('Unauthorized')
-          error.status = 401
+          var error = new Error('Forbidden')
+          error.status = 403
           return next(error)
         }
         ctx.args.data.state = 'unconfirmed'
@@ -179,8 +179,8 @@ module.exports = function (Subscription) {
   Subscription.prototype.verify = function (confirmationCode, callback) {
     var error
     if (confirmationCode !== this.confirmationRequest.confirmationCode) {
-      error = new Error('Unauthorized')
-      error.status = 401
+      error = new Error('Forbidden')
+      error.status = 403
       return callback(error, "OK")
     }
     else {
