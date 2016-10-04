@@ -61,7 +61,29 @@ module.exports = function (Notification) {
       error.status = 401
       return next(error)
     }
-    next()
+
+    var data = ctx.args.data
+    if (data.channel === 'inApp' || data.skipSubscriptionConfirmationCheck || !data.userChannelId) {
+      return next()
+    }
+    Notification.app.models.Subscription.find({
+      where: {
+        serviceName: data.serviceName,
+        state: 'confirmed',
+        channel: data.channel,
+        // todo: email address check should be case insensitive
+        userChannelId: data.userChannelId
+      }
+    }, function (err, subscribers) {
+      if (err || subscribers.length === 0) {
+        var error = new Error('invalid userChannelId')
+        error.status = 401
+        return next(error)
+      }
+      else {
+        return next()
+      }
+    })
   })
 
   Notification.afterRemote('create', function (ctx, res, next) {
@@ -169,9 +191,9 @@ module.exports = function (Notification) {
                 , e.userChannelId, data.message.subject
                 , data.message.textBody, data.message.htmlBody, function (err, info) {
                   if (err) {
-                    data.sendErroToUsers = data.sendErroToUsers || []
+                    data.errorWhenSendingToUsers = data.errorWhenSendingToUsers || []
                     try {
-                      data.sendErroToUsers.push(info.envelope.to[0])
+                      data.errorWhenSendingToUsers.push(info.envelope.to[0])
                     }
                     catch (ex) {
                     }

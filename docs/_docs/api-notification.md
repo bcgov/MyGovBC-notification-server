@@ -125,6 +125,19 @@ The API operates on following notification data model fields:
   </tr>
   <tr>
     <td>
+      <p class="name">skipSubscriptionConfirmationCheck</p>
+      <p class="description">For unicast push notification, <i>userChannelId</i> is validated against subscription data and requires a matching confirmed subscription with same <i>userChannelId</i> in the same <i>serviceName</i>, unless this field is set to true.</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>boolean</td></tr>
+        <tr><td>required</td><td>false</td></tr>
+        <tr><td>default</td><td>false</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
       <p class="name">validTill</p>
       <p class="description">expiration date of the message. Applicable to inApp notification only.</p>
     </td>
@@ -190,6 +203,18 @@ The API operates on following notification data model fields:
       </table>
     </td>
   </tr>
+  <tr>
+    <td>
+      <p class="name">errorWhenSendingToUsers</p>
+      <p class="description">this is an internal field to track the list of <i>userChannelId</i>s a broadcast push notification failed to deliver to. It is returned to notification creation API caller.</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>array</td></tr>
+        <tr><td>internal</td><td>true</td></tr>
+      </table>
+    </td>
+  </tr>
 </table>
 
 
@@ -228,10 +253,10 @@ POST /notifications
   NotifyBC performs following actions in sequence
   
   1. if it's a user request, error is returned
-  2. inputs are validated. If validation fails, error is returned
-  3. the notification request is saved to database. 
-  4. for push notification, the notification is sent
-  5. the state of push notification is updated to *sent* or *error* depending on sending status
+  2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, there must be a confirmed *userChannelId* subscription of the same service, unless field *skipSubscriptionConfirmationCheck* is set to true
+  3. the notification request is saved to database
+  4. for unicast push notification, the message is sent to targeted user; for broadcast push notification, the message is sent to all confirmed subscribers of the service in the delivery channel. 
+  5. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains the list of *userChannelId*s the message failed to deliver to, but the state will still be set to *sent*
   6. the updated notification is saved back to database
   7. the saved record is returned unless there is an error saving to database, in which case error is returned
 
