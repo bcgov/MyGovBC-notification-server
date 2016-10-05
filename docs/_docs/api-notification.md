@@ -268,6 +268,7 @@ POST /notifications
   {
     "serviceName": "education",
     "userChannelId": "foo@bar.com",
+    "skipSubscriptionConfirmationCheck": true,
     "message": {
       "from": "no_reply@bar.com",
       "subject": "test",
@@ -277,13 +278,14 @@ POST /notifications
   }
   ```
 
-  As the result, *foo@bar.com* should receive an email notification, and following json object is returned to caller upon sending the email successfully:
+  As the result, *foo@bar.com* should receive an email notification even if the user is not a confirmed subscriber, and following json object is returned to caller upon sending the email successfully:
   
   ```
   {
     "serviceName": "education",
     "state": "sent",
     "userChannelId": "foo@bar.com",
+    "skipSubscriptionConfirmationCheck": true,
     "message": {
       "from": "no_reply@bar.com",
       "subject": "test",
