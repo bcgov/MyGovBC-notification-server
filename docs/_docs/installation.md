@@ -4,7 +4,13 @@ title: Installation
 permalink: /docs/installation/
 ---
 
-*NotifyBC* can be installed from source code or by deploying a Docker container. To setup a development environment in order to contribute to *NotifyBC*, installing from source code is recommended. For small-scale production deployment or for the purpose of evaluation, both methods will do. For large-scale production deployment that requires horizontal scalability, deploying the docker container to PAAS such as OpenShift and running on a MongoDB cluster is recommended. 
+*NotifyBC* can be installed in 3 ways:
+
+  1. from source code 
+  2. deploying a Docker container
+  3. deploying to OpenShift
+  
+ To setup a development environment in order to contribute to *NotifyBC*, installing from source code is recommended. For small-scale production deployment or for the purpose of evaluation, both source code and docker container will do. For large-scale production deployment that requires horizontal scalability, deploying to OpenShift and running on a MongoDB cluster is recommended. 
 
 ## Install from Source Code
 
@@ -51,6 +57,20 @@ Browse your REST API at http://localhost:3000/explorer
 Now browse to <a href="http://localhost:3000/explorer" target="_blank">http://localhost:3000/explorer</a> the page displays StrongLoop API Explorer.
 
 ## Deploy Docker Container
+If you have git and Docker installed, you can run following command to deploy NotifyBC Docker container: 
+
+```sh
+~ $ git clone \
+https://github.com/bcgov/MyGovBC-notification-server.git \
+notifyBC
+~ $ cd notifyBC
+~ $ docker build -t notify-bc .
+~ $ docker -p 3000:3000 notify-bc
+```
+
+If successful, similar output is displayed as in source code installation.  
+
+## Deploy to OpenShift
 tbd
 
 ## Install Docs Website (Optional)
