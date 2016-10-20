@@ -174,9 +174,9 @@ module.exports = function (Notification) {
   function sendEmailNotification(data, cb) {
     switch (data.isBroadcast) {
       case false:
-        Notification.sendEmail(data.message.from || 'unknown@unknown.com'
-          , data.userChannelId, data.message.subject
-          , data.message.textBody, data.message.htmlBody, cb)
+        Notification.sendEmail(data.message.from || 'unknown@unknown.com',
+          data.userChannelId, data.message.subject,
+          data.message.textBody, data.message.htmlBody, cb)
         break
       case true:
         Notification.app.models.Subscription.find({
@@ -188,9 +188,9 @@ module.exports = function (Notification) {
         }, function (err, subscribers) {
           var tasks = subscribers.map(function (e, i) {
             return function (cb) {
-              Notification.sendEmail(data.message.from || 'unknown@unknown.com'
-                , e.userChannelId, data.message.subject
-                , data.message.textBody, data.message.htmlBody, function (err, info) {
+              Notification.sendEmail(data.message.from || 'unknown@unknown.com',
+                e.userChannelId, data.message.subject,
+                data.message.textBody, data.message.htmlBody, function (err, info) {
                   if (err) {
                     data.errorWhenSendingToUsers = data.errorWhenSendingToUsers || []
                     try {
@@ -220,7 +220,7 @@ module.exports = function (Notification) {
     var isAdminReq = currUser ? false : true
     var adminIps = Notification.app.get('adminIps')
     if (adminIps) {
-      isAdminReq &= adminIps.indexOf(httpCtx.req.ip) >= 0
+      isAdminReq = isAdminReq && (adminIps.indexOf(httpCtx.req.ip) >= 0)
     }
     return isAdminReq
   }
