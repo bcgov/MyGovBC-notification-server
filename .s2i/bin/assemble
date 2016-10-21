@@ -1,11 +1,12 @@
 #!/bin/bash
+# make sure copy and mv applies to dot files
+shopt -s dotglob nullglob
 # restore build artifacts
 if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
     echo "---> restore build artifacts"
     mv /tmp/artifacts/* ./
 fi
 echo "---> Installing application source"
-shopt -s dotglob nullglob
 mv -f /tmp/src/* ./
 echo "---> Building your Node application from source"
 npm install
