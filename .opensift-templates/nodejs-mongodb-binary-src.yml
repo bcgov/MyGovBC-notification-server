@@ -1,10 +1,10 @@
 kind: "Template"
 apiVersion: "v1"
 metadata:
-  name: "nodejs-mongodb-binary-src"
+  name: "notify-bc"
   creationTimestamp: null
   annotations:
-    description: "An Node.js application from binary source input with a MongoDB database"
+    description: "NotifyBC app with a MongoDB database"
     iconClass: "icon-nodejs"
     tags: "instant-app,nodejs,mongodb"
 objects:
@@ -12,7 +12,7 @@ objects:
     kind: "BuildConfig"
     apiVersion: "v1"
     metadata:
-      name: "nodejs-mongodb-binary-src"
+      name: "notify-bc"
       annotations:
         description: "Defines how to build the application"
     spec:
@@ -20,7 +20,6 @@ objects:
         type: "Binary"
         binary:
           asFile: "webapp.tar"
-        contextDir: "${CONTEXT_DIR}"
       strategy:
         type: "Source"
         sourceStrategy:
@@ -32,12 +31,12 @@ objects:
       output:
         to:
           kind: "ImageStreamTag"
-          name: "nodejs-mongodb-binary-src:latest"
+          name: "notify-bc:latest"
   -
     kind: "ImageStream"
     apiVersion: "v1"
     metadata:
-      name: "nodejs-mongodb-binary-src"
+      name: "notify-bc"
       annotations:
         description: "Keeps track of changes in the application image"
   -
@@ -55,7 +54,7 @@ objects:
     kind: "DeploymentConfig"
     apiVersion: "v1"
     metadata:
-      name: "nodejs-mongodb-binary-src"
+      name: "notify-bc"
       annotations:
         description: "Defines how to deploy the application server"
     spec:
@@ -67,28 +66,28 @@ objects:
           imageChangeParams:
             automatic: true
             containerNames:
-              - "nodejs-mongodb-binary-src"
+              - "notify-bc"
             from:
               kind: "ImageStreamTag"
-              name: "nodejs-mongodb-binary-src:latest"
+              name: "notify-bc:latest"
         -
           type: "ConfigChange"
       replicas: 1
       selector:
-        name: "nodejs-mongodb-binary-src"
+        name: "notify-bc"
       template:
         metadata:
-          name: "nodejs-mongodb-binary-src"
+          name: "notify-bc"
           labels:
-            name: "nodejs-mongodb-binary-src"
+            name: "notify-bc"
         spec:
           containers:
             -
-              name: "nodejs-mongodb-binary-src"
-              image: "nodejs-mongodb-binary-src"
+              name: "notify-bc"
+              image: "notify-bc"
               ports:
                 -
-                  containerPort: 8080
+                  containerPort: 3000
               env:
                 -
                   name: NODE_ENV
@@ -180,17 +179,17 @@ objects:
     kind: "Service"
     apiVersion: "v1"
     metadata:
-      name: "${APPLICATION_NAME}"
+      name: "notify-bc"
       annotations:
         description: "Exposes and load balances the application pods"
     spec:
       ports:
         -
           name: "web"
-          port: 8080
+          port: 3000
           targetPort: 3000
       selector:
-        name: "nodejs-mongodb-binary-src"
+        name: "notify-bc"
   -
     kind: "Service"
     apiVersion: "v1"
@@ -210,36 +209,16 @@ objects:
     kind: "Route"
     apiVersion: "v1"
     metadata:
-      name: "nodejs-mongodb-binary-src"
+      name: "notify-bc"
     spec:
       host: "${APPLICATION_DOMAIN}"
       to:
         kind: "Service"
-        name: "nodejs-mongodb-binary-src"
+        name: "notify-bc"
 parameters:
-  -
-    name: "APPLICATION_NAME"
-    description: "Name of the application"
-    required: true
-  -
-    name: "BUILDER_IMAGE"
-    description: "Node builder image"
-    value: "node"
-    required: true
-  -
-    name: "NODE_VERSION"
-    description: "Tag of node builder image. See https://hub.docker.com/_/node/"
-    value: "latest"
-    required: true
-  -
-    name: "CONTEXT_DIR"
-    description: "Set this to the relative path to your project if it is not in the root of your repository"
   -
     name: "APPLICATION_DOMAIN"
     description: "The exposed hostname that will route to the Node.js service, if left blank a value will be defaulted."
-  -
-    name: "APPLICATION_INTERNAL_PORT"
-    description: "The exposed port of Node.js service."
   -
     name: "DATABASE_SERVICE_NAME"
     description: "Database service name"
@@ -263,8 +242,7 @@ parameters:
     description: "Password for the database admin user"
     generate: "expression"
     from: "[a-zA-Z0-9]{16}"
-  -
-    name: "VOLUME_CAPACITY"
+  - name: "VOLUME_CAPACITY"
     displayName: "Volume capacity"
     description: "Volume space available for data, e.g. 512Mi, 2Gi"
     value: "512Mi"
@@ -275,4 +253,4 @@ parameters:
     required: true
     value: 512Mi
 labels:
-  template: "nodejs-mongodb-binary-src"
+  template: "notify-bc"
