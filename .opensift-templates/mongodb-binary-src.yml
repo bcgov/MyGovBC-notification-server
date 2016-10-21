@@ -29,7 +29,7 @@ objects:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: nodejs:4
+          name: centos7-s2i-nodejs:lts
           namespace: openshift
         incremental: true
       type: Source
@@ -83,6 +83,25 @@ objects:
             value: ${DATABASE_ADMIN_PASSWORD}
           image: notify-bc
           name: notify-bc
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 60
+            timeoutSeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
           ports:
           - containerPort: 3000
     triggers:
