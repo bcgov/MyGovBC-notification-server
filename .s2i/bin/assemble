@@ -7,6 +7,8 @@ if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
     mv /tmp/artifacts/* ./
 fi
 echo "---> Installing application source"
+rm -rf /tmp/src/node_modules /tmp/src/docs
+mv /tmp/src/server/datasources.mongodb.js /tmp/src/server/datasources.local.js
 mv -f /tmp/src/* ./
 echo "---> Building your Node application from source"
 npm install
