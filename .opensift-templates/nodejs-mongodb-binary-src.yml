@@ -1,256 +1,234 @@
-kind: "Template"
-apiVersion: "v1"
-metadata:
-  name: "notify-bc"
-  creationTimestamp: null
-  annotations:
-    description: "NotifyBC app with a MongoDB database"
-    iconClass: "icon-nodejs"
-    tags: "instant-app,nodejs,mongodb"
-objects:
-  -
-    kind: "BuildConfig"
-    apiVersion: "v1"
-    metadata:
-      name: "notify-bc"
-      annotations:
-        description: "Defines how to build the application"
-    spec:
-      source:
-        type: "Binary"
-        binary:
-          asFile: "webapp.tar"
-      strategy:
-        type: "Source"
-        sourceStrategy:
-          from:
-            kind: "ImageStreamTag"
-            name: nodejs:4
-            namespace: openshift
-          incremental: true
-      output:
-        to:
-          kind: "ImageStreamTag"
-          name: "notify-bc:latest"
-  -
-    kind: "ImageStream"
-    apiVersion: "v1"
-    metadata:
-      name: "notify-bc"
-      annotations:
-        description: "Keeps track of changes in the application image"
-  -
-    kind: "PersistentVolumeClaim"
-    apiVersion: "v1"
-    metadata:
-      name: "${DATABASE_SERVICE_NAME}"
-    spec:
-      accessModes:
-        - "ReadWriteOnce"
-      resources:
-        requests:
-          storage: "${VOLUME_CAPACITY}"
-  -
-    kind: "DeploymentConfig"
-    apiVersion: "v1"
-    metadata:
-      name: "notify-bc"
-      annotations:
-        description: "Defines how to deploy the application server"
-    spec:
-      strategy:
-        type: "Rolling"
-      triggers:
-        -
-          type: "ImageChange"
-          imageChangeParams:
-            automatic: true
-            containerNames:
-              - "notify-bc"
-            from:
-              kind: "ImageStreamTag"
-              name: "notify-bc:latest"
-        -
-          type: "ConfigChange"
-      replicas: 1
-      selector:
-        name: "notify-bc"
-      template:
-        metadata:
-          name: "notify-bc"
-          labels:
-            name: "notify-bc"
-        spec:
-          containers:
-            -
-              name: "notify-bc"
-              image: "notify-bc"
-              ports:
-                -
-                  containerPort: 3000
-              env:
-                -
-                  name: NODE_ENV
-                  value: production
-                -
-                  name: "DATABASE_SERVICE_NAME"
-                  value: "${DATABASE_SERVICE_NAME}"
-                -
-                  name: "MONGODB_USER"
-                  value: "${DATABASE_USER}"
-                -
-                  name: "MONGODB_PASSWORD"
-                  value: "${DATABASE_PASSWORD}"
-                -
-                  name: "MONGODB_DATABASE"
-                  value: "${DATABASE_NAME}"
-                -
-                  name: "MONGODB_ADMIN_PASSWORD"
-                  value: "${DATABASE_ADMIN_PASSWORD}"
-  - apiVersion: v1
-    kind: DeploymentConfig
-    metadata:
-      annotations:
-        description: Defines how to deploy the database
-      name: ${DATABASE_SERVICE_NAME}
-    spec:
-      replicas: 1
-      selector:
-        name: ${DATABASE_SERVICE_NAME}
-      strategy:
-        type: Recreate
-      template:
-        metadata:
-          labels:
-            name: ${DATABASE_SERVICE_NAME}
-          name: ${DATABASE_SERVICE_NAME}
-        spec:
-          containers:
-          - env:
-            - name: MONGODB_USER
-              value: ${DATABASE_USER}
-            - name: MONGODB_PASSWORD
-              value: ${DATABASE_PASSWORD}
-            - name: MONGODB_DATABASE
-              value: ${DATABASE_NAME}
-            - name: MONGODB_ADMIN_PASSWORD
-              value: ${DATABASE_ADMIN_PASSWORD}
-            image: ' '
-            livenessProbe:
-              initialDelaySeconds: 30
-              tcpSocket:
-                port: 27017
-              timeoutSeconds: 1
-            name: mongodb
-            ports:
-            - containerPort: 27017
-            readinessProbe:
-              exec:
-                command:
-                - /bin/sh
-                - -i
-                - -c
-                - mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD
-                  --eval="quit()"
-              initialDelaySeconds: 3
-              timeoutSeconds: 1
-            resources:
-              limits:
-                memory: ${MEMORY_MONGODB_LIMIT}
-            volumeMounts:
-            - mountPath: /var/lib/mongodb/data
-              name: ${DATABASE_SERVICE_NAME}-data
-          volumes:
-          - emptyDir:
-              medium: ""
-            name: ${DATABASE_SERVICE_NAME}-data
-      triggers:
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-          - mongodb
-          from:
-            kind: ImageStreamTag
-            name: mongodb:3.2
-            namespace: openshift
-        type: ImageChange
-      - type: ConfigChange
-  -
-    kind: "Service"
-    apiVersion: "v1"
-    metadata:
-      name: "notify-bc"
-      annotations:
-        description: "Exposes and load balances the application pods"
-    spec:
-      ports:
-        -
-          name: "web"
-          port: 3000
-          targetPort: 3000
-      selector:
-        name: "notify-bc"
-  -
-    kind: "Service"
-    apiVersion: "v1"
-    metadata:
-      name: "${DATABASE_SERVICE_NAME}"
-      annotations:
-        description: "Exposes the database server"
-    spec:
-      ports:
-        -
-          name: "mongodb"
-          port: 27017
-          targetPort: 27017
-      selector:
-        name: "${DATABASE_SERVICE_NAME}"
-  -
-    kind: "Route"
-    apiVersion: "v1"
-    metadata:
-      name: "notify-bc"
-    spec:
-      host: "${APPLICATION_DOMAIN}"
-      to:
-        kind: "Service"
-        name: "notify-bc"
-parameters:
-  -
-    name: "APPLICATION_DOMAIN"
-    description: "The exposed hostname that will route to the Node.js service, if left blank a value will be defaulted."
-  -
-    name: "DATABASE_SERVICE_NAME"
-    description: "Database service name"
-    value: "mongodb"
-  -
-    name: "DATABASE_USER"
-    description: "Username for MongoDB user that will be used for accessing the database"
-    generate: "expression"
-    from: "user[A-Z0-9]{3}"
-  -
-    name: "DATABASE_PASSWORD"
-    description: "Password for the MongoDB user"
-    generate: "expression"
-    from: "[a-zA-Z0-9]{16}"
-  -
-    name: "DATABASE_NAME"
-    description: "Database name"
-    value: "sampledb"
-  -
-    name: "DATABASE_ADMIN_PASSWORD"
-    description: "Password for the database admin user"
-    generate: "expression"
-    from: "[a-zA-Z0-9]{16}"
-  - name: "VOLUME_CAPACITY"
-    displayName: "Volume capacity"
-    description: "Volume space available for data, e.g. 512Mi, 2Gi"
-    value: "512Mi"
-    required: true
-  - description: Maximum amount of memory the MongoDB container can use.
-    displayName: Memory Limit (MongoDB)
-    name: MEMORY_MONGODB_LIMIT
-    required: true
-    value: 512Mi
+apiVersion: v1
+kind: Template
 labels:
-  template: "notify-bc"
+  template: notify-bc
+metadata:
+  annotations:
+    description: NotifyBC app with a MongoDB database
+    iconClass: icon-nodejs
+    tags: instant-app,nodejs,mongodb
+  creationTimestamp: null
+  name: notify-bc
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: notify-bc
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: notify-bc:latest
+    source:
+      binary:
+        asFile: webapp.tar
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: nodejs:4
+          namespace: openshift
+        incremental: true
+      type: Source
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: notify-bc
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: ${DATABASE_SERVICE_NAME}
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${VOLUME_CAPACITY}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+    name: notify-bc
+  spec:
+    replicas: 1
+    selector:
+      name: notify-bc
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: notify-bc
+        name: notify-bc
+      spec:
+        containers:
+        - env:
+          - name: NODE_ENV
+            value: production
+          - name: DATABASE_SERVICE_NAME
+            value: ${DATABASE_SERVICE_NAME}
+          - name: MONGODB_USER
+            value: ${DATABASE_USER}
+          - name: MONGODB_PASSWORD
+            value: ${DATABASE_PASSWORD}
+          - name: MONGODB_DATABASE
+            value: ${DATABASE_NAME}
+          - name: MONGODB_ADMIN_PASSWORD
+            value: ${DATABASE_ADMIN_PASSWORD}
+          image: notify-bc
+          name: notify-bc
+          ports:
+          - containerPort: 3000
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - notify-bc
+        from:
+          kind: ImageStreamTag
+          name: notify-bc:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the database
+    name: ${DATABASE_SERVICE_NAME}
+  spec:
+    replicas: 1
+    selector:
+      name: ${DATABASE_SERVICE_NAME}
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          name: ${DATABASE_SERVICE_NAME}
+        name: ${DATABASE_SERVICE_NAME}
+      spec:
+        containers:
+        - env:
+          - name: MONGODB_USER
+            value: ${DATABASE_USER}
+          - name: MONGODB_PASSWORD
+            value: ${DATABASE_PASSWORD}
+          - name: MONGODB_DATABASE
+            value: ${DATABASE_NAME}
+          - name: MONGODB_ADMIN_PASSWORD
+            value: ${DATABASE_ADMIN_PASSWORD}
+          image: ' '
+          livenessProbe:
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: 27017
+            timeoutSeconds: 1
+          name: mongodb
+          ports:
+          - containerPort: 27017
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -i
+              - -c
+              - mongo 127.0.0.1:27017/$MONGODB_DATABASE -u $MONGODB_USER -p $MONGODB_PASSWORD
+                --eval="quit()"
+            initialDelaySeconds: 3
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: ${MEMORY_MONGODB_LIMIT}
+          volumeMounts:
+          - mountPath: /var/lib/mongodb/data
+            name: ${DATABASE_SERVICE_NAME}-data
+        volumes:
+        - emptyDir:
+            medium: ''
+          name: ${DATABASE_SERVICE_NAME}-data
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - mongodb
+        from:
+          kind: ImageStreamTag
+          name: mongodb:3.2
+          namespace: openshift
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: notify-bc
+  spec:
+    ports:
+    - name: web
+      port: 3000
+      targetPort: 3000
+    selector:
+      name: notify-bc
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes the database server
+    name: ${DATABASE_SERVICE_NAME}
+  spec:
+    ports:
+    - name: mongodb
+      port: 27017
+      targetPort: 27017
+    selector:
+      name: ${DATABASE_SERVICE_NAME}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: notify-bc
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    to:
+      kind: Service
+      name: notify-bc
+    port:
+        targetPort: 3000
+parameters:
+- description: The exposed hostname that will route to the Node.js service, if left
+    blank a value will be defaulted.
+  name: APPLICATION_DOMAIN
+- description: Database service name
+  name: DATABASE_SERVICE_NAME
+  value: mongodb
+- description: Username for MongoDB user that will be used for accessing the database
+  from: user[A-Z0-9]{3}
+  generate: expression
+  name: DATABASE_USER
+- description: Password for the MongoDB user
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: DATABASE_PASSWORD
+- description: Database name
+  name: DATABASE_NAME
+  value: sampledb
+- description: Password for the database admin user
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+  name: DATABASE_ADMIN_PASSWORD
+- description: Volume space available for data, e.g. 512Mi, 2Gi
+  displayName: Volume capacity
+  name: VOLUME_CAPACITY
+  required: true
+  value: 512Mi
+- description: Maximum amount of memory the MongoDB container can use.
+  displayName: Memory Limit (MongoDB)
+  name: MEMORY_MONGODB_LIMIT
+  required: true
+  value: 512Mi
