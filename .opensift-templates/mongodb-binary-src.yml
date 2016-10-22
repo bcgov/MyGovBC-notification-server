@@ -236,7 +236,7 @@ parameters:
   name: DATABASE_PASSWORD
 - description: Database name
   name: DATABASE_NAME
-  value: sampledb
+  value: notify-bc
 - description: Password for the database admin user
   from: '[a-zA-Z0-9]{16}'
   generate: expression
