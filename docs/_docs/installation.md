@@ -71,7 +71,58 @@ notifyBC
 If successful, similar output is displayed as in source code installation.  
 
 ## Deploy to OpenShift
-tbd
+*NotifyBC* supports deployment to OpenShift Origin version 1.3 or later, and other compatible platforms such as OpenShift Container Platform. An [OpenShift instant app template](https://github.com/bcgov/MyGovBC-notification-server/blob/master/.opensift-templates/mongodb-binary-src.yml) has been created to facilitate deployment. This template adopts [source-to-image strategy](https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets-s2i-strategy) with [binary source](https://docs.openshift.org/latest/dev_guide/builds.html#binary-source) input and supports [incremental builds](https://docs.openshift.org/latest/dev_guide/builds.html#incremental-builds). The advantages of this deployment methods are
+
+  * flexible to allow instance specific configurations or other customizations
+  * reduced build time 
+  * allow using Jenkins for CI
+
+To deploy to OpenShift, you need to have access to an OpenShift project with minimum edit role . The deployment commands below assumes the project name is *notify-bc*. 
+
+The deployment can be initiated from localhost or from CI service such as Jenkins. Regardless, at the initiator's side following software needs to be installed:
+
+  * git 
+  * [OpenShift CLI](https://docs.openshift.org/latest/cli_reference/index.html) 
+
+If using Jenkins, all the software are pre-installed on OpenShift provided Jenkins instant-app template so it is the preferred hosting environment.
+
+### Initiate from localhost 
+Run following commands
+
+```sh
+~ $ git clone \
+https://github.com/bcgov/MyGovBC-notification-server.git \
+notifyBC
+~ $ cd notifyBC
+... (optional: customize config)
+~ $ oc login
+~ $ oc project notify-bc
+~ $ oc create -f .opensift-templates/mongodb-binary-src.yml
+~ $ oc process notify-bc|oc create -f-
+~ $ oc start-build notify-bc --follow --from-dir=.
+```
+
+If the build is successful, you can launch *NotifyBC* from the URL provided in OpenShift *notify-bc* project. 
+
+### Initiate from Jenkins
+
+To initiate the deployment from Jenkins, first create all the *NotifyBC* artifacts on OpenShift by running the commands in section [Initiate from localhost](#initiate-from-localhost) above, then create a new Freestyle project in Jenkins. Set *Source Code Management* to Git repository https://github.com/bcgov/MyGovBC-notification-server.git and add a *Execute Shell* build step with following scripts, substituting login credential and url placeholders:
+
+```
+set -e
+oc login -u <user_name> -p <password> <openshift-console-url>
+oc project notify-bc
+oc start-build notify-bc --from-dir=. --follow
+```
+
+If Jenkins is running on the same OpenShift cluster, instead of doing *oc login*, you can use Jenkins service account *system:serviceaccount:\<jenkins-project-name\>:jenkins* (substitute \<jenkins-project-name\>, which could be different from notify-bc). In such case, grant the service account edit role to the *notify-bc* project by running
+
+```sh
+~ $ oc project notify-bc
+~ $ oc policy add-role-to-user view \
+system:serviceaccount:\<jenkins-project-name\>:jenkins
+```
+
 
 ## Install Docs Website (Optional)
 If you want to contribute to *NotifyBC* docs beyond simple fix ups, you can install [Jekyll](https://jekyllrb.com/) through Ruby bundler and render this web site locally:

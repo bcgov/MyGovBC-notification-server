@@ -13,9 +13,6 @@ description: A versatile notification API server
 baseurl: "/MyGovBC-notification-server"
 url: "https://bcgov.github.io"
 
-twitter:
-  username: jekyllrb
-
 logo: img/logo-2x.png
 
 gems:
