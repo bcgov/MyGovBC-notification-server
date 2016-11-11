@@ -1,4 +1,6 @@
 var parallelLimit = require('async/parallelLimit')
+var LoopBackContext = require('loopback-context')
+
 module.exports = function (Notification) {
   Notification.disableRemoteMethod('findOne', true)
   Notification.disableRemoteMethod('findById', true)
@@ -11,7 +13,7 @@ module.exports = function (Notification) {
   Notification.disableRemoteMethod('deleteById', true)
 
   Notification.observe('access', function (ctx, next) {
-    var httpCtx = require('loopback').getCurrentContext().active.http
+    var httpCtx = LoopBackContext.getCurrentContext().get('http')
     ctx.query.where = ctx.query.where || {}
     var currUser = Notification.getCurrentUser(httpCtx)
     if (currUser) {
@@ -119,7 +121,7 @@ module.exports = function (Notification) {
         ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
       }
       if (ctx.instance.isBroadcast) {
-        var httpCtx = require('loopback').getCurrentContext().active.http
+        var httpCtx = LoopBackContext.getCurrentContext().get('http')
         var currUser = Notification.getCurrentUser(httpCtx) || 'unknown'
         switch (ctx.args.data.state) {
           case 'read':
@@ -144,7 +146,7 @@ module.exports = function (Notification) {
   Notification.prototype.deleteById = function (callback) {
     if (this.isBroadcast) {
       this.deletedBy = this.deletedBy || []
-      var httpCtx = require('loopback').getCurrentContext().active.http
+      var httpCtx = LoopBackContext.getCurrentContext().get('http')
       var currUser = Notification.getCurrentUser(httpCtx) || 'unknown'
       if (this.deletedBy.indexOf(currUser) < 0) {
         this.deletedBy.push(currUser)

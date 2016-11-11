@@ -2,6 +2,7 @@ const path = require('path')
 var rsaPath = path.resolve(__dirname, '../../server/boot/rsa.js')
 var rsa = require(rsaPath)
 var RandExp = require('randexp')
+var LoopBackContext = require('loopback-context')
 
 module.exports = function (Subscription) {
   Subscription.disableRemoteMethod('findOne', true)
@@ -14,7 +15,7 @@ module.exports = function (Subscription) {
   Subscription.disableRemoteMethod('deleteById', true)
 
   Subscription.observe('access', function (ctx, next) {
-    var httpCtx = require('loopback').getCurrentContext() && require('loopback').getCurrentContext().active.http
+    var httpCtx = LoopBackContext.getCurrentContext().get('http')
     var u = Subscription.app.models.Notification.getCurrentUser(httpCtx)
     if (u) {
       ctx.query.where = ctx.query.where || {}
