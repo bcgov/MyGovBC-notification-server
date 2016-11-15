@@ -3,13 +3,14 @@ var LoopBackContext = require('loopback-context')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 
 module.exports = function (Notification) {
-  disableAllMethods(Notification, ['find', 'create', 'updateAttributes', 'deleteById'])
+  disableAllMethods(Notification, ['find', 'create', 'updateAttributes', 'deleteItemById'])
 
   Notification.observe('access', function (ctx, next) {
     var httpCtx = LoopBackContext.getCurrentContext().get('http')
     ctx.query.where = ctx.query.where || {}
     var currUser = Notification.getCurrentUser(httpCtx)
     if (currUser) {
+      ctx.query.where.channel = 'inApp'
       ctx.query.where.or = []
       ctx.query.where.or.push({
         isBroadcast: true
@@ -136,7 +137,7 @@ module.exports = function (Notification) {
     }
   )
 
-  Notification.prototype.deleteById = function (callback) {
+  Notification.prototype.deleteItemById = function (callback) {
     if (this.isBroadcast) {
       this.deletedBy = this.deletedBy || []
       var httpCtx = LoopBackContext.getCurrentContext().get('http')

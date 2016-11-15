@@ -6,7 +6,7 @@ var LoopBackContext = require('loopback-context')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 
 module.exports = function (Subscription) {
-  disableAllMethods(Subscription, ['find', 'create', 'updateAttributes', 'deleteById', 'verify'])
+  disableAllMethods(Subscription, ['find', 'create', 'updateAttributes', 'deleteItemById', 'verify'])
   Subscription.observe('access', function (ctx, next) {
     var httpCtx = LoopBackContext.getCurrentContext().get('http')
     var u = Subscription.app.models.Notification.getCurrentUser(httpCtx)
@@ -124,7 +124,7 @@ module.exports = function (Subscription) {
   })
 
 
-  Subscription.beforeRemote('deleteById', function (ctx, unused, next) {
+  Subscription.beforeRemote('deleteItemById', function (ctx, unused, next) {
     var u = Subscription.app.models.Notification.getCurrentUser(ctx) || 'unknown'
     Subscription.findById(ctx.args.id, null, null, function (err, data) {
       if (data.userId === u) {
@@ -163,7 +163,7 @@ module.exports = function (Subscription) {
     })
   })
 
-  Subscription.prototype.deleteById = function (callback) {
+  Subscription.prototype.deleteItemById = function (callback) {
     this.state = 'deleted'
     Subscription.replaceById(this.id, this, function (err, res) {
       callback(err, 1)
