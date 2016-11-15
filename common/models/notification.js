@@ -1,16 +1,9 @@
 var parallelLimit = require('async/parallelLimit')
 var LoopBackContext = require('loopback-context')
+var disableAllMethods = require('../helpers.js').disableAllMethods
 
 module.exports = function (Notification) {
-  Notification.disableRemoteMethod('findOne', true)
-  Notification.disableRemoteMethod('findById', true)
-  Notification.disableRemoteMethod('createChangeStream', true)
-  Notification.disableRemoteMethod('exists', true)
-  Notification.disableRemoteMethod('updateAll', true)
-  //Notification.disableRemoteMethod('create', true)
-  Notification.disableRemoteMethod('count', true)
-  Notification.disableRemoteMethod('upsert', true)
-  Notification.disableRemoteMethod('deleteById', true)
+  disableAllMethods(Notification, ['find', 'create', 'updateAttributes', 'deleteById'])
 
   Notification.observe('access', function (ctx, next) {
     var httpCtx = LoopBackContext.getCurrentContext().get('http')

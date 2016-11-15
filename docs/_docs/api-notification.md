@@ -300,7 +300,7 @@ POST /notifications
 
 ## Update a Notification
 ```
-PUT /notifications/{id}
+PATCH /notifications/{id}
 ```
 This API is mainly used for changing the state of an inApp notification.
 

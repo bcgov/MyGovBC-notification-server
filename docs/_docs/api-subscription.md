@@ -269,7 +269,7 @@ POST /subscriptions
   
 ## Update a Subscription
 ```
-PUT /subscriptions/{id}
+PATCH /subscriptions/{id}
 ```
 This API is used for changing user channel id (such as email address) and resending confirmation code. 
 

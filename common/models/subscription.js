@@ -3,17 +3,10 @@ var rsaPath = path.resolve(__dirname, '../../server/boot/rsa.js')
 var rsa = require(rsaPath)
 var RandExp = require('randexp')
 var LoopBackContext = require('loopback-context')
+var disableAllMethods = require('../helpers.js').disableAllMethods
 
 module.exports = function (Subscription) {
-  Subscription.disableRemoteMethod('findOne', true)
-  Subscription.disableRemoteMethod('findById', true)
-  Subscription.disableRemoteMethod('createChangeStream', true)
-  Subscription.disableRemoteMethod('exists', true)
-  Subscription.disableRemoteMethod('updateAll', true)
-  Subscription.disableRemoteMethod('count', true)
-  Subscription.disableRemoteMethod('upsert', true)
-  Subscription.disableRemoteMethod('deleteById', true)
-
+  disableAllMethods(Subscription, ['find', 'create', 'updateAttributes', 'deleteById', 'verify'])
   Subscription.observe('access', function (ctx, next) {
     var httpCtx = LoopBackContext.getCurrentContext().get('http')
     var u = Subscription.app.models.Notification.getCurrentUser(httpCtx)
