@@ -322,7 +322,7 @@ This API is mainly used for changing the state of an inApp notification.
     2. all fields except for *state* are discarded from the input
     3. for broadcast notification, current user id in appended to array *readBy* or *deletedBy*, depending on whether *state* is *read* or *deleted*, unless the user id is already in the array. The *state* field itself is then discarded
     4. the notification identified by *id* is merged with the updates and saved to database
-    5. the saved record is returned as response unless error occurs, in which case error is returned
+    5. HTTP response code 200 is returned, unless there is error.  
     
 ## Delete a Notification
 This API is mainly used for marking an inApp notification deleted. It has the same effect as updating a notification with state set to *deleted*.

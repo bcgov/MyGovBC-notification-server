@@ -42,7 +42,10 @@ module.exports = function (Notification) {
         }
         if (e.isBroadcast && e.readBy && e.readBy.indexOf(currUser) >= 0) {
           e.state = 'read'
+        }
+        if (e.isBroadcast) {
           e.readBy = null
+          e.deletedBy = null
         }
         p.push(e)
         return p
@@ -108,7 +111,6 @@ module.exports = function (Notification) {
         break
     }
   })
-
   Notification.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
       // only allow changing state for non-admin requests
       if (!Notification.isAdminReq(ctx)) {
@@ -136,6 +138,11 @@ module.exports = function (Notification) {
       next()
     }
   )
+  Notification.afterRemote('prototype.updateAttributes', function (ctx, output, next) {
+    // don't return the update
+    ctx.result = {}
+    next()
+  })
 
   Notification.prototype.deleteItemById = function (callback) {
     if (this.isBroadcast) {
