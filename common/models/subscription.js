@@ -88,7 +88,7 @@ module.exports = function (Subscription) {
       }
     }
     if (!data.confirmationRequest.sendRequest) {
-      cb(null, null)
+      return cb(null, null)
     }
     var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
     var mailTextBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
