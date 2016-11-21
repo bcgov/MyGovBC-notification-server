@@ -90,7 +90,8 @@ module.exports = function (Notification) {
     // send non-inApp notifications immediately
     switch (res.channel) {
       case 'email':
-        sendEmailNotification(res, function (errSend) {
+      case 'sms':
+        sendPushNotification(res, function (errSend) {
           if (errSend) {
             res.state = 'error'
           }
@@ -101,10 +102,6 @@ module.exports = function (Notification) {
             next(errSend || errSave)
           })
         })
-        break
-      case 'sms':
-        // todo: handle sms notifications
-        next()
         break
       default:
         next()
@@ -174,12 +171,37 @@ module.exports = function (Notification) {
     transporter.sendMail(mailOptions, cb)
   }
 
-  function sendEmailNotification(data, cb) {
+  Notification.sendSMS = function (to, textBody, cb) {
+    // Twilio Credentials
+    var smsConfig = Notification.app.get('sms').twilio
+    var accountSid = smsConfig.accountSid
+    var authToken = smsConfig.authToken
+
+    //require the Twilio module and create a REST client
+    var client = require('twilio')(accountSid, authToken)
+
+    client.messages.create({
+      to: to,
+      from: smsConfig.fromNumber,
+      body: textBody,
+    }, function (err, message) {
+      cb(err, message)
+    })
+  }
+
+  function sendPushNotification(data, cb) {
     switch (data.isBroadcast) {
       case false:
-        Notification.sendEmail(data.message.from || 'unknown@unknown.com',
-          data.userChannelId, data.message.subject,
-          data.message.textBody, data.message.htmlBody, cb)
+        switch (data.channel) {
+          case 'sms':
+            Notification.sendSMS(data.userChannelId,
+              data.message.textBody, cb)
+            break
+          default:
+            Notification.sendEmail(data.message.from || 'unknown@unknown.com',
+              data.userChannelId, data.message.subject,
+              data.message.textBody, data.message.htmlBody, cb)
+        }
         break
       case true:
         Notification.app.models.Subscription.find({
@@ -191,19 +213,27 @@ module.exports = function (Notification) {
         }, function (err, subscribers) {
           var tasks = subscribers.map(function (e, i) {
             return function (cb) {
-              Notification.sendEmail(data.message.from || 'unknown@unknown.com',
-                e.userChannelId, data.message.subject,
-                data.message.textBody, data.message.htmlBody, function (err, info) {
-                  if (err) {
-                    data.errorWhenSendingToUsers = data.errorWhenSendingToUsers || []
-                    try {
-                      data.errorWhenSendingToUsers.push(info.envelope.to[0])
-                    }
-                    catch (ex) {
-                    }
+              var notificationMsgCB = function (err) {
+                if (err) {
+                  data.errorWhenSendingToUsers = data.errorWhenSendingToUsers || []
+                  try {
+                    data.errorWhenSendingToUsers.push(e.userChannelId)
                   }
-                  cb(null)
-                })
+                  catch (ex) {
+                  }
+                }
+                cb(null)
+              }
+              switch (e.channel) {
+                case 'sms':
+                  Notification.sendSMS(e.userChannelId,
+                    data.message.textBody, notificationMsgCB)
+                  break
+                default:
+                  Notification.sendEmail(data.message.from || 'unknown@unknown.com',
+                    e.userChannelId, data.message.subject,
+                    data.message.textBody, data.message.htmlBody, notificationMsgCB)
+              }
             }
           })
           parallelLimit(tasks, Notification.app.get('broadcastNotificationTaskConcurrency') || 100, function (err, res) {

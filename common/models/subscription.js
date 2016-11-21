@@ -90,11 +90,17 @@ module.exports = function (Subscription) {
     if (!data.confirmationRequest.sendRequest) {
       return cb(null, null)
     }
-    var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-    var mailTextBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-    var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-    Subscription.app.models.Notification.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
-      mailTextBody, mailHtmlBody, cb)
+    var textBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+    switch (data.channel) {
+      case 'sms':
+        Subscription.app.models.Notification.sendSMS(data.userChannelId, textBody, cb)
+        break
+      default:
+        var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+        var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+        Subscription.app.models.Notification.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
+          textBody, mailHtmlBody, cb)
+    }
   }
 
   Subscription.beforeRemote('create', function (ctx, unused, next) {

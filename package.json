@@ -21,7 +21,8 @@
     "node-rsa": "^0.4.1",
     "nodemailer": "^2.5.0",
     "randexp": "^0.4.3",
-    "serve-favicon": "^2.0.1"
+    "serve-favicon": "^2.0.1",
+    "twilio": "^2.11.1"
   },
   "devDependencies": {
     "jshint": "^2.5.6",
