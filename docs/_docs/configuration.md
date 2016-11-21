@@ -3,7 +3,7 @@ layout: docs
 title: Configuration
 permalink: /docs/configuration/
 ---
-Most configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). NotifyBC added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](https://docs.strongloop.com/display/public/LB/config.json#config.json-Environment-specificsettings) such as */server/config.local.json*.  
+Most configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). NotifyBC added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.json*.  
 
 ## SMTP
 By default *NotifyBC* bypasses SMTP relay and connects [directly](https://github.com/nodemailer/nodemailer#set-up-smtp) to recipients MX. You can setup SMTP relay by adding following *smtp* config object to */server/config.local.json*
@@ -19,6 +19,36 @@ By default *NotifyBC* bypasses SMTP relay and connects [directly](https://github
 }
 ```
 Check out [Nodemailer](https://github.com/nodemailer/nodemailer#set-up-smtp) for other config options that you can define in *smtp* object.
+
+## SMS
+*NotifyBC* depends on underlying SMS service providers to deliver SMS messages. The supported service providers are
+
+ * Twilio (default)
+
+Only one service provider can be chosen per installation. To change service provider, add following *smsServiceProvider* config object to file */server/config.local.json*
+
+```json
+{
+  "smsServiceProvider": "twilio"
+}
+```
+The rest configs are service provider specific. You should have an account with the chosen service provider before proceeding.
+
+### Twilio
+Add *sms.twilio* config object to file */server/config.local.json*
+
+```json
+{
+  "sms": {
+    "twilio": {
+      "accountSid": "<AccountSid>",
+      "authToken": "<AuthToken>",
+      "fromNumber": "<FromNumber>"
+    }
+  }
+}
+```
+Obtain *\<AccountSid\>*, *\<AuthToken\>* and *\<FromNumber\>* from your Twilio account.
 
 ## Admin IP List
 By [design](../overview/#architecture), NotifyBC classifies incoming requests into admin and user types. By default, the classification is based on the presence of SiteMinder header alone. In order to support user subscription from an anonymous website, an admin ip list can be used to make the distinction. To enable, add following object to */server/config.local.json* containing a list of admin ip addresses.

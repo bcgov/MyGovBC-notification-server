@@ -172,21 +172,25 @@ module.exports = function (Notification) {
   }
 
   Notification.sendSMS = function (to, textBody, cb) {
-    // Twilio Credentials
-    var smsConfig = Notification.app.get('sms').twilio
-    var accountSid = smsConfig.accountSid
-    var authToken = smsConfig.authToken
+    var smsServiceProvider = Notification.app.get('smsServiceProvider')
+    switch (smsServiceProvider) {
+      default:
+        // Twilio Credentials
+        var smsConfig = Notification.app.get('sms')[smsServiceProvider]
+        var accountSid = smsConfig.accountSid
+        var authToken = smsConfig.authToken
 
-    //require the Twilio module and create a REST client
-    var client = require('twilio')(accountSid, authToken)
+        //require the Twilio module and create a REST client
+        var client = require('twilio')(accountSid, authToken)
 
-    client.messages.create({
-      to: to,
-      from: smsConfig.fromNumber,
-      body: textBody,
-    }, function (err, message) {
-      cb(err, message)
-    })
+        client.messages.create({
+          to: to,
+          from: smsConfig.fromNumber,
+          body: textBody,
+        }, function (err, message) {
+          cb(err, message)
+        })
+    }
   }
 
   function sendPushNotification(data, cb) {

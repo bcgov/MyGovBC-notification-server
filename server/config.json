@@ -26,5 +26,6 @@
     "direct": true,
     "name": "localhost"
   },
+  "smsServiceProvider": "twilio",
   "confirmationCodeSuffixRegex": "\\d{5}"
 }
