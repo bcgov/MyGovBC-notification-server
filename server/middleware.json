@@ -4,7 +4,7 @@
   },
   "initial": {
     "loopback-context#per-request": {
-      "params":{
+      "params": {
         "enableHttpContext": true
       }
     },
@@ -38,6 +38,7 @@
   "session": {},
   "auth": {},
   "parse": {},
+  "routes:before": {},
   "routes": {
     "loopback#rest": {
       "paths": [
