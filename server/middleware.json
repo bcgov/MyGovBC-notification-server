@@ -38,7 +38,14 @@
   "session": {},
   "auth": {},
   "parse": {},
-  "routes:before": {},
+  "routes:before": {
+    "morgan":{
+      "enabled": false,
+      "params":[
+        "[:date[clf]] :remote-addr \":req[X-Forwarded-For]\""
+      ]
+    }
+  },
   "routes": {
     "loopback#rest": {
       "paths": [
