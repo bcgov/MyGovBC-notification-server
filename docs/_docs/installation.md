@@ -99,7 +99,7 @@ notifyBC
 ~ $ oc project notify-bc
 ~ $ oc create -f .opensift-templates/mongodb-binary-src.yml
 ~ $ oc process notify-bc|oc create -f-
-~ $ oc start-build notify-bc --follow --from-dir=.
+~ $ oc start-build notify-bc --follow --wait --from-dir=.
 ```
 
 If the build is successful, you can launch *NotifyBC* from the URL provided in OpenShift *notify-bc* project. 
@@ -109,10 +109,9 @@ If the build is successful, you can launch *NotifyBC* from the URL provided in O
 To initiate the deployment from Jenkins, first create all the *NotifyBC* artifacts on OpenShift by running the commands in section [Initiate from localhost](#initiate-from-localhost) above except for the last line, then create a new Freestyle project in Jenkins. Set *Source Code Management* to Git repository https://github.com/bcgov/MyGovBC-notification-server.git and add a *Execute Shell* build step with following scripts, substituting login credential and url placeholders:
 
 ```
-set -e
 oc login -u <username> -p <password> <openshift-console-url>
 oc project notify-bc
-oc start-build notify-bc --from-dir=. --follow
+oc start-build notify-bc --from-dir=. --follow --wait
 ```
 
 If Jenkins is running in the same OpenShift cluster but in a different project from notify-bc, instead of doing *oc login*, you can use Jenkins service account *system:serviceaccount:\<jenkins-project-name\>:\<jenkins-service-name\>*, replacing \<jenkins-project-name\> and \<jenkins-service-name\>. In such case, grant the service account edit role to the *notify-bc* project by running

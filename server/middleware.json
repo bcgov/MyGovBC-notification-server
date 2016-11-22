@@ -42,7 +42,7 @@
     "morgan":{
       "enabled": false,
       "params":[
-        "[:date[clf]] :remote-addr \":req[X-Forwarded-For]\""
+        ":remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status \":req[X-Forwarded-For]\""
       ]
     }
   },
