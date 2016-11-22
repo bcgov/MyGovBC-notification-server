@@ -18,6 +18,7 @@
     "loopback-connector-mongodb": "^1.15.2",
     "loopback-context": "^1.0.0",
     "loopback-datasource-juggler": "^2.39.0",
+    "morgan": "^1.7.0",
     "node-rsa": "^0.4.1",
     "nodemailer": "^2.5.0",
     "randexp": "^0.4.3",
