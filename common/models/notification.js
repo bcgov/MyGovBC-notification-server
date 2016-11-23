@@ -1,6 +1,8 @@
 var parallelLimit = require('async/parallelLimit')
 var LoopBackContext = require('loopback-context')
 var disableAllMethods = require('../helpers.js').disableAllMethods
+var _ = require('lodash')
+var ipRangeCheck = require("ip-range-check")
 
 module.exports = function (Notification) {
   disableAllMethods(Notification, ['find', 'create', 'updateAttributes', 'deleteItemById'])
@@ -249,7 +251,38 @@ module.exports = function (Notification) {
   }
 
   Notification.getCurrentUser = function (httpCtx) {
-    return httpCtx && (httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname'))
+    var currUser = httpCtx && (httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname'))
+    var siteMinderReverseProxyIps = Notification.app.get('siteMinderReverseProxyIps')
+    if (!siteMinderReverseProxyIps || siteMinderReverseProxyIps.length <= 0) {
+      return currUser
+    }
+    var xffStr = httpCtx.req.get('x-forwarded-for') || ''
+    var xffArr = xffStr.trim().split(/\s*,\s*/)
+    xffArr.push(httpCtx.req.connection.remoteAddress)
+    var trustedReverseProxyIps = Notification.app.get('trustedReverseProxyIps')
+    if (trustedReverseProxyIps && trustedReverseProxyIps.length > 0) {
+      trustedReverseProxyIps.forEach(function (e) {
+        var i = xffArr.length - 1
+        while (i >= 0) {
+          if (ipRangeCheck(xffArr[i], e)) {
+            xffArr.splice(i, 1)
+          }
+          else {
+            break
+          }
+          i--
+        }
+      })
+    }
+    var realIp = xffArr[xffArr.length - 1]
+    var i = 0
+    while (i < siteMinderReverseProxyIps.length) {
+      if (ipRangeCheck(realIp, siteMinderReverseProxyIps[i])) {
+        return currUser
+      }
+      i++
+    }
+    return null
   }
 
   Notification.isAdminReq = function (httpCtx) {
