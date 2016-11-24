@@ -21,7 +21,7 @@ NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure
   * support message states - read, deleted
   * support message expiration
   * deleted messages are not deleted immediately for auditing and recovery purposes
- 
+
 ### subscription and un-subscription
 * Verify the ownership of push notification subscription channel:
   * generates confirmation code based on a regex input
@@ -33,11 +33,11 @@ NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure
 NotifyBC, designed to be a microservice, doesn't use ACL to secure API calls. Instead, it classifies incoming requests into admin and user types according to following criteria:
 
 * If the request bears SiteMinder header, it is a user request;
-* If the source ip is in the admin ip list, it's an admin request.  
+* If the source ip is in the admin ip list, it's an admin request.
 
-An admin request carries full authorization whereas user request has limited access. For example, a user request is not allowed to 
+An admin request carries full authorization whereas user request has limited access. For example, a user request is not allowed to
 
-* send message 
+* send message
 * bypass the delivery channel confirmation process when subscribing to a service
 * retrieve in-app notifications that is not targeted to the current user
 
@@ -48,7 +48,7 @@ The way NotifyBC interacts with other components is diagrammed below.
 
 <div class="note warning">
   <h5>Secure RESTful API end point</h5>
-  <p>When NotifyBC is used to serve SiteMinder authenticated requests, its RESTful API URL end point should be protected against direct internet access using firewall or reverse proxy, otherwise SiteMinder header can be easily spoofed.</p>
+  <p>When NotifyBC is used to serve SiteMinder authenticated requests, its RESTful API URL end point should be protected against direct internet access using firewall, otherwise SiteMinder headers can be easily spoofed. Firewall can be external or <a href="../configuration/#siteminder-reverse-proxy-ip-list-and-trusted-reverse-proxy-ip-list">built-in</a></p>
 </div>
 
 ## Application Framework
