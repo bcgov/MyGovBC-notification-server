@@ -1,3 +1,5 @@
+[![Build Status](https://jenkins-gcpe-notifybc-tools.pathfinder.gov.bc.ca/buildStatus/icon?job=notify-bc-dev)](https://jenkins-gcpe-notifybc-tools.pathfinder.gov.bc.ca/job/notify-bc-dev/)
+
 NotifyBC
 ===========
 
