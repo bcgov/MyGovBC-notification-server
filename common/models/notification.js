@@ -290,6 +290,7 @@ module.exports = function (Notification) {
     var isAdminReq = currUser ? false : true
     var adminIps = Notification.app.get('adminIps')
     if (adminIps) {
+      // todo: use express trust proxy settings. See https://expressjs.com/en/guide/behind-proxies.html
       isAdminReq = isAdminReq && (adminIps.indexOf(httpCtx.req.ip) >= 0)
     }
     return isAdminReq
