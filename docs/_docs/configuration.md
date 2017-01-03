@@ -67,7 +67,7 @@ By [design](../overview/#architecture), NotifyBC classifies incoming requests in
 SiteMinder, being a gateway approached SSO solution, expects the backend HTTP access point of the web sites it protests to be firewall restricted, otherwise the SiteMinder injected HTTP headers can be easily spoofed. However, the restriction cannot be easily implemented on PAAS such as OpenShift. To mitigate, two configuration objects are introduced to create an application-level firewall, both are arrays of ip addresses in the format of [dot-decimal](https://en.wikipedia.org/wiki/Dot-decimal_notation) or [CIDR](https://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing#CIDR_notation) notation
 
   * *siteMinderReverseProxyIps* contains a list of ips or ranges of SiteMinder Web Agents. If set, then the SiteMinder HTTP headers are trusted only if the request is routed from the listed nodes.
-  * *trustedReverseProxyIps* contains a list of ips or ranges of trusted reverse proxies between the SiteMinder Web Agents and *NotifyBC* application. This is usually the OpenShift router. This object serves the same purpose as nginx [set_real_ip_from](http://nginx.org/en/docs/http/ngx_http_realip_module.html#set_real_ip_from)
+  * *trustedReverseProxyIps* contains a list of ips or ranges of trusted reverse proxies between the SiteMinder Web Agents and *NotifyBC* application. This is usually the OpenShift router. Express.js [trust proxy](https://expressjs.com/en/guide/behind-proxies.html) is set to this config object.
 
 To set, add following objects for example to file /server/config.local.json
 
@@ -84,10 +84,8 @@ To set, add following objects for example to file /server/config.local.json
 
 The algorithm of the application firewall is
 
-1. parse HTTP header X-Forwarded-For to an array of ips
-2. append client ip to the array
-3. remove all ips that match *trustedReverseProxyIps* from the array
-4. if the last ip in the array matches *siteMinderReverseProxyIps*, then the request is from SiteMinder, and its SiteMinder headers are trusted; otherwise, the request is considered as directly from internet, and its SiteMinder headers are ignored.
+1. determine the real client ip address by filtering out trusted proxy ips according to [Express behind proxies](https://expressjs.com/en/guide/behind-proxies.html)
+2. if the real client ip is contained in *siteMinderReverseProxyIps*, then the request is from SiteMinder, and its SiteMinder headers are trusted; otherwise, the request is considered as directly from internet, and its SiteMinder headers are ignored.
 
 ## Broadcast Notification Task Concurrency
 When handling a broadcast push notification, NotifyBC sends messages concurrently to improve performance. The configuration object *broadcastNotificationTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :

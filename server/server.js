@@ -4,6 +4,7 @@ var boot = require('loopback-boot');
 var app = module.exports = loopback();
 
 app.start = function() {
+  app.set('trust proxy', app.get('trustedReverseProxyIps'))
   // start the web server
   return app.listen(function() {
     app.emit('started');

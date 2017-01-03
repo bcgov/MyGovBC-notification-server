@@ -256,25 +256,8 @@ module.exports = function (Notification) {
     if (!siteMinderReverseProxyIps || siteMinderReverseProxyIps.length <= 0) {
       return currUser
     }
-    var xffStr = httpCtx.req.get('x-forwarded-for') || ''
-    var xffArr = xffStr.trim().split(/\s*,\s*/)
-    xffArr.push(httpCtx.req.connection.remoteAddress)
-    var trustedReverseProxyIps = Notification.app.get('trustedReverseProxyIps')
-    if (trustedReverseProxyIps && trustedReverseProxyIps.length > 0) {
-      trustedReverseProxyIps.forEach(function (e) {
-        var i = xffArr.length - 1
-        while (i >= 0) {
-          if (ipRangeCheck(xffArr[i], e)) {
-            xffArr.splice(i, 1)
-          }
-          else {
-            break
-          }
-          i--
-        }
-      })
-    }
-    var realIp = xffArr[xffArr.length - 1]
+    // rely on express 'trust proxy' settings to obtain real ip
+    var realIp = httpCtx.req.ip
     var i = 0
     while (i < siteMinderReverseProxyIps.length) {
       if (ipRangeCheck(realIp, siteMinderReverseProxyIps[i])) {
@@ -287,12 +270,13 @@ module.exports = function (Notification) {
 
   Notification.isAdminReq = function (httpCtx) {
     var currUser = Notification.getCurrentUser(httpCtx)
-    var isAdminReq = currUser ? false : true
+    if (currUser) return false
     var adminIps = Notification.app.get('adminIps')
     if (adminIps) {
-      // todo: use express trust proxy settings. See https://expressjs.com/en/guide/behind-proxies.html
-      isAdminReq = isAdminReq && (adminIps.indexOf(httpCtx.req.ip) >= 0)
+      return adminIps.some(function (e, i) {
+        return ipRangeCheck(httpCtx.req.ip, e)
+      })
     }
-    return isAdminReq
+    return false
   }
 }
