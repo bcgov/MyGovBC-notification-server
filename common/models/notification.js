@@ -258,14 +258,10 @@ module.exports = function (Notification) {
     }
     // rely on express 'trust proxy' settings to obtain real ip
     var realIp = httpCtx.req.ip
-    var i = 0
-    while (i < siteMinderReverseProxyIps.length) {
-      if (ipRangeCheck(realIp, siteMinderReverseProxyIps[i])) {
-        return currUser
-      }
-      i++
-    }
-    return null
+    var isFromSM = siteMinderReverseProxyIps.some(function (e) {
+      return ipRangeCheck(realIp, e)
+    })
+    return isFromSM ? currUser : null
   }
 
   Notification.isAdminReq = function (httpCtx) {
