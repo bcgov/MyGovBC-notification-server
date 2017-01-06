@@ -130,3 +130,25 @@ When NotifyBC starts up, it checks if two files containing a RSA key pair exists
   <h5>Expose RSA public key to only trusted party</h5>
   <p>Dispite of the adjective public, NotifyBC's public key should only be distributed to trusted third party. The trusted third party should only use the public key at server backend. Using the public key in client-side JavaScript poses a security loophole.</p>
 </div>
+
+## Cron Job
+*NotifyBC* runs a cron job to purge old notifications and subscriptions. You can change the frequency of cron job and retention policy by adding following *cron* config object to */server/config.local.json*
+
+```
+ {
+   "cron": {
+    "timeSpec": "0 0 1 * * *",
+    "pushNotificationRetentionDays" : 30,
+    "expiredInAppNotificationRetentionDays" : 30,
+    "unconfirmedSubscriptionRetentionDays" : 30,
+    "defaultRetentionDays": 30
+   }
+ }
+ ```
+
+The values shown above are default ones if the corresponding config item is omitted. The config items are
+
+* timeSpec: a space separated fields conformed to [unix crontab format](https://www.freebsd.org/cgi/man.cgi?crontab(5)) with an optional left-most seconds field. See [allowed ranges](https://github.com/kelektiv/node-cron#cron-ranges) of each field
+* pushNotificationRetentionDays: the retention days of push notifications
+* expiredInAppNotificationRetentionDays: the retention days of expired inApp notifications
+* unconfirmedSubscriptionRetentionDays: the retention days of unconfirmed subscriptions 

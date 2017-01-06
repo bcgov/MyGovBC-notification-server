@@ -41,13 +41,13 @@ module.exports.disableAllMethods = function (model, methodsToExpose) {
 
 module.exports.cronTask = function (app) {
   var cronConfig = app.get('cron') || {}
-  var cutoffDays
+  var retentionDays
 
   // delete all non-inApp old notifications
-  cutoffDays = cronConfig.nonInAppNotificationCutoffDays || cronConfig.defaultCutoffDays || 30
+  retentionDays = cronConfig.pushNotificationRetentionDays || cronConfig.defaultRetentionDays || 30
   app.models.Notification.destroyAll({
     channel: {neq: 'inApp'},
-    created: {lt: Date.now() - cutoffDays * 86400000}
+    created: {lt: Date.now() - retentionDays * 86400000}
   }, function (err, data) {
     if (!err && data && data.count > 0) {
       console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')
@@ -55,10 +55,10 @@ module.exports.cronTask = function (app) {
   })
 
   // delete all expired inApp notifications
-  cutoffDays = cronConfig.expiredInAppNotificationCutoffDays || cronConfig.defaultCutoffDays || 30
+  retentionDays = cronConfig.expiredInAppNotificationRetentionDays || cronConfig.defaultRetentionDays || 30
   app.models.Notification.destroyAll({
     channel: 'inApp',
-    validTill: {lt: Date.now() - cutoffDays * 86400000}
+    validTill: {lt: Date.now() - retentionDays * 86400000}
   }, function (err, data) {
     if (!err && data && data.count > 0) {
       console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')
@@ -76,10 +76,10 @@ module.exports.cronTask = function (app) {
   })
 
   // delete all old unconfirmed subscriptions
-  cutoffDays = cronConfig.unconfirmedSubscriptionCutoffDays || cronConfig.defaultCutoffDays || 30
+  retentionDays = cronConfig.unconfirmedSubscriptionRetentionDays || cronConfig.defaultRetentionDays || 30
   app.models.Subscription.destroyAll({
     state: 'unconfirmed',
-    created: {lt: Date.now() - cutoffDays * 86400000}
+    created: {lt: Date.now() - retentionDays * 86400000}
   }, function (err, data) {
     if (!err && data && data.count > 0) {
       console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')
