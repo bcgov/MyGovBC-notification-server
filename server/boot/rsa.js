@@ -10,6 +10,8 @@ module.exports = function (app, cb) {
    * http://docs.strongloop.com/display/public/LB/Working+with+LoopBack+objects
    * for more info.
    */
+
+  // todo: save rsa keys in db in order to share among multiple app servers
   var privateKeyFilePath = path.resolve(__dirname, '../id_rsa')
   var publicKeyFilePath = path.resolve(__dirname, '../id_rsa.pub')
   fs.readFile(privateKeyFilePath, 'utf8', (err, data) => {
