@@ -8,7 +8,12 @@ module.exports = function (Notification) {
   disableAllMethods(Notification, ['find', 'create', 'updateAttributes', 'deleteItemById'])
 
   Notification.observe('access', function (ctx, next) {
-    var httpCtx = LoopBackContext.getCurrentContext().get('http')
+    var httpCtx
+    try {
+      httpCtx = LoopBackContext.getCurrentContext().get('http')
+    }
+    catch (ex) {
+    }
     ctx.query.where = ctx.query.where || {}
     var currUser = Notification.getCurrentUser(httpCtx)
     if (currUser) {
@@ -251,7 +256,8 @@ module.exports = function (Notification) {
   }
 
   Notification.getCurrentUser = function (httpCtx) {
-    var currUser = httpCtx && (httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname'))
+    if (!httpCtx) return null
+    var currUser = httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname')
     var siteMinderReverseProxyIps = Notification.app.get('siteMinderReverseProxyIps')
     if (!siteMinderReverseProxyIps || siteMinderReverseProxyIps.length <= 0) {
       return currUser
@@ -265,6 +271,7 @@ module.exports = function (Notification) {
   }
 
   Notification.isAdminReq = function (httpCtx) {
+    if (!httpCtx) return true
     var currUser = Notification.getCurrentUser(httpCtx)
     if (currUser) return false
     var adminIps = Notification.app.get('adminIps')
