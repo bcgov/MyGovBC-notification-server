@@ -6,17 +6,12 @@ var app = module.exports = loopback()
 app.start = function () {
   // start cron
   var cron = require('cron')
+  var cronTask = require('../common/helpers').cronTask
+  var cronConfig = app.get('cron') || {}
   var job = new cron.CronJob({
-    cronTime: '* * * * *',
+    cronTime: cronConfig.timeSpec || '0 0 1 * * *',
     onTick: function () {
-      app.models.Notification.destroyAll({
-        channel: {neq: 'inApp'},
-        created: {lt: Date.now() - 30 * 24 * 60 * 60 * 1000}
-      }, function (err, data) {
-        if (!err && data && data.count > 0) {
-          console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')
-        }
-      })
+      cronTask(app)
     },
     start: true
   })

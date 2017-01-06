@@ -1,4 +1,4 @@
-module.exports.disableAllMethods = function disableAllMethods(model, methodsToExpose) {
+module.exports.disableAllMethods = function (model, methodsToExpose) {
   if (model && model.sharedClass) {
     methodsToExpose = methodsToExpose || []
 
@@ -37,4 +37,53 @@ module.exports.disableAllMethods = function disableAllMethods(model, methodsToEx
       console.log('\nRemote mehtods hidden for', modelName, ':', hiddenMethods.join(', '), '\n')
     }
   }
+}
+
+module.exports.cronTask = function (app) {
+  var cronConfig = app.get('cron') || {}
+  var cutoffDays
+
+  // delete all non-inApp old notifications
+  cutoffDays = cronConfig.nonInAppNotificationCutoffDays || cronConfig.defaultCutoffDays || 30
+  app.models.Notification.destroyAll({
+    channel: {neq: 'inApp'},
+    created: {lt: Date.now() - cutoffDays * 86400000}
+  }, function (err, data) {
+    if (!err && data && data.count > 0) {
+      console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')
+    }
+  })
+
+  // delete all expired inApp notifications
+  cutoffDays = cronConfig.expiredInAppNotificationCutoffDays || cronConfig.defaultCutoffDays || 30
+  app.models.Notification.destroyAll({
+    channel: 'inApp',
+    validTill: {lt: Date.now() - cutoffDays * 86400000}
+  }, function (err, data) {
+    if (!err && data && data.count > 0) {
+      console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')
+    }
+  })
+
+  // delete all deleted inApp notifications
+  app.models.Notification.destroyAll({
+    channel: 'inApp',
+    state: 'deleted'
+  }, function (err, data) {
+    if (!err && data && data.count > 0) {
+      console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')
+    }
+  })
+
+  // delete all old unconfirmed subscriptions
+  cutoffDays = cronConfig.unconfirmedSubscriptionCutoffDays || cronConfig.defaultCutoffDays || 30
+  app.models.Subscription.destroyAll({
+    state: 'unconfirmed',
+    created: {lt: Date.now() - cutoffDays * 86400000}
+  }, function (err, data) {
+    if (!err && data && data.count > 0) {
+      console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')
+    }
+  })
+
 }

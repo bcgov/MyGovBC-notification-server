@@ -8,7 +8,11 @@ var disableAllMethods = require('../helpers.js').disableAllMethods
 module.exports = function (Subscription) {
   disableAllMethods(Subscription, ['find', 'create', 'updateAttributes', 'deleteItemById', 'verify'])
   Subscription.observe('access', function (ctx, next) {
-    var httpCtx = LoopBackContext.getCurrentContext().get('http')
+    var httpCtx
+    try {
+      httpCtx = LoopBackContext.getCurrentContext().get('http')
+    } catch (ex) {
+    }
     var u = Subscription.app.models.Notification.getCurrentUser(httpCtx)
     if (u) {
       ctx.query.where = ctx.query.where || {}
