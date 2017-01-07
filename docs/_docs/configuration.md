@@ -152,3 +152,4 @@ The values shown above are default ones if the corresponding config item is omit
 * pushNotificationRetentionDays: the retention days of push notifications
 * expiredInAppNotificationRetentionDays: the retention days of expired inApp notifications
 * unconfirmedSubscriptionRetentionDays: the retention days of unconfirmed subscriptions 
+* defaultRetentionDays: if any of the above retention day config item is omitted, default retention days is used as fall back.
