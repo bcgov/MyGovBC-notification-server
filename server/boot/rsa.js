@@ -11,26 +11,25 @@ module.exports = function (app, cb) {
    * for more info.
    */
 
-  // todo: save rsa keys in db in order to share among multiple app servers; update docs as well
-  var privateKeyFilePath = path.resolve(__dirname, '../id_rsa')
-  var publicKeyFilePath = path.resolve(__dirname, '../id_rsa.pub')
-  fs.readFile(privateKeyFilePath, 'utf8', (err, data) => {
+  // todo: update docs about how to get public rsa key
+  app.models.Configuration.find({where: {name: 'rsa'}}, (err, data) => {
     var key = new NodeRSA()
-    if (!err) {
-      key.importKey(data, 'private')
+    if (!err && data.length > 0) {
+      key.importKey(data[0].value.private, 'private')
+      key.importKey(data[0].value.public, 'public')
       module.exports.key = key
       return cb()
     }
     key.generateKeyPair()
     module.exports.key = key
-    var privateKey = key.exportKey('private')
-    var publicKey = key.exportKey('public')
-    fs.writeFile(privateKeyFilePath, privateKey, (err) => {
-      if (err) throw err
-      fs.writeFile(publicKeyFilePath, publicKey, (err) => {
-        if (err) throw err
-        cb()
-      })
+    app.models.Configuration.create({
+      name: 'rsa',
+      value: {
+        private: key.exportKey('private'),
+        public: key.exportKey('public')
+      }
+    }, function (err, data) {
+      cb()
     })
   })
 }

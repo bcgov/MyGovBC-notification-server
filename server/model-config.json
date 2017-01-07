@@ -20,5 +20,9 @@
   "subscription": {
     "dataSource": "db",
     "public": true
+  },
+  "configuration": {
+    "dataSource": "db",
+    "public": false
   }
 }
