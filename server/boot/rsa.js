@@ -11,7 +11,7 @@ module.exports = function (app, cb) {
    * for more info.
    */
 
-  // todo: save rsa keys in db in order to share among multiple app servers
+  // todo: save rsa keys in db in order to share among multiple app servers; update docs as well
   var privateKeyFilePath = path.resolve(__dirname, '../id_rsa')
   var publicKeyFilePath = path.resolve(__dirname, '../id_rsa.pub')
   fs.readFile(privateKeyFilePath, 'utf8', (err, data) => {
