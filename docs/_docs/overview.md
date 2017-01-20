@@ -9,14 +9,14 @@ NotifyBC is a general purpose notification subscription API Server supporting mu
 NotifyBC is designed initially for MyGovBC but can be used independently.
 
 ## Features
-NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure webapps implementing notification feature. A NotifyBC server instance supports multiple notification services.  A service is a topic of interest that user wants to receive updates. It is used as the partition of notification messages and user subscriptions. A user may subscribe to a service in multiple push delivery channels allowed. In-app pull notification doesn't require subscription as it's not intrusive to user.
+NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure webapps implementing notification feature. A NotifyBC server instance supports multiple notification services.  A service is a topic of interest that user wants to receive updates. It is used as the partition of notification messages and user subscriptions. A user may subscribe to a service in multiple push delivery channels allowed. A user may subscribe to multiple services. In-app pull notification doesn't require subscription as it's not intrusive to user.
 
 ### notification
 * Support both in-app pull notifications (a.k.a. messages or alerts) and push notifications
 * Support both unicast and broadcast message types
 * Deliver push notifications to confirmed subscription channels (or force delivering to unconfirmed channels):
   * email
-  * sms (planned)
+  * sms
 * For in-app pull notifications
   * support message states - read, deleted
   * support message expiration
