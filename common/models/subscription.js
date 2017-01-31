@@ -134,16 +134,14 @@ module.exports = function (Subscription) {
   })
 
 
-  Subscription.beforeRemote('deleteItemById', function (ctx, unused, next) {
+  Subscription.beforeRemote('prototype.deleteItemById', function (ctx, unused, next) {
     var u = Subscription.app.models.Notification.getCurrentUser(ctx) || 'unknown'
-    Subscription.findById(ctx.args.id, null, null, function (err, data) {
-      if (data.userId === u) {
-        return next()
-      }
-      var error = new Error('Forbidden')
-      error.status = 403
-      next(error)
-    })
+    if (ctx.instance.userId === u) {
+      return next()
+    }
+    var error = new Error('Forbidden')
+    error.status = 403
+    next(error)
   })
 
   Subscription.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
