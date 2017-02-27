@@ -29,7 +29,7 @@ module.exports.disableAllMethods = function (model, methodsToExpose) {
       var methodName = method.name
       if (methodsToExpose.indexOf(methodName) < 0) {
         hiddenMethods.push(methodName)
-        model.disableRemoteMethod(methodName, method.isStatic)
+        model.disableRemoteMethodByName(methodName)
       }
     })
 

@@ -41,8 +41,7 @@
   "relations": {},
   "acls": [],
   "methods": {
-    "deleteItemById": {
-      "isStatic": false,
+    "prototype.deleteItemById": {
       "accepts": [],
       "returns": [
         {
@@ -60,8 +59,7 @@
         }
       ]
     },
-    "verify": {
-      "isStatic": false,
+    "prototype.verify": {
       "accepts": [
         {
           "arg": "confirmationCode",

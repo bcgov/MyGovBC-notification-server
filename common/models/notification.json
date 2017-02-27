@@ -46,8 +46,7 @@
   "relations": {},
   "acls": [],
   "methods": {
-    "deleteItemById": {
-      "isStatic": false,
+    "prototype.deleteItemById": {
       "accepts": [],
       "returns": [
         {
