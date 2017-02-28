@@ -17,7 +17,7 @@
     "lodash": "^4.17.2",
     "loopback": "^3.0.0",
     "loopback-boot": "^2.6.5",
-    "loopback-component-explorer": "^2.4.0",
+    "loopback-component-explorer": "^4.0.0",
     "loopback-connector-mongodb": "^1.15.2",
     "loopback-context": "^1.0.0",
     "morgan": "^1.7.0",
