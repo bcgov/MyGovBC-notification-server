@@ -65,7 +65,7 @@ https://github.com/bcgov/MyGovBC-notification-server.git \
 notifyBC
 ~ $ cd notifyBC
 ~ $ docker build -t notify-bc .
-~ $ docker -p 3000:3000 notify-bc
+~ $ docker run -p 3000:3000 notify-bc
 ```
 
 If successful, similar output is displayed as in source code installation.
