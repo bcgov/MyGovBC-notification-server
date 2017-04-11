@@ -60,7 +60,7 @@
   "final:after": {
     "strong-error-handler": {
       "params": {
-        "debug": false,
+        "debug": true,
         "log": true
       }
     }
