@@ -6,6 +6,9 @@
     "validateUpsert": true,
     "replaceOnPUT": true
   },
+  "mixins": {
+    "CtxInjection": {}
+  },
   "properties": {
     "serviceName": {
       "type": "string",
@@ -42,7 +45,13 @@
   "acls": [],
   "methods": {
     "prototype.deleteItemById": {
-      "accepts": [],
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
       "returns": [
         {
           "arg": "count",

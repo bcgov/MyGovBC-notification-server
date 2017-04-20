@@ -1,19 +1,13 @@
 var parallelLimit = require('async/parallelLimit')
-var LoopBackContext = require('loopback-context')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
 var ipRangeCheck = require("ip-range-check")
 
 module.exports = function (Notification) {
-  disableAllMethods(Notification, ['find', 'create', 'updateAttributes', 'deleteItemById'])
+  disableAllMethods(Notification, ['find', 'create', 'patchAttributes', 'deleteItemById'])
 
   Notification.observe('access', function (ctx, next) {
-    var httpCtx
-    try {
-      httpCtx = LoopBackContext.getCurrentContext().get('http')
-    }
-    catch (ex) {
-    }
+    var httpCtx = ctx.options.httpContext
     ctx.query.where = ctx.query.where || {}
     var currUser = Notification.getCurrentUser(httpCtx)
     if (currUser) {
@@ -115,14 +109,13 @@ module.exports = function (Notification) {
         break
     }
   })
-  Notification.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
+  Notification.beforeRemote('prototype.patchAttributes', function (ctx, instance, next) {
       // only allow changing state for non-admin requests
       if (!Notification.isAdminReq(ctx)) {
         ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
       }
       if (ctx.instance.isBroadcast) {
-        var httpCtx = LoopBackContext.getCurrentContext().get('http')
-        var currUser = Notification.getCurrentUser(httpCtx) || 'unknown'
+        var currUser = Notification.getCurrentUser(ctx) || 'unknown'
         switch (ctx.args.data.state) {
           case 'read':
             ctx.args.data.readBy = instance.readBy || []
@@ -142,17 +135,16 @@ module.exports = function (Notification) {
       next()
     }
   )
-  Notification.afterRemote('prototype.updateAttributes', function (ctx, output, next) {
+  Notification.afterRemote('prototype.patchAttributes', function (ctx, output, next) {
     // don't return the update
     ctx.result = {}
     next()
   })
 
-  Notification.prototype.deleteItemById = function (callback) {
+  Notification.prototype.deleteItemById = function (options, callback) {
     if (this.isBroadcast) {
       this.deletedBy = this.deletedBy || []
-      var httpCtx = LoopBackContext.getCurrentContext().get('http')
-      var currUser = Notification.getCurrentUser(httpCtx) || 'unknown'
+      var currUser = Notification.getCurrentUser(options.httpContext) || 'unknown'
       if (this.deletedBy.indexOf(currUser) < 0) {
         this.deletedBy.push(currUser)
       }

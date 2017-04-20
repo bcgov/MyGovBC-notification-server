@@ -2,58 +2,52 @@ const path = require('path')
 var rsaPath = path.resolve(__dirname, '../../server/boot/rsa.js')
 var rsa = require(rsaPath)
 var RandExp = require('randexp')
-var LoopBackContext = require('loopback-context')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 
 module.exports = function (Subscription) {
-  disableAllMethods(Subscription, ['find', 'create', 'updateAttributes', 'deleteItemById', 'verify'])
+  disableAllMethods(Subscription, ['find', 'create', 'patchAttributes', 'deleteItemById', 'verify'])
 
   // centralized callback for customized access control of endpoint
   Subscription.beforeRemote('**', function checkAccess() {
     // Since this callback acts on all methods, we have to support
     // different param (ctx, next) and (ctx, modelInstance, next) (for create)
-    var ctx = arguments[0];
-    var next = arguments[arguments.length - 1];
+    var ctx = arguments[0]
+    var next = arguments[arguments.length - 1]
 
-    var method = ctx.req.method;
-    var userId = Subscription.app.models.Notification.getCurrentUser(ctx);
+    var method = ctx.req.method
+    var userId = Subscription.app.models.Notification.getCurrentUser(ctx)
     if(Subscription.app.models.Notification.isAdminReq(ctx)) {
-      return next();
+      return next()
     }
     else if(userId){
       // siteminder user requestId
       // here we whitelist the available access control for siteminder user
       switch(method) {
         case 'GET':
-          return next();
-          break;
+          return next()
+          break
         case 'PUT':
         case 'POST':
           if(ctx.args.data.confirmationRequest) {
-            return next();
+            return next()
           }
-          break;
+          break
         case 'DELETE':
           if(ctx.instance.userId === userId) {
-            return next();
+            return next()
           }
-          break;
+          break
       }
     }
     // if we get here, the request is a siteminder user that does not
     // match the criteria above OR an anonymous user
-    var error = new Error('Forbidden');
-    error.status = 403;
-    next(error);
+    var error = new Error('Forbidden')
+    error.status = 403
+    next(error)
   })
 
   Subscription.observe('access', function (ctx, next) {
-    var httpCtx
-    try {
-      httpCtx = LoopBackContext.getCurrentContext().get('http')
-    } catch (ex) {
-    }
-    var u = Subscription.app.models.Notification.getCurrentUser(httpCtx)
+    var u = Subscription.app.models.Notification.getCurrentUser(ctx.options.httpContext)
     if (u) {
       ctx.query.where = ctx.query.where || {}
       ctx.query.where.userId = u
@@ -134,7 +128,7 @@ module.exports = function (Subscription) {
   Subscription.beforeRemote('create', function (ctx, unused, next) {
     var userId = Subscription.app.models.Notification.getCurrentUser(ctx)
     if (userId) {
-      ctx.args.data.userId = userId;
+      ctx.args.data.userId = userId
     }
     // this can only come from admin channel
     return next()
@@ -151,7 +145,7 @@ module.exports = function (Subscription) {
     })
   })
 
-  Subscription.beforeRemote('prototype.updateAttributes', function (ctx, instance, next) {
+  Subscription.beforeRemote('prototype.patchAttributes', function (ctx, instance, next) {
     var userId = Subscription.app.models.Notification.getCurrentUser(ctx)
     if (userId) {
       ctx.args.data.userId = userId
@@ -161,7 +155,7 @@ module.exports = function (Subscription) {
     return next()
   })
 
-  Subscription.afterRemote('prototype.updateAttributes', function (ctx, instance, next) {
+  Subscription.afterRemote('prototype.patchAttributes', function (ctx, instance, next) {
     if (!ctx.args.data.confirmationRequest) {
       return next()
     }
@@ -180,7 +174,7 @@ module.exports = function (Subscription) {
   }
 
   Subscription.prototype.verify = function (confirmationCode, callback) {
-    var error;
+    var error
     if (confirmationCode !== this.confirmationRequest.confirmationCode) {
       error = new Error('Forbidden')
       error.status = 403
