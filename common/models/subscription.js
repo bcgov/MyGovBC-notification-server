@@ -16,34 +16,40 @@ module.exports = function (Subscription) {
 
     var method = ctx.req.method
     var userId = Subscription.app.models.Notification.getCurrentUser(ctx)
-    if(Subscription.app.models.Notification.isAdminReq(ctx)) {
+    if (Subscription.app.models.Notification.isAdminReq(ctx)) {
       return next()
     }
-    else if(userId){
+
+    if (userId) {
       // siteminder user requestId
       // here we whitelist the available access control for siteminder user
-      switch(method) {
+      switch (method) {
         case 'GET':
           return next()
           break
-        case 'PUT':
         case 'POST':
-          if(ctx.args.data.confirmationRequest) {
+        case 'PATCH':
+          if (ctx.args.data.confirmationRequest) {
             return next()
           }
           break
         case 'DELETE':
-          if(ctx.instance.userId === userId) {
+          if (ctx.instance.userId === userId) {
             return next()
           }
           break
       }
     }
+
+    if (ctx.methodString === 'subscription.prototype.verify') {
+      return next()
+    }
+
     // if we get here, the request is a siteminder user that does not
     // match the criteria above OR an anonymous user
     var error = new Error('Forbidden')
     error.status = 403
-    next(error)
+    return next(error)
   })
 
   Subscription.observe('access', function (ctx, next) {
@@ -145,13 +151,23 @@ module.exports = function (Subscription) {
     })
   })
 
-  Subscription.beforeRemote('prototype.patchAttributes', function (ctx, instance, next) {
+  Subscription.beforeRemote('prototype.patchAttributes', function () {
+    var ctx = arguments[0]
+    var next = arguments[arguments.length - 1]
+    if (Subscription.app.models.Notification.isAdminReq(ctx)) {
+      return next()
+    }
     var userId = Subscription.app.models.Notification.getCurrentUser(ctx)
+    var filteredData = {}
+    filteredData.userChannelId = ctx.args.data.userChannelId
+    filteredData.confirmationRequest = ctx.args.data.confirmationRequest
+    if (filteredData.userChannelId !== ctx.instance.userChannelId) {
+      filteredData.state = 'unconfirmed'
+    }
+    ctx.args.data = filteredData
     if (userId) {
       ctx.args.data.userId = userId
-      ctx.args.data.state = 'unconfirmed'
     }
-    // this can only come from admin channel
     return next()
   })
 
@@ -166,25 +182,25 @@ module.exports = function (Subscription) {
     })
   })
 
-  Subscription.prototype.deleteItemById = function (callback) {
+  Subscription.prototype.deleteItemById = function () {
+    var cb = arguments[arguments.length - 1]
     this.state = 'deleted'
     Subscription.replaceById(this.id, this, function (err, res) {
-      callback(err, 1)
+      cb(err, 1)
     })
   }
 
-  Subscription.prototype.verify = function (confirmationCode, callback) {
+  Subscription.prototype.verify = function (confirmationCode, cb) {
     var error
-    if (confirmationCode !== this.confirmationRequest.confirmationCode) {
+    if (this.state !== 'unconfirmed'
+      || confirmationCode !== this.confirmationRequest.confirmationCode) {
       error = new Error('Forbidden')
       error.status = 403
-      return callback(error, "OK")
+      return cb(error, "OK")
     }
-    else {
-      this.state = 'confirmed'
-      Subscription.replaceById(this.id, this, function (err, res) {
-        return callback(err, "OK")
-      })
-    }
+    this.state = 'confirmed'
+    Subscription.replaceById(this.id, this, function (err, res) {
+      return cb(err, "OK")
+    })
   }
 }

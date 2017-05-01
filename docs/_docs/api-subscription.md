@@ -290,6 +290,7 @@ This API is used for changing user channel id (such as email address) and resend
   NotifyBC processes the request similarly as creating a subscription except during input validation it imposes following extra constraints to user request  
   * only fields *userChannelId*, *state* and *confirmationRequest* can be updated     
   * when changing *userChannelId*, *confirmationRequest* must also be supplied
+  * if *userChannelId* is different from the saved record, *state* is forced to *unconfirmed*.
 
      
 ## Delete a Subscription (un-subscribing)
