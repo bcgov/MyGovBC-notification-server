@@ -128,55 +128,52 @@ module.exports = function (Notification) {
         break
     }
   })
-  Notification.beforeRemote('prototype.patchAttributes', function () {
-      var ctx = arguments[0]
-      var next = arguments[arguments.length - 1]
-      // only allow changing state for non-admin requests
-      if (!Notification.isAdminReq(ctx)) {
-        ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
-      }
-      if (ctx.instance.isBroadcast) {
-        var currUser = Notification.getCurrentUser(ctx) || 'unknown'
-        switch (ctx.args.data.state) {
-          case 'read':
-            ctx.args.data.readBy = ctx.instance.readBy || []
-            if (ctx.args.data.readBy.indexOf(currUser) < 0) {
-              ctx.args.data.readBy.push(currUser)
-            }
-            break
-          case 'deleted':
-            ctx.args.data.deletedBy = ctx.instance.deletedBy || []
-            if (ctx.args.data.deletedBy.indexOf(currUser) < 0) {
-              ctx.args.data.deletedBy.push(currUser)
-            }
-            break
-        }
-        delete ctx.args.data.state
-      }
-      next()
+
+  function beforePatchAttributes() {
+    var ctx = arguments[0]
+    var next = arguments[arguments.length - 1]
+    if (ctx.method.name === 'deleteItemById') {
+      ctx.args.data = {state: 'deleted'}
     }
-  )
-  Notification.afterRemote('prototype.patchAttributes', function (ctx, output, next) {
+    // only allow changing state for non-admin requests
+    if (!Notification.isAdminReq(ctx)) {
+      ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
+    }
+    if (ctx.instance.isBroadcast) {
+      var currUser = Notification.getCurrentUser(ctx) || 'unknown'
+      switch (ctx.args.data.state) {
+        case 'read':
+          ctx.args.data.readBy = ctx.instance.readBy || []
+          if (ctx.args.data.readBy.indexOf(currUser) < 0) {
+            ctx.args.data.readBy.push(currUser)
+          }
+          break
+        case 'deleted':
+          ctx.args.data.deletedBy = ctx.instance.deletedBy || []
+          if (ctx.args.data.deletedBy.indexOf(currUser) < 0) {
+            ctx.args.data.deletedBy.push(currUser)
+          }
+          break
+      }
+      delete ctx.args.data.state
+    }
+    next()
+  }
+
+  function afterPatchAttributes() {
+    var ctx = arguments[0]
+    var next = arguments[arguments.length - 1]
     // don't return the update
     ctx.result = {}
     next()
-  })
+  }
 
+  Notification.beforeRemote('prototype.patchAttributes', beforePatchAttributes)
+  Notification.afterRemote('prototype.patchAttributes', afterPatchAttributes)
+  Notification.beforeRemote('prototype.deleteItemById', beforePatchAttributes)
+  Notification.afterRemote('prototype.deleteItemById', afterPatchAttributes)
   Notification.prototype.deleteItemById = function (options, callback) {
-    // todo: call prototype.patchAttributes instead since this is just a special case
-    if (this.isBroadcast) {
-      this.deletedBy = this.deletedBy || []
-      var currUser = Notification.getCurrentUser(options.httpContext) || 'unknown'
-      if (this.deletedBy.indexOf(currUser) < 0) {
-        this.deletedBy.push(currUser)
-      }
-    }
-    else {
-      this.state = 'deleted'
-    }
-    Notification.replaceById(this.id, this, function (err, res) {
-      callback(err, 1)
-    })
+    this.patchAttributes(options.httpContext.args.data, options, callback)
   }
 
   Notification.sendEmail = function (from, to, subject, textBody, htmlBody, cb) {
