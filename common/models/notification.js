@@ -63,25 +63,44 @@ module.exports = function (Notification) {
     }
 
     var data = ctx.args.data
-    if (data.channel === 'inApp' || data.skipSubscriptionConfirmationCheck || !data.userChannelId) {
+    if (!data.isBroadcast && data.skipSubscriptionConfirmationCheck && !data.userChannelId) {
+      var error = new Error('invalid user')
+      error.status = 403
+      return next(error)
+    }
+    if (data.channel === 'inApp' || data.skipSubscriptionConfirmationCheck || data.isBroadcast) {
       return next()
     }
-    // validate userChannelId of a unicast push notification against subscription data
+    if (!data.userChannelId && !data.userId) {
+      var error = new Error('invalid user')
+      error.status = 403
+      return next(error)
+    }
+    // validate userChannelId/userId of a unicast push notification against subscription data
+    var whereClause = {
+      serviceName: data.serviceName,
+      state: 'confirmed',
+      channel: data.channel,
+    }
+    if (data.userChannelId) {
+      // todo: email address check should be case insensitive
+      whereClause.userChannelId = data.userChannelId
+    }
+    if (data.userId) {
+      whereClause.userId = data.userId
+    }
+
     Notification.app.models.Subscription.find({
-      where: {
-        serviceName: data.serviceName,
-        state: 'confirmed',
-        channel: data.channel,
-        // todo: email address check should be case insensitive
-        userChannelId: data.userChannelId
-      }
+      where: whereClause
     }, function (err, subscribers) {
       if (err || subscribers.length === 0) {
-        var error = new Error('invalid userChannelId')
+        var error = new Error('invalid user')
         error.status = 403
         return next(error)
       }
       else {
+        // in case request supplies userId instead of userChannelId
+        data.userChannelId = subscribers[0].userChannelId
         return next()
       }
     })
@@ -109,7 +128,9 @@ module.exports = function (Notification) {
         break
     }
   })
-  Notification.beforeRemote('prototype.patchAttributes', function (ctx, instance, next) {
+  Notification.beforeRemote('prototype.patchAttributes', function () {
+      var ctx = arguments[0]
+      var next = arguments[arguments.length - 1]
       // only allow changing state for non-admin requests
       if (!Notification.isAdminReq(ctx)) {
         ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
@@ -118,14 +139,14 @@ module.exports = function (Notification) {
         var currUser = Notification.getCurrentUser(ctx) || 'unknown'
         switch (ctx.args.data.state) {
           case 'read':
-            ctx.args.data.readBy = instance.readBy || []
-            if (ctx.args.data.readBy.indexOf(currUser) <= 0) {
+            ctx.args.data.readBy = ctx.instance.readBy || []
+            if (ctx.args.data.readBy.indexOf(currUser) < 0) {
               ctx.args.data.readBy.push(currUser)
             }
             break
           case 'deleted':
-            ctx.args.data.deletedBy = instance.deletedBy || []
-            if (ctx.args.data.deletedBy.indexOf(currUser) <= 0) {
+            ctx.args.data.deletedBy = ctx.instance.deletedBy || []
+            if (ctx.args.data.deletedBy.indexOf(currUser) < 0) {
               ctx.args.data.deletedBy.push(currUser)
             }
             break
@@ -142,6 +163,7 @@ module.exports = function (Notification) {
   })
 
   Notification.prototype.deleteItemById = function (options, callback) {
+    // todo: call prototype.patchAttributes instead since this is just a special case
     if (this.isBroadcast) {
       this.deletedBy = this.deletedBy || []
       var currUser = Notification.getCurrentUser(options.httpContext) || 'unknown'
@@ -248,7 +270,9 @@ module.exports = function (Notification) {
   }
 
   Notification.getCurrentUser = function (httpCtx) {
+    // internal requests
     if (!httpCtx) return null
+
     var currUser = httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname')
     var siteMinderReverseProxyIps = Notification.app.get('siteMinderReverseProxyIps')
     if (!siteMinderReverseProxyIps || siteMinderReverseProxyIps.length <= 0) {
@@ -263,9 +287,9 @@ module.exports = function (Notification) {
   }
 
   Notification.isAdminReq = function (httpCtx) {
+    // internal requests
     if (!httpCtx) return true
-    var currUser = Notification.getCurrentUser(httpCtx)
-    if (currUser) return false
+
     var adminIps = Notification.app.get('adminIps')
     if (adminIps) {
       return adminIps.some(function (e, i) {

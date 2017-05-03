@@ -75,7 +75,19 @@ The API operates on following notification data model fields:
   <tr>
     <td>
       <p class="name">userChannelId</p>
-      <p class="description">user's delivery channel id, for example, email address. For unicast inApp notification, this is authenticated user id.</p>
+      <p class="description">user's delivery channel id, for example, email address. For unicast inApp notification, this is authenticated user id. When sending unicast push notification, either <i>userChannelId</i> or <i>userId</i> is required.</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>string</td></tr>
+        <tr><td>required</td><td>false</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <p class="name">userId</p>
+      <p class="description">authenticated user id. When sending unicast push notification, either <i>userChannelId</i> or <i>userId</i> is required.</p>
     </td>
     <td>
       <table>
@@ -126,7 +138,7 @@ The API operates on following notification data model fields:
   <tr>
     <td>
       <p class="name">skipSubscriptionConfirmationCheck</p>
-      <p class="description">For unicast push notification, <i>userChannelId</i> is validated against subscription data and requires a matching confirmed subscription with same <i>userChannelId</i> in the same <i>serviceName</i>, unless this field is set to true.</p>
+      <p class="description">When sending unicast push notification, whether or not to verify if the recipient has a confirmed subscription. This field allows subscription information be kept elsewhere and <i>NotifyBC</i> be used as a unicast push notification gateway only.</p>
     </td>
     <td>
       <table>
@@ -238,7 +250,7 @@ GET /notifications
     * if current user is in *readBy*, then the *state* is changed to *read*
     * the internal field *readBy* and *deletedBy* are removed
 
-## Create a Notification
+## Send Notifications
 ```
 POST /notifications
 ```
@@ -253,7 +265,7 @@ POST /notifications
   NotifyBC performs following actions in sequence
   
   1. if it's a user request, error is returned
-  2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, there must be a confirmed *userChannelId* subscription of the same service, unless field *skipSubscriptionConfirmationCheck* is set to true
+  2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, the recipient as identified by either *userChannelId* or *userId* must have a confirmed subscription if field *skipSubscriptionConfirmationCheck* is not set to true. If *skipSubscriptionConfirmationCheck* is set to true, then the subscription check is skipped, but in such case the request must contain *userChannelId*, not *userId* as subscription data is not queried to obtain *userChannelId* from *userId*.   
   3. the notification request is saved to database
   4. for unicast push notification, the message is sent to targeted user; for broadcast push notification, the message is sent to all confirmed subscribers of the service in the delivery channel. 
   5. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains the list of *userChannelId*s the message failed to deliver to, but the state will still be set to *sent*
@@ -302,7 +314,7 @@ POST /notifications
 ```
 PATCH /notifications/{id}
 ```
-This API is mainly used for changing the state of an inApp notification.
+This API is mainly used for updating an inApp notification.
 
 * inputs
   * notification id
