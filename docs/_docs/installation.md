@@ -71,66 +71,77 @@ notifyBC
 If successful, similar output is displayed as in source code installation.
 
 ## Deploy to OpenShift
-*NotifyBC* supports deployment to OpenShift Origin of minimum version 1.3, or other compatible platforms such as OpenShift Container Platform of matching version. An [OpenShift instant app template](https://github.com/bcgov/MyGovBC-notification-server/blob/master/.opensift-templates/notify-bc.yml) has been created to facilitate deployment. This template adopts [source-to-image strategy](https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets-s2i-strategy) with [binary source](https://docs.openshift.org/latest/dev_guide/builds.html#binary-source) input and supports [incremental builds](https://docs.openshift.org/latest/dev_guide/builds.html#incremental-builds). The advantages of this deployment method are
+*NotifyBC* supports deployment to OpenShift Origin of minimum version 1.3, or other compatible platforms such as OpenShift Container Platform of matching version. [OpenShift instant app templates](https://github.com/bcgov/MyGovBC-notification-server/blob/master/.opensift-templates) have been created to facilitate build and deployment. This template adopts [source-to-image strategy](https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets-s2i-strategy) with [binary source](https://docs.openshift.org/latest/dev_guide/builds.html#binary-source) input and supports [incremental builds](https://docs.openshift.org/latest/dev_guide/builds.html#incremental-builds). 
 
-  * flexible to allow instance specific configurations or other customizations
-  * reduced build time
-  * allow using Jenkins for CI
+To deploy to OpenShift, you need to have access to relevant OpenShift projects with minimum edit role. This implies you know and have access to OpenShift web console as identified by *\<openshift-console-url\>* below.
 
-To deploy to OpenShift, you need to have access to an OpenShift project with minimum edit role . The deployment commands below assumes the project name is *notify-bc*.
+OpenShift is expected to be setup this way:
 
-The deployment can be initiated from localhost or from CI service such as Jenkins. Regardless, at the initiator's side following software needs to be installed:
+* 1 project for build. This project is identified by *\<yourprojectname-tools\>*  below. All build related activities take place in this project.
+* 1 or more projects for runtime environments such as *dev*, *test* etc, identified by *\<yourprojectname-\<env\>>* below. All deployment activities and runtime artifacts are contained in respective projects to make an environment self-sufficient.
+
+The deployment can be initiated from localhost or automated by CI service such as Jenkins. Regardless, at the initiator's side following software needs to be installed:
 
   * git
   * [OpenShift CLI](https://docs.openshift.org/latest/cli_reference/index.html)
 
-If using Jenkins, all the software are pre-installed on OpenShift provided Jenkins instant-app template so it is the preferred hosting environment.
+If using Jenkins, all the software are pre-installed on OpenShift provided Jenkins instant-app template so it is the preferred CI environment. Instructions below assumes OpenShift Jenkins is used. OpenShift Jenkins should be created in project *\<yourprojectname-tools\>*.  
 
-### Initiated from localhost
-Run following commands
+### Hosting Environment Setup
 
-```sh
-~ $ git clone \
-https://github.com/bcgov/MyGovBC-notification-server.git \
-notifyBC
-~ $ cd notifyBC
-... (optional: customize config)
-~ $ oc login -u <username> -p <password>
-~ $ oc project notify-bc
-~ $ oc create -f .opensift-templates/notify-bc.yml
-~ $ oc process notify-bc|oc create -f-
-~ $ oc start-build notify-bc --follow --wait --from-dir=.
-```
+1. Install the templates
 
-If the build is successful, you can launch *NotifyBC* from the URL provided in OpenShift *notify-bc* project.
+    ```sh
+    ~ $ git clone \
+    https://github.com/bcgov/MyGovBC-notification-server.git \
+    notifyBC
+    ~ $ cd notifyBC
+    ... (optional: customize config)
+    ~ $ oc login -u <username> -p <password> <openshift-console-url>
+    ~ $ oc create -f .opensift-templates/notify-bc-build.yml -n <yourprojectname-tools>
+    ~ $ oc create -f .opensift-templates/notify-bc-deploy.yml -n <yourprojectname-<env>>
+    ```    
+    After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc-deploy* in the *\<yourprojectname-\<env\>>* project.
+2. create OpenShift instant apps by clicking *notify-bc-build* and *notify-bc-deploy* template from *Add to Project* in web console of respective projects (Tip: you may need to click *See all* link in Instant Apps section to reveal the template). Adjust parameters as you see fit.
 
-### Initiated from Jenkins
+### Build
+To build runtime image manually from localhost, run
 
-To initiate the deployment from Jenkins, first create all the *NotifyBC* artifacts on OpenShift by running the commands in section [Initiate from localhost](#initiate-from-localhost) above except for the last line, then create a new Freestyle project in Jenkins. Set *Source Code Management* to Git repository https://github.com/bcgov/MyGovBC-notification-server.git and add a *Execute Shell* build step with following scripts, substituting login credential and url placeholders:
+   ```
+    ~ $ oc start-build notify-bc --follow --wait --from-dir=. -n <yourprojectname-tools>
+   ```
+If build is successful, you will find image *\<yourprojectname-tools\>/notify-bc:latest* is updated.
 
-```
-oc login -u <username> -p <password> <openshift-console-url>
-oc project notify-bc
-oc start-build notify-bc --from-dir=. --follow --wait
-```
+To initiate the build from Jenkins, create a new Freestyle project. Set *Source Code Management* to Git repository https://github.com/bcgov/MyGovBC-notification-server.git and add a *Execute Shell* build step with the command.
 
-If Jenkins is running in the same OpenShift cluster but in a different project from notify-bc, instead of doing *oc login*, you can use Jenkins service account *system:serviceaccount:\<jenkins-project-name\>:\<jenkins-service-name\>*, replacing \<jenkins-project-name\> and \<jenkins-service-name\>. In such case, grant the service account edit role to the *notify-bc* project by running
+### Deploy
+Deployment is achieved through image tagging. This guarantees the image deployed to different runtime environments are binary identical. To deploy manually from localhost, run
+
+    ```sh
+    ~ $ oc tag <yourprojectname-tools>/notify-bc:latest <yourprojectname-<env>>/notify-bc:latest
+    ```
+If the deployment is successful, you can launch *NotifyBC* from the URL provided in *\<yourprojectname-\<env\>>* project.
+
+To initiate the deployment from Jenkins, add the above command to the build command in Jenkins. Proper authorization is needed for Jenkins to execute this command because the command updates image in another project. The service account used by Jenkins has to be granted edit role in target project by running
 
 ```sh
 ~ $ oc policy add-role-to-user edit \
-system:serviceaccount:<jenkins-project-name>:<jenkins-service-name> \
--n notify-bc
+system:serviceaccount:<yourprojectname-tools>:<jenkins-service-name> \
+-n <yourprojectname-<env>>
 ```
-
-In some editions of OpenShift, *\<jenkins-service-name\>* is fixed to *default*. To find exact Jenkins service account, add following line to Jenkins shell build step and inspect its build output
+replace *\<jenkins-service-name\>* with the jenkins service name. In some editions of OpenShift, *\<jenkins-service-name\>* is fixed to *default*. To find exact Jenkins service account, add following line to Jenkins shell build step and inspect its build output
 
 ```sh
 oc whoami
 ```
 
-If Jenkins is running in the same project notify-bc, then the service account already has proper access so there is no need to add role to user.
+### Change Propagation
+To promote runtime image from one environment to another, for example from *dev* to *test*, run
 
-After setting up the jenkins project, you can manually start the build or add a webhook to trigger the build upon git push.
+```
+oc tag <yourprojectname-tools>/notify-bc:latest <yourprojectname-test>/notify-bc:latest <yourprojectname-tools>/notify-bc:test
+```
+The above command will deploy the latest (which should also be dev) runtime image to *test* env. The purpose of tagging runtime image of *test* env in both \<yourprojectname-test\>/notify-bc:latest and \<yourprojectname-tools\>/notify-bc:test is to use \<yourprojectname-tools\>/notify-bc:test as backup such that in case the image stream \<yourprojectname-test\>/notify-bc, which is used by *test* runtime pods, is deleted inadvertently, it can be recovered from \<yourprojectname-tools\>/notify-bc:test.
 
 ## Install Docs Website (Optional)
 If you want to contribute to *NotifyBC* docs beyond simple fix ups, you can install [Jekyll](https://jekyllrb.com/) through Ruby bundler and render this web site locally:
