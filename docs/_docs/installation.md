@@ -71,7 +71,7 @@ notifyBC
 If successful, similar output is displayed as in source code installation.
 
 ## Deploy to OpenShift
-*NotifyBC* supports deployment to OpenShift Origin of minimum version 1.3, or other compatible platforms such as OpenShift Container Platform of matching version. An [OpenShift instant app template](https://github.com/bcgov/MyGovBC-notification-server/blob/master/.opensift-templates/mongodb-binary-src.yml) has been created to facilitate deployment. This template adopts [source-to-image strategy](https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets-s2i-strategy) with [binary source](https://docs.openshift.org/latest/dev_guide/builds.html#binary-source) input and supports [incremental builds](https://docs.openshift.org/latest/dev_guide/builds.html#incremental-builds). The advantages of this deployment method are
+*NotifyBC* supports deployment to OpenShift Origin of minimum version 1.3, or other compatible platforms such as OpenShift Container Platform of matching version. An [OpenShift instant app template](https://github.com/bcgov/MyGovBC-notification-server/blob/master/.opensift-templates/notify-bc.yml) has been created to facilitate deployment. This template adopts [source-to-image strategy](https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets-s2i-strategy) with [binary source](https://docs.openshift.org/latest/dev_guide/builds.html#binary-source) input and supports [incremental builds](https://docs.openshift.org/latest/dev_guide/builds.html#incremental-builds). The advantages of this deployment method are
 
   * flexible to allow instance specific configurations or other customizations
   * reduced build time
@@ -97,7 +97,7 @@ notifyBC
 ... (optional: customize config)
 ~ $ oc login -u <username> -p <password>
 ~ $ oc project notify-bc
-~ $ oc create -f .opensift-templates/mongodb-binary-src.yml
+~ $ oc create -f .opensift-templates/notify-bc.yml
 ~ $ oc process notify-bc|oc create -f-
 ~ $ oc start-build notify-bc --follow --wait --from-dir=.
 ```

@@ -54,18 +54,15 @@ objects:
   metadata:
     annotations:
       description: Defines how to deploy the application server
-    name: notify-bc
+    name: notify-bc-app
   spec:
     replicas: 1
-    selector:
-      name: notify-bc
     strategy:
       type: Rolling
     template:
       metadata:
         labels:
-          name: notify-bc
-        name: notify-bc
+          name: notify-bc-app
       spec:
         containers:
         - env:
@@ -81,8 +78,80 @@ objects:
             value: ${DATABASE_NAME}
           - name: MONGODB_ADMIN_PASSWORD
             value: ${DATABASE_ADMIN_PASSWORD}
+          - name: NOTIFYBC_SKIP_CRON
+            value: "true"
           image: notify-bc
           name: notify-bc
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 60
+            timeoutSeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          ports:
+          - containerPort: 3000
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - notify-bc
+        from:
+          kind: ImageStreamTag
+          name: notify-bc:latest
+      type: ImageChange
+    - type: ConfigChange
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+    name: notify-bc-cron
+  spec:
+    replicas: 1
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: notify-bc-cron
+      spec:
+        containers:
+        - env:
+          - name: NODE_ENV
+            value: production
+          - name: DATABASE_SERVICE_NAME
+            value: ${DATABASE_SERVICE_NAME}
+          - name: MONGODB_USER
+            value: ${DATABASE_USER}
+          - name: MONGODB_PASSWORD
+            value: ${DATABASE_PASSWORD}
+          - name: MONGODB_DATABASE
+            value: ${DATABASE_NAME}
+          - name: MONGODB_ADMIN_PASSWORD
+            value: ${DATABASE_ADMIN_PASSWORD}
+          - name: NOTIFYBC_SKIP_CRON
+            value: "false"
+          image: notify-bc
+          name: notify-bc
+          resources:
+            limits:
+              cpu: 100m
+            requests:
+              cpu: 100m
           livenessProbe:
             httpGet:
               path: /
@@ -122,15 +191,12 @@ objects:
     name: ${DATABASE_SERVICE_NAME}
   spec:
     replicas: 1
-    selector:
-      name: ${DATABASE_SERVICE_NAME}
     strategy:
       type: Recreate
     template:
       metadata:
         labels:
           name: ${DATABASE_SERVICE_NAME}
-        name: ${DATABASE_SERVICE_NAME}
       spec:
         containers:
         - env:
@@ -194,7 +260,7 @@ objects:
       port: 3000
       targetPort: 3000
     selector:
-      name: notify-bc
+      name: notify-bc-app
 - apiVersion: v1
   kind: Service
   metadata:
@@ -219,10 +285,19 @@ objects:
       name: notify-bc
     port:
         targetPort: 3000
+- apiVersion: extensions/v1beta1
+  kind: HorizontalPodAutoscaler
+  metadata:
+    name: notify-bc-cron
+  spec:
+    scaleRef:
+      kind: DeploymentConfig
+      name: notify-bc-cron
+      apiVersion: extensions/v1beta1
+      subresource: scale
+    minReplicas: 1
+    maxReplicas: 1
 parameters:
-- description: The exposed hostname that will route to the Node.js service, if left
-    blank a value will be defaulted.
-  name: APPLICATION_DOMAIN
 - description: Database service name
   name: DATABASE_SERVICE_NAME
   value: mongodb
@@ -251,3 +326,6 @@ parameters:
   name: MEMORY_MONGODB_LIMIT
   required: true
   value: 512Mi
+- description: The exposed hostname that will route to the Node.js service, if left
+    blank a value will be defaulted.
+  name: APPLICATION_DOMAIN

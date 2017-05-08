@@ -154,3 +154,5 @@ The values shown above are default ones if the corresponding config item is omit
 * expiredInAppNotificationRetentionDays: the retention days of expired inApp notifications
 * unconfirmedSubscriptionRetentionDays: the retention days of unconfirmed subscriptions 
 * defaultRetentionDays: if any of the above retention day config item is omitted, default retention days is used as fall back.
+
+By default cron job is enabled. In a multi-node deployment, cron job should only run on one node. This can be achieved by setting environment variable *NOTIFYBC_SKIP_CRON* on all other nodes to *true*.

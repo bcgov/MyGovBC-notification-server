@@ -4,17 +4,19 @@ var boot = require('loopback-boot')
 var app = module.exports = loopback()
 
 app.start = function () {
-  // start cron
-  var cron = require('cron')
-  var cronTask = require('../common/helpers').cronTask
-  var cronConfig = app.get('cron') || {}
-  var job = new cron.CronJob({
-    cronTime: cronConfig.timeSpec || '0 0 1 * * *',
-    onTick: function () {
-      cronTask(app)
-    },
-    start: true
-  })
+  if (process.env.NOTIFYBC_SKIP_CRON != 'true') {
+    // start cron
+    var cron = require('cron')
+    var cronTask = require('../common/helpers').cronTask
+    var cronConfig = app.get('cron') || {}
+    var job = new cron.CronJob({
+      cronTime: cronConfig.timeSpec || '0 0 1 * * *',
+      onTick: function () {
+        cronTask(app)
+      },
+      start: true
+    })
+  }
 
   app.set('trust proxy', app.get('trustedReverseProxyIps'))
   // start the web server
