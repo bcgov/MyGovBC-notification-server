@@ -90,26 +90,25 @@ If using Jenkins, all the software are pre-installed on OpenShift provided Jenki
 ### Hosting Environment Setup
 
 1. Install the templates
-
-    ```sh
-    ~ $ git clone \
-    https://github.com/bcgov/MyGovBC-notification-server.git \
-    notifyBC
-    ~ $ cd notifyBC
-    ... (optional: customize config)
-    ~ $ oc login -u <username> -p <password> <openshift-console-url>
-    ~ $ oc create -f .opensift-templates/notify-bc-build.yml -n <yourprojectname-tools>
-    ~ $ oc create -f .opensift-templates/notify-bc-deploy.yml -n <yourprojectname-<env>>
-    ```    
-    After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc-deploy* in the *\<yourprojectname-\<env\>>* project.
+```sh
+~ $ git clone \
+https://github.com/bcgov/MyGovBC-notification-server.git \
+notifyBC
+~ $ cd notifyBC
+... (optional: customize config)
+~ $ oc login -u <username> -p <password> <openshift-console-url>
+~ $ oc create -f .opensift-templates/notify-bc-build.yml -n <yourprojectname-tools>
+~ $ oc create -f .opensift-templates/notify-bc-deploy.yml -n <yourprojectname-<env>>
+``` 
+After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc-deploy* in the *\<yourprojectname-\<env\>>* project.
 2. create OpenShift instant apps by clicking *notify-bc-build* and *notify-bc-deploy* template from *Add to Project* in web console of respective projects (Tip: you may need to click *See all* link in Instant Apps section to reveal the template). Adjust parameters as you see fit.
 
 ### Build
 To build runtime image manually from localhost, run
 
-   ```
-    ~ $ oc start-build notify-bc --follow --wait --from-dir=. -n <yourprojectname-tools>
-   ```
+```
+~ $ oc start-build notify-bc --follow --wait --from-dir=. -n <yourprojectname-tools>
+```
 If build is successful, you will find image *\<yourprojectname-tools\>/notify-bc:latest* is updated.
 
 To initiate the build from Jenkins, create a new Freestyle project. Set *Source Code Management* to Git repository https://github.com/bcgov/MyGovBC-notification-server.git and add a *Execute Shell* build step with the command.
@@ -117,9 +116,9 @@ To initiate the build from Jenkins, create a new Freestyle project. Set *Source 
 ### Deploy
 Deployment is achieved through image tagging. This guarantees the image deployed to different runtime environments are binary identical. To deploy manually from localhost, run
 
-    ```sh
-    ~ $ oc tag <yourprojectname-tools>/notify-bc:latest <yourprojectname-<env>>/notify-bc:latest
-    ```
+```sh
+~ $ oc tag <yourprojectname-tools>/notify-bc:latest <yourprojectname-<env>>/notify-bc:latest
+```
 If the deployment is successful, you can launch *NotifyBC* from the URL provided in *\<yourprojectname-\<env\>>* project.
 
 To initiate the deployment from Jenkins, add the above command to the build command in Jenkins. Proper authorization is needed for Jenkins to execute this command because the command updates image in another project. The service account used by Jenkins has to be granted edit role in target project by running
