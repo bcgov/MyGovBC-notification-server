@@ -95,13 +95,25 @@ If using Jenkins, all the software are pre-installed on OpenShift provided Jenki
 https://github.com/bcgov/MyGovBC-notification-server.git \
 notifyBC
 ~ $ cd notifyBC
-... (optional: customize config)
 ~ $ oc login -u <username> -p <password> <openshift-console-url>
 ~ $ oc create -f .opensift-templates/notify-bc-build.yml -n <yourprojectname-tools>
 ~ $ oc create -f .opensift-templates/notify-bc.yml -n <yourprojectname-<env>>
 ``` 
 After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc* in the *\<yourprojectname-\<env\>>* project.
 2. create OpenShift instant apps by clicking *notify-bc-build* and *notify-bc* template from *Add to Project* in web console of respective projects (Tip: you may need to click *See all* link in Instant Apps section to reveal the template). Adjust parameters as you see fit.
+3. (optional) create instance-specific [configuration](../configuration) files for each runtime environment and upload to OpenShift via [configMaps](https://docs.openshift.org/latest/dev_guide/configmaps.html). To do so, 
+    * create a temporary directory for each environment *\<env\>/*, say *dev/* 
+    * create **.local.json* config files such as *config.local.json* and *middleware.local.json* under *\<env\>/*
+    * run
+      ```sh
+      ~ $ oc create configmap notify-bc --from-file=<env>/ --dry-run -o yaml|oc replace -f- -n <yourprojectname-<env>>
+      ```
+    * delete temporary directory *\<env\>/*
+
+<div class="note">
+  <h5>ProTips™ backup config files</h5>
+  <p>Backup config files to a private secured SCM outside of OpenShift is highly recommended, especially for production environment.</p>
+</div>
 
 ### Build
 To build runtime image manually from localhost, run
@@ -146,6 +158,16 @@ To promote runtime image from one environment to another, for example from *dev*
 oc tag <yourprojectname-tools>/notify-bc:latest <yourprojectname-test>/notify-bc:latest <yourprojectname-tools>/notify-bc:test
 ```
 The above command will deploy the latest (which should also be dev) runtime image to *test* env. The purpose of tagging runtime image of *test* env in both \<yourprojectname-test\>/notify-bc:latest and \<yourprojectname-tools\>/notify-bc:test is to use \<yourprojectname-tools\>/notify-bc:test as backup such that in case the image stream \<yourprojectname-test\>/notify-bc, which is used by *test* runtime pods, is deleted inadvertently, it can be recovered from \<yourprojectname-tools\>/notify-bc:test.
+
+### Update Configuration Files
+To update configurations files on a running environment
+
+```sh
+~ $ oc get configmaps notify-bc -o yaml -n <yourprojectname-<env>> > configMap.yml
+# modify configMap.yml...
+~ $ oc replace -f configMap.yml -n <yourprojectname-<env>>
+```
+For updated config files to take effect, manually run deployments of *notify-bc-app* and *notify-bc-cron*.
 
 ## Install Docs Website (Optional)
 If you want to contribute to *NotifyBC* docs beyond simple fix ups, you can install [Jekyll](https://jekyllrb.com/) through Ruby bundler and render this web site locally:

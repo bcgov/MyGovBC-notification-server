@@ -291,13 +291,6 @@ objects:
   kind: ConfigMap
   metadata:
     name: notify-bc
-  data:
-    config.local.json: |
-      {
-      }
-    middleware.local.json: |
-      {
-      }
 parameters:
 - description: Database service name
   name: DATABASE_SERVICE_NAME
