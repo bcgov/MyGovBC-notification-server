@@ -164,8 +164,9 @@ To update configurations files on a running environment
 
 ```sh
 ~ $ oc get configmaps notify-bc -o yaml -n <yourprojectname-<env>> > configMap.yml
-# modify configMap.yml...
+~ $ # modify configMap.yml...
 ~ $ oc replace -f configMap.yml -n <yourprojectname-<env>>
+~ $ rm configMap.yml
 ```
 For updated config files to take effect, manually run deployments of *notify-bc-app* and *notify-bc-cron*.
 
