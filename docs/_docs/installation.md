@@ -106,7 +106,7 @@ After this step you will find an instant app template called *notify-bc-build* a
 ### Build
 To build runtime image manually from localhost, run
 
-```
+```sh
 ~ $ oc start-build notify-bc --follow --wait --from-dir=. -n <yourprojectname-tools>
 ```
 If build is successful, you will find image *\<yourprojectname-tools\>/notify-bc:latest* is updated.
