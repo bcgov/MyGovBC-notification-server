@@ -1,0 +1,3 @@
+#!/bin/bash
+cp /mnt/* /opt/app-root/src/server
+/usr/libexec/s2i/run

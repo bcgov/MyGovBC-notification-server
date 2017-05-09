@@ -1,14 +1,13 @@
 apiVersion: v1
 kind: Template
 labels:
-  template: notify-bc-deploy
+  template: notify-bc
 metadata:
   annotations:
     description: NotifyBC app with a MongoDB database
     iconClass: icon-nodejs
     tags: instant-app,nodejs,mongodb
-  creationTimestamp: null
-  name: notify-bc-deploy
+  name: notify-bc
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -59,6 +58,9 @@ objects:
             value: "true"
           image: notify-bc
           name: notify-bc
+          volumeMounts:
+          - name: config-volume
+            mountPath: /mnt
           livenessProbe:
             httpGet:
               path: /
@@ -80,6 +82,10 @@ objects:
             failureThreshold: 3
           ports:
           - containerPort: 3000
+        volumes:
+          - name: config-volume
+            configMap:
+              name: notify-bc
     triggers:
     - imageChangeParams:
         automatic: true
@@ -124,6 +130,9 @@ objects:
             value: "false"
           image: notify-bc
           name: notify-bc
+          volumeMounts:
+          - name: config-volume
+            mountPath: /mnt
           resources:
             limits:
               cpu: 100m
@@ -150,6 +159,10 @@ objects:
             failureThreshold: 3
           ports:
           - containerPort: 3000
+        volumes:
+          - name: config-volume
+            configMap:
+              name: notify-bc
     triggers:
     - imageChangeParams:
         automatic: true
@@ -274,6 +287,17 @@ objects:
       subresource: scale
     minReplicas: 1
     maxReplicas: 1
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: notify-bc
+  data:
+    config.local.json: |
+      {
+      }
+    middleware.local.json: |
+      {
+      }
 parameters:
 - description: Database service name
   name: DATABASE_SERVICE_NAME
