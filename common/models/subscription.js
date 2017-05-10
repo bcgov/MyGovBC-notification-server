@@ -145,8 +145,10 @@ module.exports = function (Subscription) {
           catch (ex) {
           }
         }
-        if (overrideConfirmationRequest && overrideConfirmationRequest[data.channel]) {
-          data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideConfirmationRequest[data.channel])
+        try {
+          data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideConfirmationRequest.value[data.channel])
+        }
+        catch (ex) {
         }
         data.confirmationRequest.confirmationCode = ''
         if (data.confirmationRequest.confirmationCodeRegex) {

@@ -5,6 +5,9 @@
   "options": {
     "validateUpsert": true
   },
+  "mixins": {
+    "Common": {}
+  },
   "properties": {
     "name": {
       "type": "string",
