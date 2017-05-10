@@ -3,6 +3,8 @@ var rsaPath = path.resolve(__dirname, '../../server/boot/rsa.js')
 var rsa = require(rsaPath)
 var RandExp = require('randexp')
 var disableAllMethods = require('../helpers.js').disableAllMethods
+var _ = require('lodash')
+
 
 module.exports = function (Subscription) {
   disableAllMethods(Subscription, ['find', 'create', 'patchAttributes', 'deleteItemById', 'verify'])
@@ -90,6 +92,23 @@ module.exports = function (Subscription) {
   })
 
   function handleConfirmationRequest(ctx, data, cb) {
+    function sendConfirmationRequest(data, cb) {
+      if (!data.confirmationRequest.sendRequest) {
+        return cb(null, null)
+      }
+      var textBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+      switch (data.channel) {
+        case 'sms':
+          Subscription.sendSMS(data.userChannelId, textBody, cb)
+          break
+        default:
+          var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+          var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+          Subscription.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
+            textBody, mailHtmlBody, cb)
+      }
+    }
+
     if (data.confirmationRequest.confirmationCodeEncrypted) {
       var key = rsa.key
       var decrypted
@@ -102,32 +121,40 @@ module.exports = function (Subscription) {
       var decryptedData = decrypted.split(' ')
       data.userChannelId = decryptedData[0]
       data.confirmationRequest.confirmationCode = decryptedData[1]
+      return sendConfirmationRequest(data, cb)
     }
     else {
-      data.confirmationRequest.confirmationCode = ''
-      if (data.confirmationRequest.confirmationCodeRegex) {
-        var confirmationCodeRegex = new RegExp(data.confirmationRequest.confirmationCodeRegex)
-        data.confirmationRequest.confirmationCode += new RandExp(confirmationCodeRegex).gen()
+      var promise
+      if (!Subscription.isAdminReq(ctx)) {
+        // use confirmationRequest in config
+        promise = Subscription.app.models.Configuration.findOne({
+          where: {
+            name: 'subscriptionConfirmationRequest',
+            serviceName: data.serviceName
+          }
+        })
       }
-      var confirmationCodeSuffixRegexStr = Subscription.app.get('confirmationCodeSuffixRegex')
-      if (confirmationCodeSuffixRegexStr) {
-        var confirmationCodeSuffixRegex = new RegExp(confirmationCodeSuffixRegexStr)
-        data.confirmationRequest.confirmationCode += new RandExp(confirmationCodeSuffixRegex).gen()
+      else {
+        promise = require('bluebird').resolve(null)
       }
-    }
-    if (!data.confirmationRequest.sendRequest) {
-      return cb(null, null)
-    }
-    var textBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-    switch (data.channel) {
-      case 'sms':
-        Subscription.sendSMS(data.userChannelId, textBody, cb)
-        break
-      default:
-        var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-        var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-        Subscription.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
-          textBody, mailHtmlBody, cb)
+      promise.then(overrideConfirmationRequest => {
+        if (!Subscription.isAdminReq(ctx)) {
+          try {
+            data.confirmationRequest = _.merge({}, data.confirmationRequest, Subscription.app.get("subscriptionConfirmationRequest")[data.channel])
+          }
+          catch (ex) {
+          }
+        }
+        if (overrideConfirmationRequest && overrideConfirmationRequest[data.channel]) {
+          data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideConfirmationRequest[data.channel])
+        }
+        data.confirmationRequest.confirmationCode = ''
+        if (data.confirmationRequest.confirmationCodeRegex) {
+          var confirmationCodeRegex = new RegExp(data.confirmationRequest.confirmationCodeRegex)
+          data.confirmationRequest.confirmationCode += new RandExp(confirmationCodeRegex).gen()
+        }
+        return sendConfirmationRequest(data, cb)
+      })
     }
   }
 

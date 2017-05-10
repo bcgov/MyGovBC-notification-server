@@ -3,7 +3,7 @@ layout: docs
 title: Configuration
 permalink: /docs/configuration/
 ---
-Most configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). NotifyBC added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.json*.
+There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect; whereas dynamic configurations are defined in databases and updates take effect immediately. Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). NotifyBC added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.json*.
 
 ## SMTP
 By default *NotifyBC* bypasses SMTP relay and connects [directly](https://github.com/nodemailer/nodemailer#set-up-smtp) to recipients MX. You can setup SMTP relay by adding following *smtp* config object to */server/config.local.json*
@@ -50,6 +50,32 @@ Add *sms.twilio* config object to file */server/config.local.json*
 ```
 Obtain *\<AccountSid\>*, *\<AuthToken\>* and *\<FromNumber\>* from your Twilio account.
 
+## Subscription Confirmation Request Template
+To prevent *NotifyBC* from being used as spam engine, when a subscription request is sent by user (i.e. non-admin), the content of confirmation request message sent back to user cannot be specified in the subscription request. *NotifyBC* provides two places to define the subscription confirmation request template
+
+* to apply to a specific service, define the template in database
+
+* to apply to all services as fall back, define the template in file */server/config.local.json*
+  ```json
+    "subscriptionConfirmationRequest": {
+      "sms": {
+        "confirmationCodeRegex": "\\d{5}",
+        "sendRequest": true,
+        "textBody": "Enter {confirmation_code} on screen"
+      },
+      "email": {
+        "confirmationCodeRegex": "\\d{5}",
+        "sendRequest": true,
+        "from": "no_reply@example.com",
+        "subject": "Subscription confirmation",
+        "textBody": "Enter {confirmation_code} on screen",
+        "htmlBody": "Enter {confirmation_code} on screen"
+      }
+    }
+  ```
+
+  This template is merged with service-specific template if defined. 
+
 ## Admin IP List
 By [design](../overview/#architecture), NotifyBC classifies incoming requests into admin and user types. By default, the classification is based on the presence of SiteMinder header alone. In order to support user subscription from an anonymous website, an admin ip list can be used to make the distinction. To enable, add following object to */server/config.local.json* containing a list of admin ip addresses.
 
@@ -95,17 +121,6 @@ When handling a broadcast push notification, NotifyBC sends messages concurrentl
   "broadcastNotificationTaskConcurrency": 200
 }
 ```
-
-## Confirmation Code Suffix RegEx
-A subscription request can be submitted from user browser as a user request. This subscription request may contain a regular expression in field *confirmationRequest.confirmationCodeRegex* to instruct NotifyBC to generate the confirmation code from the RegEx. 
-Because a user request could be spoofed, measurement has to be imposed on server side to ensure minimum randomness of the generated confirmation code.    Configuration *confirmationCodeSuffixRegex*, which by default is a RegEx to generate 5 random digits, provides the mitigation. The confirmation code is thus a concatenation of random strings generated from RegEx *confirmationRequest.confirmationCodeRegex* in request field and *confirmationCodeSuffixRegex* in config. To change *confirmationCodeSuffixRegex*, add following object to */server/config.local.json* with a value of a RegEx in escaped string format (the example yields a 6 random digits):
-
-```
-{
-  "confirmationCodeSuffixRegex": "\\d{6}"
-}
-```
-
 
 ## Database
 By default NotifyBC uses in-memory database backed up by file in */server/database/data.json*. To use MongoDB, which is highly recommended for production deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
@@ -156,3 +171,4 @@ The values shown above are default ones if the corresponding config item is omit
 * defaultRetentionDays: if any of the above retention day config item is omitted, default retention days is used as fall back.
 
 By default cron job is enabled. In a multi-node deployment, cron job should only run on one node. This can be achieved by setting environment variable *NOTIFYBC_SKIP_CRON* on all other nodes to *true*.
+

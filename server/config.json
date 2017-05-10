@@ -27,5 +27,19 @@
     "name": "localhost"
   },
   "smsServiceProvider": "twilio",
-  "confirmationCodeSuffixRegex": "\\d{5}"
+  "subscriptionConfirmationRequest": {
+    "sms": {
+      "confirmationCodeRegex": "\\d{5}",
+      "sendRequest": true,
+      "textBody": "Enter {confirmation_code} on screen"
+    },
+    "email": {
+      "confirmationCodeRegex": "\\d{5}",
+      "sendRequest": true,
+      "from": "no_reply@example.com",
+      "subject": "Subscription confirmation",
+      "textBody": "Enter {confirmation_code} on screen",
+      "htmlBody": "Enter {confirmation_code} on screen"
+    }
+  }
 }
