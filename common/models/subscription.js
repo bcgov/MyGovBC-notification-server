@@ -53,7 +53,7 @@ module.exports = function (Subscription) {
   })
 
   Subscription.observe('access', function (ctx, next) {
-    var u = Subscription.app.models.Notification.getCurrentUser(ctx.options.httpContext)
+    var u = Subscription.getCurrentUser(ctx.options.httpContext)
     if (u) {
       ctx.query.where = ctx.query.where || {}
       ctx.query.where.userId = u
@@ -75,7 +75,7 @@ module.exports = function (Subscription) {
     if (!data) {
       next()
     }
-    var u = Subscription.app.models.Notification.getCurrentUser(ctx)
+    var u = Subscription.getCurrentUser(ctx)
     if (u) {
       if (data instanceof Array) {
         data.forEach(function (e) {
@@ -89,7 +89,7 @@ module.exports = function (Subscription) {
     next()
   })
 
-  function handleConfirmationRequest(data, cb) {
+  function handleConfirmationRequest(ctx, data, cb) {
     if (data.confirmationRequest.confirmationCodeEncrypted) {
       var key = rsa.key
       var decrypted
@@ -121,18 +121,18 @@ module.exports = function (Subscription) {
     var textBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
     switch (data.channel) {
       case 'sms':
-        Subscription.app.models.Notification.sendSMS(data.userChannelId, textBody, cb)
+        Subscription.sendSMS(data.userChannelId, textBody, cb)
         break
       default:
         var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
         var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-        Subscription.app.models.Notification.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
+        Subscription.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
           textBody, mailHtmlBody, cb)
     }
   }
 
   Subscription.beforeRemote('create', function (ctx, unused, next) {
-    var userId = Subscription.app.models.Notification.getCurrentUser(ctx)
+    var userId = Subscription.getCurrentUser(ctx)
     if (userId) {
       ctx.args.data.userId = userId
     }
@@ -144,7 +144,7 @@ module.exports = function (Subscription) {
     if (!ctx.args.data.confirmationRequest) {
       return next()
     }
-    handleConfirmationRequest(res, function (handleConfirmationRequestError, info) {
+    handleConfirmationRequest(ctx, res, function (handleConfirmationRequestError, info) {
       res.save(function (saveError) {
         next(handleConfirmationRequestError || saveError)
       })
@@ -154,10 +154,10 @@ module.exports = function (Subscription) {
   Subscription.beforeRemote('prototype.patchAttributes', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
-    if (Subscription.app.models.Notification.isAdminReq(ctx)) {
+    if (Subscription.isAdminReq(ctx)) {
       return next()
     }
-    var userId = Subscription.app.models.Notification.getCurrentUser(ctx)
+    var userId = Subscription.getCurrentUser(ctx)
     var filteredData = {}
     filteredData.userChannelId = ctx.args.data.userChannelId
     filteredData.confirmationRequest = ctx.args.data.confirmationRequest
@@ -175,7 +175,7 @@ module.exports = function (Subscription) {
     if (!ctx.args.data.confirmationRequest) {
       return next()
     }
-    handleConfirmationRequest(instance, function (handleConfirmationRequestError, info) {
+    handleConfirmationRequest(ctx, instance, function (handleConfirmationRequestError, info) {
       instance.save(function (saveError) {
         next(handleConfirmationRequestError || saveError)
       })

@@ -12,6 +12,9 @@
     },
     "value": {
       "type": "object"
+    },
+    "serivceName": {
+      "type": "string"
     }
   },
   "validations": [],

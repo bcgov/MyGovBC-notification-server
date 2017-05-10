@@ -8,7 +8,7 @@
   },
   "hidden": [],
   "mixins": {
-    "CtxInjection": {}
+    "Common": {}
   },
   "properties": {
     "serviceName": {
@@ -55,14 +55,6 @@
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "count",
-          "type": "object",
-          "root": true,
-          "description": "Count"
         }
       ],
       "description": "delete a notification by Id",

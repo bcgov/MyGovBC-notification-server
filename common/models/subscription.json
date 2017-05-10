@@ -7,7 +7,7 @@
     "replaceOnPUT": true
   },
   "mixins": {
-    "CtxInjection": {}
+    "Common": {}
   },
   "properties": {
     "serviceName": {

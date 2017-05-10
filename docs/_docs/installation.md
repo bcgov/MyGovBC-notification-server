@@ -101,7 +101,7 @@ notifyBC
 ``` 
 After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc* in the *\<yourprojectname-\<env\>>* project.
 2. create OpenShift instant apps by clicking *notify-bc-build* and *notify-bc* template from *Add to Project* in web console of respective projects (Tip: you may need to click *See all* link in Instant Apps section to reveal the template). Adjust parameters as you see fit.
-3. (optional) create instance-specific [configuration](../configuration) files for each runtime environment and upload to OpenShift via [configMaps](https://docs.openshift.org/latest/dev_guide/configmaps.html). To do so, 
+3. (optional) create instance-specific [configuration](../configuration) files for each runtime environment and upload to OpenShift via [configMap](https://docs.openshift.org/latest/dev_guide/configmaps.html) named *notify-bc*. To do so, 
     * create a temporary directory for each environment *\<env\>/*, say *dev/* 
     * create **.local.json* config files such as *config.local.json* and *middleware.local.json* under *\<env\>/*
     * run

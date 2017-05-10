@@ -1,7 +1,6 @@
 var parallelLimit = require('async/parallelLimit')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
-var ipRangeCheck = require("ip-range-check")
 
 module.exports = function (Notification) {
   disableAllMethods(Notification, ['find', 'create', 'patchAttributes', 'deleteItemById'])
@@ -176,41 +175,6 @@ module.exports = function (Notification) {
     this.patchAttributes(options.httpContext.args.data, options, callback)
   }
 
-  Notification.sendEmail = function (from, to, subject, textBody, htmlBody, cb) {
-    var nodemailer = require('nodemailer')
-    var transporter = nodemailer.createTransport(Notification.app.get('smtp'))
-    var mailOptions = {
-      from: from,
-      to: to,
-      subject: subject,
-      text: textBody,
-      html: htmlBody
-    }
-    transporter.sendMail(mailOptions, cb)
-  }
-
-  Notification.sendSMS = function (to, textBody, cb) {
-    var smsServiceProvider = Notification.app.get('smsServiceProvider')
-    switch (smsServiceProvider) {
-      default:
-        // Twilio Credentials
-        var smsConfig = Notification.app.get('sms')[smsServiceProvider]
-        var accountSid = smsConfig.accountSid
-        var authToken = smsConfig.authToken
-
-        //require the Twilio module and create a REST client
-        var client = require('twilio')(accountSid, authToken)
-
-        client.messages.create({
-          to: to,
-          from: smsConfig.fromNumber,
-          body: textBody,
-        }, function (err, message) {
-          cb(err, message)
-        })
-    }
-  }
-
   function sendPushNotification(data, cb) {
     switch (data.isBroadcast) {
       case false:
@@ -264,35 +228,5 @@ module.exports = function (Notification) {
         })
         break
     }
-  }
-
-  Notification.getCurrentUser = function (httpCtx) {
-    // internal requests
-    if (!httpCtx) return null
-
-    var currUser = httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname')
-    var siteMinderReverseProxyIps = Notification.app.get('siteMinderReverseProxyIps')
-    if (!siteMinderReverseProxyIps || siteMinderReverseProxyIps.length <= 0) {
-      return currUser
-    }
-    // rely on express 'trust proxy' settings to obtain real ip
-    var realIp = httpCtx.req.ip
-    var isFromSM = siteMinderReverseProxyIps.some(function (e) {
-      return ipRangeCheck(realIp, e)
-    })
-    return isFromSM ? currUser : null
-  }
-
-  Notification.isAdminReq = function (httpCtx) {
-    // internal requests
-    if (!httpCtx) return true
-
-    var adminIps = Notification.app.get('adminIps')
-    if (adminIps) {
-      return adminIps.some(function (e, i) {
-        return ipRangeCheck(httpCtx.req.ip, e)
-      })
-    }
-    return false
   }
 }
