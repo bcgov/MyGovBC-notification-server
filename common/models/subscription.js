@@ -167,9 +167,7 @@ module.exports = function (Subscription) {
       return next()
     }
     handleConfirmationRequest(ctx, res, function (handleConfirmationRequestError, info) {
-      res.save(function (saveError) {
-        next(handleConfirmationRequestError || saveError)
-      })
+      next(handleConfirmationRequestError)
     })
   })
 
@@ -193,9 +191,7 @@ module.exports = function (Subscription) {
       return next()
     }
     handleConfirmationRequest(ctx, instance, function (handleConfirmationRequestError, info) {
-      instance.save(function (saveError) {
-        next(handleConfirmationRequestError || saveError)
-      })
+      next(handleConfirmationRequestError)
     })
   })
 
