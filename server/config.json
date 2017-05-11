@@ -38,8 +38,7 @@
       "sendRequest": true,
       "from": "no_reply@example.com",
       "subject": "Subscription confirmation",
-      "textBody": "Enter {confirmation_code} on screen",
-      "htmlBody": "Enter {confirmation_code} on screen"
+      "textBody": "Enter {confirmation_code} on screen"
     }
   }
 }
