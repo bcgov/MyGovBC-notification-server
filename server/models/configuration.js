@@ -1,4 +1,6 @@
+var disableAllMethods = require('../../common/helpers.js').disableAllMethods
 module.exports = function (Configuration) {
+  disableAllMethods(Configuration, ['find', 'create', 'patchAttributes', 'deleteById'])
   Configuration.beforeRemote('**', function (ctx, unused, next) {
     if (Configuration.isAdminReq(ctx)) {
       return next()

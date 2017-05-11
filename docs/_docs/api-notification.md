@@ -42,7 +42,7 @@ The API operates on following notification data model fields:
     </td>
     <td>
       <table>
-        <tr><td>type</td><td>number</td></tr>
+        <tr><td>type</td><td>string, format depends on db</td></tr>
         <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>

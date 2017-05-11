@@ -39,6 +39,7 @@ An admin request carries full authorization whereas user request has limited acc
 
 * send message
 * bypass the delivery channel confirmation process when subscribing to a service
+* retrieve push notifications
 * retrieve in-app notifications that is not targeted to the current user
 
 The result of an API call to the same end point may differ depending on if the request is made by admin or user. For example, the call *GET /notifications* without a filter will return all notifications to all users for an admin request, but only non-deleted, non-expired in-app notifications targeted to the current user when the request comes from user browser.
