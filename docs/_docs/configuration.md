@@ -87,8 +87,8 @@ Add *sms.twilio* config object to file */server/config.local.json*
 ```
 Obtain *\<AccountSid\>*, *\<AuthToken\>* and *\<FromNumber\>* from your Twilio account.
 
-## Subscription Confirmation Request Template
-To prevent *NotifyBC* from being used as spam engine, when a subscription request is sent by user (i.e. non-admin), the content of confirmation request message sent back to user cannot be specified in the subscription request. *NotifyBC* provides two places to define the subscription confirmation request template
+## Subscription Confirmation Request Message Template
+To prevent *NotifyBC* from being used as spam engine, when a subscription request is sent by user (as opposed to admin), the content of confirmation request sent to user's notification channel cannot be specified in the subscription request. *NotifyBC* provides two places to define the subscription confirmation request message template
 
 * to apply to a specific service, define the template in database by calling REST api from an admin ip
 ```sh
@@ -133,7 +133,7 @@ To prevent *NotifyBC* from being used as spam engine, when a subscription reques
   ```
 
   This template is merged with service-specific template if defined. 
-
+  
 ## Broadcast Notification Task Concurrency
 When handling a broadcast push notification, NotifyBC sends messages concurrently to improve performance. The configuration object *broadcastNotificationTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
 
