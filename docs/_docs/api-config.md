@@ -78,7 +78,7 @@ GET /configurations
     * data type: object
 * outcome
   
-  For admin request, a list of config items matching the filter; forbidden otherwise
+  For admin request, a list of config items matching the filter; forbidden for user request
 
 * example
 
@@ -106,7 +106,7 @@ POST /configurations
     * data type: object
 * outcome
   
-  For admin request, create the config item requested; forbidden otherwise
+  For admin request, create the config item requested if all required fields are populated; forbidden for user request
 
 * example
   
@@ -130,7 +130,7 @@ PATCH /configurations/{id}
 
 * outcome
   
-  For admin request, update the config item requested; forbidden otherwise
+  For admin request, update the config item requested if all required fields are populated; forbidden for user request
 
 
 ## Delete a Configuration
@@ -146,5 +146,5 @@ DELETE /configurations/{id}
 
 * outcome
   
-  For admin request, delete the config item requested; forbidden otherwise
+  For admin request, delete the config item requested; forbidden for user request
 
