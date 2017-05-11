@@ -27,13 +27,9 @@ module.exports = function (Subscription) {
       // here we whitelist the available access control for siteminder user
       switch (method) {
         case 'GET':
-          return next()
-          break
         case 'POST':
         case 'PATCH':
-          if (ctx.args.data.confirmationRequest) {
-            return next()
-          }
+          return next()
           break
         case 'DELETE':
           if (ctx.instance.userId === userId) {
@@ -92,83 +88,80 @@ module.exports = function (Subscription) {
   })
 
   function handleConfirmationRequest(ctx, data, cb) {
-    function sendConfirmationRequest(data, cb) {
-      if (!data.confirmationRequest.sendRequest) {
-        return cb(null, null)
-      }
-      var textBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-      switch (data.channel) {
-        case 'sms':
-          Subscription.sendSMS(data.userChannelId, textBody, cb)
-          break
-        default:
-          var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-          var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-          Subscription.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
-            textBody, mailHtmlBody, cb)
-      }
+    if (data.state !== 'unconfirmed' || !data.confirmationRequest.sendRequest) {
+      return cb(null, null)
     }
+    var textBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+    switch (data.channel) {
+      case 'sms':
+        Subscription.sendSMS(data.userChannelId, textBody, cb)
+        break
+      default:
+        var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+        var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+        Subscription.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
+          textBody, mailHtmlBody, cb)
+    }
+  }
 
-    if (data.confirmationRequest.confirmationCodeEncrypted) {
+  function beforeUpsert(ctx, unused, next) {
+    var userId = Subscription.getCurrentUser(ctx)
+    var data = ctx.args.data
+    if (userId) {
+      data.userId = userId
+    }
+    if (Subscription.isAdminReq(ctx)) {
+      return next()
+    }
+    if (data.confirmationRequest && data.confirmationRequest.confirmationCodeEncrypted) {
       var key = rsa.key
       var decrypted
       try {
         decrypted = key.decrypt(data.confirmationRequest.confirmationCodeEncrypted, 'utf8')
       }
       catch (ex) {
-        return cb(ex, null)
+        return next(ex, null)
       }
       var decryptedData = decrypted.split(' ')
       data.userChannelId = decryptedData[0]
       data.confirmationRequest.confirmationCode = decryptedData[1]
-      return sendConfirmationRequest(data, cb)
+      return next()
     }
-    else {
-      var promise
-      if (!Subscription.isAdminReq(ctx)) {
-        // use confirmationRequest in config
-        promise = Subscription.app.models.Configuration.findOne({
-          where: {
-            name: 'subscriptionConfirmationRequest',
-            serviceName: data.serviceName
-          }
-        })
+    // use request without encrypted payload
+    Subscription.app.models.Configuration.findOne({
+      where: {
+        name: 'subscriptionConfirmationRequest',
+        serviceName: data.serviceName
       }
-      else {
-        promise = require('bluebird').resolve(null)
+    }, (err, overrideConfirmationRequest) => {
+      if (err) {
+        return next(err)
       }
-      promise.then(overrideConfirmationRequest => {
-        if (!Subscription.isAdminReq(ctx)) {
-          try {
-            data.confirmationRequest = _.merge({}, data.confirmationRequest, Subscription.app.get("subscriptionConfirmationRequest")[data.channel])
-          }
-          catch (ex) {
-          }
-        }
-        try {
-          data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideConfirmationRequest.value[data.channel])
-        }
-        catch (ex) {
-        }
-        data.confirmationRequest.confirmationCode = ''
-        if (data.confirmationRequest.confirmationCodeRegex) {
-          var confirmationCodeRegex = new RegExp(data.confirmationRequest.confirmationCodeRegex)
-          data.confirmationRequest.confirmationCode += new RandExp(confirmationCodeRegex).gen()
-        }
-        return sendConfirmationRequest(data, cb)
-      })
-    }
+      try {
+        data.confirmationRequest = _.merge({}, Subscription.app.get("subscriptionConfirmationRequest")[data.channel])
+      }
+      catch (ex) {
+      }
+      try {
+        data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideConfirmationRequest.value[data.channel])
+      }
+      catch (ex) {
+      }
+      data.confirmationRequest.confirmationCode = ''
+      if (data.confirmationRequest.confirmationCodeRegex) {
+        var confirmationCodeRegex = new RegExp(data.confirmationRequest.confirmationCodeRegex)
+        data.confirmationRequest.confirmationCode += new RandExp(confirmationCodeRegex).gen()
+      }
+      return next()
+    })
   }
 
-  Subscription.beforeRemote('create', function (ctx, unused, next) {
-    var userId = Subscription.getCurrentUser(ctx)
-    if (userId) {
-      ctx.args.data.userId = userId
-    }
-    // this can only come from admin channel
-    return next()
+  Subscription.beforeRemote('create', function () {
+    var ctx = arguments[0]
+    delete ctx.args.data.state
+    delete ctx.args.data.id
+    beforeUpsert.apply(null, arguments)
   })
-
   Subscription.afterRemote('create', function (ctx, res, next) {
     if (!ctx.args.data.confirmationRequest) {
       return next()
@@ -186,18 +179,13 @@ module.exports = function (Subscription) {
     if (Subscription.isAdminReq(ctx)) {
       return next()
     }
-    var userId = Subscription.getCurrentUser(ctx)
-    var filteredData = {}
+    var filteredData = _.merge({}, ctx.instance)
     filteredData.userChannelId = ctx.args.data.userChannelId
-    filteredData.confirmationRequest = ctx.args.data.confirmationRequest
     if (filteredData.userChannelId !== ctx.instance.userChannelId) {
       filteredData.state = 'unconfirmed'
     }
     ctx.args.data = filteredData
-    if (userId) {
-      ctx.args.data.userId = userId
-    }
-    return next()
+    beforeUpsert.apply(null, arguments)
   })
 
   Subscription.afterRemote('prototype.patchAttributes', function (ctx, instance, next) {
