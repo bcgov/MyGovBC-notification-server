@@ -50,14 +50,23 @@
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
+        },
+        {
+          "arg": "unsubscriptionCode",
+          "required": false,
+          "description": "unsubscription code, may be required for unauthenticated user request",
+          "type": "string",
+          "http": {
+            "source": "query"
+          }
         }
       ],
       "returns": [
         {
-          "arg": "count",
-          "type": "number",
+          "arg": "message",
+          "type": "any",
           "root": true,
-          "description": "number of records affected"
+          "description": "operation outcome"
         }
       ],
       "description": "delete a subscription by id",
@@ -65,6 +74,10 @@
         {
           "path": "/",
           "verb": "delete"
+        },
+        {
+          "path": "/unsubscribe",
+          "verb": "get"
         }
       ]
     },

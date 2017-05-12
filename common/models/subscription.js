@@ -38,13 +38,16 @@ module.exports = function (Subscription) {
           break
       }
     }
-
-    if (ctx.methodString === 'subscription.prototype.verify') {
-      return next()
+    else {
+      switch (ctx.methodString) {
+        case 'subscription.create':
+        case 'subscription.prototype.verify':
+        case 'subscription.prototype.deleteItemById':
+          return next()
+          break
+      }
     }
 
-    // if we get here, the request is a siteminder user that does not
-    // match the criteria above OR an anonymous user
     var error = new Error('Forbidden')
     error.status = 403
     return next(error)
@@ -67,24 +70,23 @@ module.exports = function (Subscription) {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (arguments.length <= 2) {
-      next()
+      return next()
     }
     var data = arguments[1]
     if (!data) {
-      next()
+      return next()
     }
-    var u = Subscription.getCurrentUser(ctx)
-    if (u) {
+    if (!Subscription.isAdminReq(ctx)) {
       if (data instanceof Array) {
         data.forEach(function (e) {
           e.confirmationRequest = undefined
         })
       }
-      else {
+      else if (data instanceof Object) {
         data.confirmationRequest = undefined
       }
     }
-    next()
+    return next()
   })
 
   function handleConfirmationRequest(ctx, data, cb) {
@@ -109,6 +111,14 @@ module.exports = function (Subscription) {
     var data = ctx.args.data
     if (userId) {
       data.userId = userId
+    }
+    else if (!Subscription.isAdminReq(ctx)) {
+      // generate unsubscription code
+      var anonymousUnsubscription = Subscription.app.get('anonymousUnsubscription')
+      if (anonymousUnsubscription.code && anonymousUnsubscription.code.required) {
+        var unsubscriptionCodeRegex = new RegExp(anonymousUnsubscription.code.regex)
+        data.unsubscriptionCode = new RandExp(unsubscriptionCodeRegex).gen()
+      }
     }
     if (data.confirmationRequest && data.confirmationRequest.confirmationCodeEncrypted) {
       var key = rsa.key
@@ -195,11 +205,36 @@ module.exports = function (Subscription) {
     })
   })
 
-  Subscription.prototype.deleteItemById = function () {
-    var cb = arguments[arguments.length - 1]
+  Subscription.prototype.deleteItemById = function (options, unsubscriptionCode, cb) {
+    if (!Subscription.getCurrentUser(options.httpContext) && !Subscription.isAdminReq(options.httpContext) && this.unsubscriptionCode) {
+      if (unsubscriptionCode != this.unsubscriptionCode) {
+        var error = new Error('Forbidden')
+        error.status = 403
+        return cb(error)
+      }
+    }
     this.state = 'deleted'
     Subscription.replaceById(this.id, this, function (err, res) {
-      cb(err, 1)
+      var anonymousUnsubscription = Subscription.app.get('anonymousUnsubscription')
+      try {
+        // todo: send acknowledgement notification
+        if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
+          var redirectUrl = anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
+          if (err) {
+            redirectUrl += '?err=' + encodeURIComponent(err)
+          }
+          return options.httpContext.res.redirect(redirectUrl)
+        }
+        else {
+          if (err) {
+            return cb(null, anonymousUnsubscription.acknowledgements.onScreen.failureMessage)
+          }
+          return cb(null, anonymousUnsubscription.acknowledgements.onScreen.successMessage)
+        }
+      }
+      catch (ex) {
+      }
+      return cb(err, 1)
     })
   }
 
