@@ -213,11 +213,29 @@ module.exports = function (Subscription) {
         return cb(error)
       }
     }
+    if (this.state !== 'confirmed' && !Subscription.isAdminReq(options.httpContext)) {
+      var error = new Error('Forbidden')
+      error.status = 403
+      return cb(error)
+    }
     this.state = 'deleted'
     Subscription.replaceById(this.id, this, function (err, res) {
       var anonymousUnsubscription = Subscription.app.get('anonymousUnsubscription')
       try {
-        // todo: send acknowledgement notification
+        if (!err) {
+          // send acknowledgement notification
+          try {
+            switch (res.channel) {
+              case 'email':
+                var msg = anonymousUnsubscription.acknowledgements.notification[res.channel]
+                // todo: replace placeholders in message, should consolidate the replacement with method handleConfirmationRequest
+                Subscription.sendEmail(msg.from, res.userChannelId, msg.subject, msg.textBody, msg.htmlBody)
+                break
+            }
+          }
+          catch (ex) {
+          }
+        }
         if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
           var redirectUrl = anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
           if (err) {
