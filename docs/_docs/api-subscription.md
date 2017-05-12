@@ -166,7 +166,7 @@ The API operates on following subscription data model fields:
     <td>
       <table>
         <tr><td>type</td><td>object</td></tr>
-        <tr><td>required</td><td>true for user request; false for admin request</td></tr>
+        <tr><td>required</td><td>true for user request with encrypted confirmation code; false otherwise</td></tr>
       </table>
     </td>
   </tr>
@@ -213,60 +213,67 @@ POST /subscriptions
   7. the updated subscription request is saved to database 
   8. The subscription data, including auto-generated id, is returned as response unless there is error when sending confirmation request or saving to database. For user request, the field *confirmationRequest* is removed prior to sending the response.
   
-* example
-
-  To subscribe a user to service *education* and have NotifyBC to generate the confirmation code, copy and paste following json object to the data value box in API explorer, change email addresses as needed, and click *Try it out!* button:
-  
+* examples
+  1. To subscribe a user to service *education*, copy and paste following json object to the data value box in API explorer, change email addresses as needed, and click *Try it out!* button:
   ```
   {
     "serviceName": "education",
     "channel": "email",
-    "userChannelId": "foo@bar.com",
-    "confirmationRequest": {
-      "confirmationCodeRegex": "\\d{5}",
-      "sendRequest": true,
-      "from": "no_reply@bar.com",
-      "subject": "confirmation",
-      "textBody": "Enter {confirmation_code} on screen"
+    "userChannelId": "foo@bar.com"
+  }
+  ```
+        
+     As a result, *foo@bar.com* should receive an email confirmation request, and following json object is returned to caller upon sending the email successfully for admin request:
+    ```json
+    {
+      "serviceName": "education",
+      "channel": "email",
+      "userChannelId": "foo@bar.com",
+      "state": "unconfirmed",
+      "confirmationRequest": {
+        "confirmationCodeRegex": "\\d{5}",
+        "sendRequest": true,
+        "from": "no_reply@bar.com",
+        "subject": "confirmation",
+        "textBody": "Enter {confirmation_code} on screen",
+        "confirmationCode": "45304"
+      },
+      "created": "2016-10-03T17:35:40.202Z",
+      "id": "57f296ec7eead50554c61de7"
     }
-  }
-  ```
+    ```
 
-  As the result, *foo@bar.com* should receive an email confirmation request with place holder *{confirmation_code}* replaced by a randomly generated 5 digit string, and following json object is returned to caller upon sending the email successfully for admin request:
+      For non-admin request, the field *confirmationRequest* is removed from response, and field *userId* is populated from SiteMinder header if request is authenticated:
+    ```json
+    {
+      "serviceName": "education",
+      "channel": "email",
+      "userChannelId": "foo@bar.com",
+      "state": "unconfirmed",
+      "userId": "<user_id>",
+      "created": "2016-10-03T18:17:09.778Z",
+      "id": "57f2a0a5b1aa0e2d5009eced"
+    }
+    ```
+  2. To subscribe a user to service *education* with RSA public key encrypted confirmation code supplied, POST following request 
   
-  ```
-  {
-    "serviceName": "education",
-    "channel": "email",
-    "userChannelId": "foo@bar.com",
-    "state": "unconfirmed",
-    "confirmationRequest": {
-      "confirmationCodeRegex": "\\d{5}",
-      "sendRequest": true,
-      "from": "no_reply@bar.com",
-      "subject": "confirmation",
-      "textBody": "Enter {confirmation_code} on screen",
-      "confirmationCode": "45304"
-    },
-    "created": "2016-10-03T17:35:40.202Z",
-    "id": "57f296ec7eead50554c61de7"
-  }
-  ```
-
-  For non-admin request, the field *confirmationRequest* is removed from response, and field *userId* is populated from SiteMinder header:
-
-  ```
-  {
-    "serviceName": "education",
-    "channel": "email",
-    "userChannelId": "foo@bar.com",
-    "state": "unconfirmed",
-    "userId": "<user_id>",
-    "created": "2016-10-03T18:17:09.778Z",
-    "id": "57f2a0a5b1aa0e2d5009eced"
-  }
-  ```
-  
+      ```json
+      {
+        "serviceName": "education",
+        "channel": "email",
+        "userChannelId": "foo@bar.com",
+        "confirmationRequest": {
+         "confirmationCodeEncrypted": "<encrypted-confirmation-code>",
+         "sendRequest": true,
+         "from": "no_reply@bar.com",
+         "subject": "confirmation",
+         "textBody": "Enter {confirmation_code} on screen"
+        }
+      }
+      ```
+      
+      As a result, *NotifyBC* will decrypt the confirmation code using the private RSA key, replace placeholder  *{confirmation_code}* in the email template with the confirmation code, and send confirmation request to *foo@bar.com*.
+      
 ## Update a Subscription
 ```
 PATCH /subscriptions/{id}
