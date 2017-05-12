@@ -194,7 +194,7 @@ GET /subscriptions
 POST /subscriptions
 ```
 * inputs
-  * an object containing subscription data model fields. At a minimum all required fields that don't have a default value must be supplied. Id field should be omitted since it's auto-generated. The API explorer only created an empty object for field *confirmationRequest* but you should populate the child fields according to [model schema](#model-schema)
+  * an object containing subscription data model fields. At a minimum all required fields that don't have a default value must be supplied. Id field should be omitted since it's auto-generated.
     * parameter name: data
     * required: true
     * parameter type: body
