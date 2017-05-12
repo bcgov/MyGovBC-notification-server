@@ -245,15 +245,15 @@ POST /subscriptions
 
       For non-admin request, the field *confirmationRequest* is removed from response, and field *userId* is populated from SiteMinder header if request is authenticated:
     ```json
-    {
-      "serviceName": "education",
-      "channel": "email",
-      "userChannelId": "foo@bar.com",
-      "state": "unconfirmed",
-      "userId": "<user_id>",
-      "created": "2016-10-03T18:17:09.778Z",
-      "id": "57f2a0a5b1aa0e2d5009eced"
-    }
+      {
+        "serviceName": "education",
+        "channel": "email",
+        "userChannelId": "foo@bar.com",
+        "state": "unconfirmed",
+        "userId": "<user_id>",
+        "created": "2016-10-03T18:17:09.778Z",
+        "id": "57f2a0a5b1aa0e2d5009eced"
+      }
     ```
   2. To subscribe a user to service *education* with RSA public key encrypted confirmation code supplied, POST following request 
   
