@@ -110,9 +110,6 @@ module.exports = function (Subscription) {
     if (userId) {
       data.userId = userId
     }
-    if (Subscription.isAdminReq(ctx)) {
-      return next()
-    }
     if (data.confirmationRequest && data.confirmationRequest.confirmationCodeEncrypted) {
       var key = rsa.key
       var decrypted
@@ -137,17 +134,20 @@ module.exports = function (Subscription) {
       if (err) {
         return next(err)
       }
-      try {
-        data.confirmationRequest = _.merge({}, Subscription.app.get("subscriptionConfirmationRequest")[data.channel])
+      if (!Subscription.isAdminReq(ctx) || !data.confirmationRequest) {
+
+        try {
+          data.confirmationRequest = _.merge({}, Subscription.app.get("subscriptionConfirmationRequest")[data.channel])
+        }
+        catch (ex) {
+        }
+        try {
+          data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideConfirmationRequest.value[data.channel])
+        }
+        catch (ex) {
+        }
+        data.confirmationRequest.confirmationCode = ''
       }
-      catch (ex) {
-      }
-      try {
-        data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideConfirmationRequest.value[data.channel])
-      }
-      catch (ex) {
-      }
-      data.confirmationRequest.confirmationCode = ''
       if (data.confirmationRequest.confirmationCodeRegex) {
         var confirmationCodeRegex = new RegExp(data.confirmationRequest.confirmationCodeRegex)
         data.confirmationRequest.confirmationCode += new RandExp(confirmationCodeRegex).gen()
