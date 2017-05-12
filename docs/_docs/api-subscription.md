@@ -210,7 +210,7 @@ POST /subscriptions
   5. otherwise, for user requests and for admin requests missing message template, the message template is set to configured value. Then, if *confirmationRequest.confirmationCodeRegex* is populated, a confirmation code is generated conforming to regex and put to field *confirmationRequest.confirmationCode*
   6. the subscription request is saved to database.
   7. if *confirmationRequest.sendRequest* is true, a confirmation request is sent to *userChannelId* using the template fields in *confirmationRequest* with following string placeholders substituted:
-    * \{\{confirmation_code\}\} replaced with *confirmationRequest.confirmationCode*
+    * \{confirmation_code\} replaced with *confirmationRequest.confirmationCode*
   8. The subscription data, including auto-generated id, is returned as response unless there is error when sending confirmation request or saving to database. For user request, the field *confirmationRequest* is removed prior to sending the response.
   
 * examples
@@ -225,22 +225,22 @@ POST /subscriptions
         
      As a result, *foo@bar.com* should receive an email confirmation request, and following json object is returned to caller upon sending the email successfully for admin request:
     ```json
-    {
-      "serviceName": "education",
-      "channel": "email",
-      "userChannelId": "foo@bar.com",
-      "state": "unconfirmed",
-      "confirmationRequest": {
-        "confirmationCodeRegex": "\\d{5}",
-        "sendRequest": true,
-        "from": "no_reply@bar.com",
-        "subject": "confirmation",
-        "textBody": "Enter {confirmation_code} on screen",
-        "confirmationCode": "45304"
-      },
-      "created": "2016-10-03T17:35:40.202Z",
-      "id": "57f296ec7eead50554c61de7"
-    }
+      {
+        "serviceName": "education",
+        "channel": "email",
+        "userChannelId": "foo@bar.com",
+        "state": "unconfirmed",
+        "confirmationRequest": {
+          "confirmationCodeRegex": "\\d{5}",
+          "sendRequest": true,
+          "from": "no_reply@bar.com",
+          "subject": "confirmation",
+          "textBody": "Enter {confirmation_code} on screen",
+          "confirmationCode": "45304"
+        },
+        "created": "2016-10-03T17:35:40.202Z",
+        "id": "57f296ec7eead50554c61de7"
+      }
     ```
 
       For non-admin request, the field *confirmationRequest* is removed from response, and field *userId* is populated from SiteMinder header if request is authenticated:
