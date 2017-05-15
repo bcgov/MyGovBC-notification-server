@@ -43,6 +43,7 @@ module.exports = function (Subscription) {
         case 'subscription.create':
         case 'subscription.prototype.verify':
         case 'subscription.prototype.deleteItemById':
+        case 'subscription.prototype.unDeleteItemById':
           return next()
           break
       }
@@ -271,6 +272,39 @@ module.exports = function (Subscription) {
     this.state = 'confirmed'
     Subscription.replaceById(this.id, this, function (err, res) {
       return cb(err, "OK")
+    })
+  }
+
+  Subscription.prototype.unDeleteItemById = function (options, unsubscriptionCode, cb) {
+    if (!Subscription.isAdminReq(options.httpContext)) {
+      if (this.unsubscriptionCode && unsubscriptionCode != this.unsubscriptionCode) {
+        var error = new Error('Forbidden')
+        error.status = 403
+        return cb(error)
+      }
+      if (Subscription.getCurrentUser(options.httpContext) || this.state !== 'deleted') {
+        var error = new Error('Forbidden')
+        error.status = 403
+        return cb(error)
+      }
+    }
+    this.state = 'confirmed'
+    Subscription.replaceById(this.id, this, function (err, res) {
+      var anonymousUndoUnsubscription = Subscription.app.get('anonymousUndoUnsubscription')
+      if (anonymousUndoUnsubscription.redirectUrl) {
+        var redirectUrl = anonymousUndoUnsubscription.redirectUrl
+        if (err) {
+          redirectUrl += '?err=' + encodeURIComponent(err)
+        }
+        return options.httpContext.res.redirect(redirectUrl)
+      }
+      else {
+        options.httpContext.res.setHeader('Content-Type', 'text/plain')
+        if (err) {
+          return options.httpContext.res.end(anonymousUndoUnsubscription.failureMessage)
+        }
+        return options.httpContext.res.end(anonymousUndoUnsubscription.successMessage)
+      }
     })
   }
 }

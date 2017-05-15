@@ -59,5 +59,9 @@
         }
       }
     }
+  },
+  "anonymousUndoUnsubscription":{
+    "successMessage": "You have been re-subscribed.",
+    "failureMessage": "Error happened while re-subscribing."
   }
 }

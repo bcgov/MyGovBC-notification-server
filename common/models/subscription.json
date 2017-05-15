@@ -69,7 +69,7 @@
           "description": "operation outcome"
         }
       ],
-      "description": "delete a subscription by id",
+      "description": "unsubscribe by id",
       "http": [
         {
           "path": "/",
@@ -77,6 +77,39 @@
         },
         {
           "path": "/unsubscribe",
+          "verb": "get"
+        }
+      ]
+    },
+    "prototype.unDeleteItemById": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        },
+        {
+          "arg": "unsubscriptionCode",
+          "required": false,
+          "description": "unsubscription code, may be required for unauthenticated user request",
+          "type": "string",
+          "http": {
+            "source": "query"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "message",
+          "type": "any",
+          "root": true,
+          "description": "operation outcome"
+        }
+      ],
+      "description": "revert anonymous unsubscription by id",
+      "http": [
+        {
+          "path": "/unsubscribe/undo",
           "verb": "get"
         }
       ]
