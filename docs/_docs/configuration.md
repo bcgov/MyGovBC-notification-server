@@ -43,7 +43,7 @@ The rule to determine if the incoming request is authenticated by SiteMinder is
 2. if the real client ip is contained in *siteMinderReverseProxyIps*, then the request is from SiteMinder, and its SiteMinder headers are trusted; otherwise, the request is considered as directly from internet, and its SiteMinder headers are ignored.
 
 ## SMTP
-By default *NotifyBC* bypasses SMTP relay and connects [directly](https://github.com/nodemailer/nodemailer#set-up-smtp) to recipients MX. You can setup SMTP relay by adding following *smtp* config object to */server/config.local.json*
+By default *NotifyBC* connects [directly](https://community.nodemailer.com/2-0-0-beta/setup-smtp/) to recipient's mailbox bypassing any SMTP relay. You can setup SMTP relay by adding following *smtp* config object to */server/config.local.json*
 
 ```json
 {
@@ -132,7 +132,62 @@ To prevent *NotifyBC* from being used as spam engine, when a subscription reques
     }
   ```
 
-  This template is merged with service-specific template if defined. 
+  This template is merged with service-specific template, if defined. 
+
+## Anonymous Unsubscription
+For anonymous subscription, *NotifyBC* supports one-click opt-out by allowing unsubscription URL provided in notifications. To mitigate unsubscription made by unauthorized users, *NotifyBC* implemented and enabled by default two security measurements 
+
+* Anonymous unsubscription request requires unsubscription code, which is a random string generated at subscription time. Unsubscription code reduces brute force attack risk by increasing size of key space. Without it, the attacker only needs to guess subscription id.   
+* Acknowledgement notification - a (final) notification is sent to user acknowledging unsubscription, and offers a link to revert had the change been made unauthorized. 
+
+You can customize anonymous unsubscription settings by changing the *anonymousUnsubscription* configuration. Following is the default settings defined in [config.json](https://github.com/bcgov/MyGovBC-notification-server/blob/master/server/config.json)
+ 
+```json
+"anonymousUnsubscription": {
+  "code": {
+    "required": true,
+    "regex": "\\d{5}"
+  },
+  "acknowledgements":{
+    "onScreen": {
+      "successMessage": "You have been un-subscribed.",
+      "failureMessage": "Error happened while un-subscribing."
+    },
+    "notification":{
+      "email": {
+        "from": "no_reply@example.com",
+        "subject": "Un-subscription acknowledgement",
+        "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for service {serviceName}. If you did not authorize this change or if you changed your mind, click {HTTP_HOST}{restApiRoot}/subscriptions/{subscriptionId}/unsubscribe/undo?unsubscriptionCode={unsubscriptionCode} to revert."
+      }
+    }
+  }
+}
+```
+The settings control whether or not unsubscription code is required, its RegEx pattern, and acknowledgement message templates, both on-screen and push notifications. Customization should be made to file */server/config.local.json*.
+
+For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For exmaple, to redirect on-screen acknowledgement to a page in your app, create following config in file */server/config.local.json* 
+
+```json
+"anonymousUnsubscription": {
+  "acknowledgements":{
+    "onScreen": {
+      "redirectUrl": "https://myapp/unsubscription/acknowledgement"
+    }
+  }
+}
+```
+If error happened during unsubscription, query string *?err=\<error\>* will be appended to *redirectUrl*.
+
+<a name="anonymousUndoUnsubscription"></a>
+You can customize message displayed on-screen when user clicks revert unsubscription in the acknowledgement notification. The default settings are
+
+```json
+"anonymousUndoUnsubscription":{
+  "successMessage": "You have been re-subscribed.",
+  "failureMessage": "Error happened while re-subscribing."
+}
+```
+Again, you can redirect the message page by supplying *anonymousUndoUnsubscription.redirectUrl* in file */server/config.local.json* .
   
 ## Broadcast Notification Task Concurrency
 When handling a broadcast push notification, NotifyBC sends messages concurrently to improve performance. The configuration object *broadcastNotificationTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :

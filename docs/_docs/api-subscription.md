@@ -170,6 +170,18 @@ The API operates on following subscription data model fields:
       </table>
     </td>
   </tr>
+  <tr>
+    <td>
+      <p class="name">unsubscriptionCode</p>
+      <p class="description">generated randomly according to RegEx config <i>anonymousUnsubscription.code.regex</i> during anonymous subscription if config <i>anonymousUnsubscription.code.required</i> is set to true</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>string</td></tr>
+        <tr><td>required</td><td>false</td></tr>
+      </table>
+    </td>
+  </tr>
 </table>
 
 ## Get Subscriptions
@@ -273,6 +285,32 @@ POST /subscriptions
       ```
       
       As a result, *NotifyBC* will decrypt the confirmation code using the private RSA key, replace placeholder  *{confirmation_code}* in the email template with the confirmation code, and send confirmation request to *foo@bar.com*.
+  
+## Verify a Confirmation Code
+```
+GET /subscriptions/{id}/verify
+```
+* inputs
+  * subscription id
+    * parameter name: id
+    * required: true
+    * parameter type: path
+    * data type: string
+  * confirmation code
+    * parameter name: confirmationCode
+    * required: true
+    * parameter type: query
+    * data type: string
+* outcome
+
+  NotifyBC performs following actions in sequence
+  
+  1. the subscription identified by *id* is retrieved
+  2. for user request, the *userId* of the subscription is checked against current request user, if not match, error is returned; otherwise
+  3. input parameter *confirmationCode* is checked against *confirmationRequest.confirmationCode*. If not match, error is returned; otherwise
+  4. *state* is set to *confirmed*
+  5. the subscription is saved back to database
+  6. returns HTTP status code 200 for success unless error occurs during saving
       
 ## Update a Subscription
 ```
@@ -300,9 +338,11 @@ This API is used for changing user channel id (such as email address) and resend
   * if *userChannelId* is different from the saved record, *state* is forced to *unconfirmed*.
 
      
-## Delete a Subscription (un-subscribing)
+## Delete a Subscription (unsubscribing)
 ```
 DELETE /subscriptions/{id}
+or 
+GET /subscriptions/{id}/unsubscribe
 ```
 * inputs
   * subscription id
@@ -310,29 +350,9 @@ DELETE /subscriptions/{id}
     * required: true
     * parameter type: path
     * data type: string
-* outcome
-
-  NotifyBC performs following actions in sequence
-  
-  1. the subscription identified by *id* is retrieved
-  2. for user request, the *userId* of the subscription is checked against current request user, if not match, error is returned; otherwise
-  3. the field *state* is set to *deleted*
-  4. the subscription is saved back to database
-  5. returns 1 (number of records deleted) unless  error occurs when saving to database
-  
-## Verify a Confirmation Code
-```
-GET /subscriptions/{id}/verify
-```
-* inputs
-  * subscription id
-    * parameter name: id
-    * required: true
-    * parameter type: path
-    * data type: string
-  * confirmation code
-    * parameter name: confirmationCode
-    * required: true
+  * unsubscription code for anonymous request 
+    * parameter name: unsubscriptionCode
+    * required: false
     * parameter type: query
     * data type: string
 * outcome
@@ -340,8 +360,43 @@ GET /subscriptions/{id}/verify
   NotifyBC performs following actions in sequence
   
   1. the subscription identified by *id* is retrieved
-  2. for user request, the *userId* of the subscription is checked against current request user, if not match, error is returned; otherwise
-  3. input parameter *confirmationCode* is checked against *confirmationRequest.confirmationCode*. If not match, error is returned; otherwise
-  4. *state* is set to *confirmed*
-  5. the subscription is saved back to database
-  6. returns HTTP status code 200 for success unless error occurs during saving
+  2. for user request, 
+    * if request is authenticated, the *userId* of the subscription is checked against current request user, if not match, request is rejected
+    * if request is anonymous, and server is configured to require unsubscription code, the input  unsubscription code is matched againts the *unsubscriptionCode* field. Request is rejected if not match 
+    * if the subscription state is not *confirmed*, request is rejected
+  3. the field *state* is set to *deleted*
+  4. the subscription is saved back to database
+  5. for anonymous unsubscription, an acknowledgement notification is sent to user if configured so 
+  6. returns 
+    * for anonymous request, either the message or redirect as configured in *anonymousUnsubscription.acknowledgements.onScreen*
+    * for authenticated user or admin requests, number of records affected or error message if occurred.
+
+     
+## Un-deleteing a Subscription
+```
+GET /subscriptions/{id}/unsubscribe/undo
+```
+This API allows an anonymous subscriber to undo an unauthorized unsubscription 
+* inputs
+  * subscription id
+    * parameter name: id
+    * required: true
+    * parameter type: path
+    * data type: string
+  * unsubscription code 
+    * parameter name: unsubscriptionCode
+    * required: false
+    * parameter type: query
+    * data type: string
+* outcome
+
+  NotifyBC performs following actions in sequence
+  
+  1. the subscription identified by *id* is retrieved
+  2. for user request, 
+    * if request is anonymous, and server is configured to require unsubscription code, the input  unsubscription code is matched againts the *unsubscriptionCode* field. Request is rejected if not match 
+    * if request is authenticated, request is rejected
+    * if the subscription state is not *deleted*, request is rejected
+  3. the field *state* is set to *confirmed*
+  4. the subscription is saved back to database
+  5. returns either the message or redirect as configured in *[anonymousUndoUnsubscription](../configuration/#anonymousUndoUnsubscription)*
