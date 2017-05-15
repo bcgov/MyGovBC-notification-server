@@ -93,14 +93,14 @@ module.exports = function (Subscription) {
     if (data.state !== 'unconfirmed' || !data.confirmationRequest.sendRequest) {
       return cb(null, null)
     }
-    var textBody = data.confirmationRequest.textBody && data.confirmationRequest.textBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+    var textBody = data.confirmationRequest.textBody && Subscription.mailMerge(data.confirmationRequest.textBody, data, ctx)
     switch (data.channel) {
       case 'sms':
         Subscription.sendSMS(data.userChannelId, textBody, cb)
         break
       default:
-        var mailSubject = data.confirmationRequest.subject && data.confirmationRequest.subject.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
-        var mailHtmlBody = data.confirmationRequest.htmlBody && data.confirmationRequest.htmlBody.replace(/\{confirmation_code\}/i, data.confirmationRequest.confirmationCode)
+        var mailSubject = data.confirmationRequest.subject && Subscription.mailMerge(data.confirmationRequest.subject, data, ctx)
+        var mailHtmlBody = data.confirmationRequest.htmlBody && Subscription.mailMerge(data.confirmationRequest.htmlBody, data, ctx)
         Subscription.sendEmail(data.confirmationRequest.from, data.userChannelId, mailSubject,
           textBody, mailHtmlBody, cb)
     }
@@ -228,8 +228,10 @@ module.exports = function (Subscription) {
             switch (res.channel) {
               case 'email':
                 var msg = anonymousUnsubscription.acknowledgements.notification[res.channel]
-                // todo: replace placeholders in message, should consolidate the replacement with method handleConfirmationRequest
-                Subscription.sendEmail(msg.from, res.userChannelId, msg.subject, msg.textBody, msg.htmlBody)
+                var subject = Subscription.mailMerge(msg.subject, res, options.httpContext)
+                var textBody = Subscription.mailMerge(msg.textBody, res, options.httpContext)
+                var htmlBody = Subscription.mailMerge(msg.htmlBody, res, options.httpContext)
+                Subscription.sendEmail(msg.from, res.userChannelId, subject, textBody, htmlBody)
                 break
             }
           }
