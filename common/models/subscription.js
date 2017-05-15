@@ -9,46 +9,13 @@ var _ = require('lodash')
 module.exports = function (Subscription) {
   disableAllMethods(Subscription, ['find', 'create', 'patchAttributes', 'deleteItemById', 'verify'])
 
-  // centralized callback for customized access control of endpoint
-  Subscription.beforeRemote('**', function checkAccess() {
-    // Since this callback acts on all methods, we have to support
-    // different param (ctx, next) and (ctx, modelInstance, next) (for create)
+  Subscription.beforeRemote('find', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
-
-    var method = ctx.req.method
-    var userId = Subscription.app.models.Notification.getCurrentUser(ctx)
-    if (Subscription.app.models.Notification.isAdminReq(ctx)) {
+    var userId = Subscription.getCurrentUser(ctx)
+    if (userId || Subscription.isAdminReq(ctx)) {
       return next()
     }
-
-    if (userId) {
-      // siteminder user requestId
-      // here we whitelist the available access control for siteminder user
-      switch (method) {
-        case 'GET':
-        case 'POST':
-        case 'PATCH':
-          return next()
-          break
-        case 'DELETE':
-          if (ctx.instance.userId === userId) {
-            return next()
-          }
-          break
-      }
-    }
-    else {
-      switch (ctx.methodString) {
-        case 'subscription.create':
-        case 'subscription.prototype.verify':
-        case 'subscription.prototype.deleteItemById':
-        case 'subscription.prototype.unDeleteItemById':
-          return next()
-          break
-      }
-    }
-
     var error = new Error('Forbidden')
     error.status = 403
     return next(error)
@@ -188,6 +155,12 @@ module.exports = function (Subscription) {
     if (Subscription.isAdminReq(ctx)) {
       return next()
     }
+    var userId = Subscription.getCurrentUser(ctx)
+    if(!userId){
+      var error = new Error('Forbidden')
+      error.status = 403
+      return next(error)
+    }
     var filteredData = _.merge({}, ctx.instance)
     filteredData.userChannelId = ctx.args.data.userChannelId
     if (filteredData.userChannelId !== ctx.instance.userChannelId) {
@@ -207,17 +180,26 @@ module.exports = function (Subscription) {
   })
 
   Subscription.prototype.deleteItemById = function (options, unsubscriptionCode, cb) {
-    if (!Subscription.getCurrentUser(options.httpContext) && !Subscription.isAdminReq(options.httpContext) && this.unsubscriptionCode) {
-      if (unsubscriptionCode != this.unsubscriptionCode) {
+    if (!Subscription.isAdminReq(options.httpContext)) {
+      var forbidden = false
+      var userId = Subscription.getCurrentUser(options.httpContext)
+      if (userId) {
+        if (this.userId !== userId) {
+          forbidden = true
+        }
+      }
+      else if (this.unsubscriptionCode && unsubscriptionCode != this.unsubscriptionCode) {
+        forbidden = true
+      }
+      if (this.state !== 'confirmed') {
+        forbidden = true
+      }
+      if (forbidden) {
         var error = new Error('Forbidden')
         error.status = 403
         return cb(error)
+
       }
-    }
-    if (this.state !== 'confirmed' && !Subscription.isAdminReq(options.httpContext)) {
-      var error = new Error('Forbidden')
-      error.status = 403
-      return cb(error)
     }
     this.state = 'deleted'
     Subscription.replaceById(this.id, this, function (err, res) {
