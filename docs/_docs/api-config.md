@@ -86,7 +86,7 @@ GET /configurations
   
   ```bash
   ~ $ curl -X GET --header 'Accept: application/json' \
-  'http://localhost:3000/ext/api/configurations?filter=%7B%22where%22%3A%20%7B%22name%22%3A%22rsa%22%7D%7D'
+  'http://localhost:3000/api/configurations?filter=%7B%22where%22%3A%20%7B%22name%22%3A%22rsa%22%7D%7D'
   ```
   the value of filter query parameter is the [stringified JSON](https://loopback.io/doc/en/lb3/Querying-data.html#using-stringified-json-in-rest-queries) 
   

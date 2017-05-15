@@ -111,7 +111,7 @@ To prevent *NotifyBC* from being used as spam engine, when a subscription reques
        "htmlBody": "Enter {confirmation_code} on screen" \ 
      } \ 
     } \ 
- }' 'http://localhost:3000/ext/api/configurations'
+ }' 'http://localhost:3000/api/configurations'
 ```
 * to apply to all services as fall back, define the template in file */server/config.local.json*
   ```json

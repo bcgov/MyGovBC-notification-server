@@ -13,7 +13,7 @@ After [installing](../installation) NotifyBC, you can start exploring the functi
 ```sh
  $ curl -X GET --header "Accept: application/json" \
     --header "SM_USER: foo" \
-    "http://localhost:3000/ext/api/notifications"
+    "http://localhost:3000/api/notifications"
 ```
 
 Consult the [API docs](../api-overview/) for valid inputs and expected outcome while you are exploring the APIs. Once you are familiar with the APIs, you can start writing code to call the APIs from either user browser or from a server application.  
