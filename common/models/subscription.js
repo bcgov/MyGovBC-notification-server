@@ -246,10 +246,12 @@ module.exports = function (Subscription) {
           return options.httpContext.res.redirect(redirectUrl)
         }
         else {
+          options.httpContext.res.setHeader('Content-Type', 'text/plain')
+
           if (err) {
-            return cb(null, anonymousUnsubscription.acknowledgements.onScreen.failureMessage)
+            return options.httpContext.res.end(anonymousUnsubscription.acknowledgements.onScreen.failureMessage)
           }
-          return cb(null, anonymousUnsubscription.acknowledgements.onScreen.successMessage)
+          return options.httpContext.res.end(anonymousUnsubscription.acknowledgements.onScreen.successMessage)
         }
       }
       catch (ex) {
