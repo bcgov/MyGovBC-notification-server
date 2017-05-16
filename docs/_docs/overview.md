@@ -28,6 +28,16 @@ NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure
   * send confirmation request to unconfirmed subscription channel
   * verify confirmation code
 
+### mail merge
+*NotifyBC* recognizes following tokens in push notification or subscription messages. They are replaced dynamically when sending the message
+ 
+* {confirmation_code} - subscription confirmation code
+* {serviceName} 
+* {HTTP_HOST} - http host in the form *http(s)://\<host_name\>:\<port\>*
+* {restApiRoot} - configured Loopback [Root URI of REST API](https://loopback.io/doc/en/lb3/config.json.html#top-level-properties)
+* {subscriptionId} 
+* {unsubscriptionCode} - for anonymous subscriptions 
+
 ## Architecture
 
 NotifyBC, designed to be a microservice, doesn't use ACL to secure API calls. Instead, it classifies incoming requests into admin and user types according to following criteria:

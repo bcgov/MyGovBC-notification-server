@@ -278,7 +278,7 @@ POST /notifications
   1. if it's a user request, error is returned
   2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, the recipient as identified by either *userChannelId* or *userId* must have a confirmed subscription if field *skipSubscriptionConfirmationCheck* is not set to true. If *skipSubscriptionConfirmationCheck* is set to true, then the subscription check is skipped, but in such case the request must contain *userChannelId*, not *userId* as subscription data is not queried to obtain *userChannelId* from *userId*.   
   3. the notification request is saved to database
-  4. for unicast push notification, the message is sent to targeted user; for broadcast push notification, the message is sent to all confirmed subscribers of the service in the delivery channel. 
+  4. for unicast push notification, the message is sent to targeted user; for broadcast push notification, the message is sent to all confirmed subscribers of the service in the delivery channel. In both cases, [mail merge](../overview/#mail-merge) is performed on messages.
   5. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains the list of *userChannelId*s the message failed to deliver to, but the state will still be set to *sent*
   6. the updated notification is saved back to database
   7. the saved record is returned unless there is an error saving to database, in which case error is returned
