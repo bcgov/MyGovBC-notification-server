@@ -383,7 +383,7 @@ GET /subscriptions/{id}/unsubscribe
   6. returns 
     * for anonymous request, either the message or redirect as configured in *anonymousUnsubscription.acknowledgements.onScreen*
     * for authenticated user or admin requests, number of records affected or error message if occurred.
-* example
+* <a name="unsubscription-example"></a> example 
 
   To allow an anonymous subscriber to unsubscribe, provide following link in notification messages
 
@@ -421,7 +421,7 @@ This API allows an anonymous subscriber to undo an unauthorized unsubscription.
   3. the field *state* is set to *confirmed*
   4. the subscription is saved back to database
   5. returns either the message or redirect as configured in *[anonymousUndoUnsubscription](../configuration/#anonymousUndoUnsubscription)*
-* example
+* example 
 
   To allow an anonymous subscriber to undo unsubscription, provide following link in unsubscription acknowledgement notification, which is by default set
 
