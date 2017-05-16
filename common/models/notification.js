@@ -89,17 +89,18 @@ module.exports = function (Notification) {
       whereClause.userId = data.userId
     }
 
-    Notification.app.models.Subscription.find({
+    Notification.app.models.Subscription.findOne({
       where: whereClause
-    }, function (err, subscribers) {
-      if (err || subscribers.length === 0) {
+    }, function (err, subscription) {
+      if (err || !subscription) {
         var error = new Error('invalid user')
         error.status = 403
         return next(error)
       }
       else {
         // in case request supplies userId instead of userChannelId
-        data.userChannelId = subscribers[0].userChannelId
+        data.userChannelId = subscription.userChannelId
+        ctx.subscription = subscription
         return next()
       }
     })
@@ -110,7 +111,7 @@ module.exports = function (Notification) {
     switch (res.channel) {
       case 'email':
       case 'sms':
-        sendPushNotification(res, function (errSend) {
+        sendPushNotification(ctx, res, function (errSend) {
           if (errSend) {
             res.state = 'error'
           }
@@ -175,18 +176,21 @@ module.exports = function (Notification) {
     this.patchAttributes(options.httpContext.args.data, options, callback)
   }
 
-  function sendPushNotification(data, cb) {
+  function sendPushNotification(ctx, data, cb) {
     switch (data.isBroadcast) {
       case false:
+        var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, ctx.subscription, ctx)
         switch (data.channel) {
           case 'sms':
             Notification.sendSMS(data.userChannelId,
-              data.message.textBody, cb)
+              textBody, cb)
             break
           default:
-            Notification.sendEmail(data.message.from || 'unknown@unknown.com',
-              data.userChannelId, data.message.subject,
-              data.message.textBody, data.message.htmlBody, cb)
+            var htmlBody = data.message.htmlBody && Notification.mailMerge(data.message.htmlBody, ctx.subscription, ctx)
+            var subject = data.message.subject && Notification.mailMerge(data.message.subject, ctx.subscription, ctx)
+            Notification.sendEmail(data.message.from,
+              data.userChannelId, subject,
+              textBody, htmlBody, cb)
         }
         break
       case true:
@@ -210,15 +214,18 @@ module.exports = function (Notification) {
                 }
                 cb(null)
               }
+              var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, e, ctx)
               switch (e.channel) {
                 case 'sms':
                   Notification.sendSMS(e.userChannelId,
-                    data.message.textBody, notificationMsgCB)
+                    textBody, notificationMsgCB)
                   break
                 default:
-                  Notification.sendEmail(data.message.from || 'unknown@unknown.com',
-                    e.userChannelId, data.message.subject,
-                    data.message.textBody, data.message.htmlBody, notificationMsgCB)
+                  var subject = data.message.subject && Notification.mailMerge(data.message.subject, e, ctx)
+                  var htmlBody = data.message.htmlBody && Notification.mailMerge(data.message.htmlBody, e, ctx)
+                  Notification.sendEmail(data.message.from,
+                    e.userChannelId, subject,
+                    textBody, htmlBody, notificationMsgCB)
               }
             }
           })
