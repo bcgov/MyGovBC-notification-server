@@ -31,6 +31,14 @@ module.exports = function (Subscription) {
     next()
   })
 
+  Subscription.observe('before save', function updateTimestamp(ctx, next) {
+    if (ctx.instance) {
+      ctx.instance.updated = new Date()
+    } else if (ctx.data) {
+      ctx.data.updated = new Date()
+    }
+    next()
+  })
   /**
    * hide confirmation request field, especially confirmation code
    */
@@ -156,7 +164,7 @@ module.exports = function (Subscription) {
       return next()
     }
     var userId = Subscription.getCurrentUser(ctx)
-    if(!userId){
+    if (!userId) {
       var error = new Error('Forbidden')
       error.status = 403
       return next(error)

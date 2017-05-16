@@ -115,6 +115,19 @@ The API operates on following subscription data model fields:
   </tr>
   <tr>
     <td>
+      <p class="name">updated</p>
+      <p class="description">date and time of last update</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>date</td></tr>
+        <tr><td>required</td><td>false</td></tr>
+        <tr><td>default</td><td>$now</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
       <p class="name">confirmationRequest</p>
       <div class="description">an object containing these child fields
         <ul>

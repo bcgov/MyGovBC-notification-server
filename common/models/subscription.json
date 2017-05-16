@@ -38,6 +38,10 @@
     "created": {
       "type": "date",
       "default": "$now"
+    },
+    "updated": {
+      "type": "date",
+      "default": "$now"
     }
   },
   "validations": [],
