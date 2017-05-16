@@ -32,6 +32,10 @@
       "type": "date",
       "default": "$now"
     },
+    "updated": {
+      "type": "date",
+      "default": "$now"
+    },
     "channel": {
       "type": "string",
       "required": true,

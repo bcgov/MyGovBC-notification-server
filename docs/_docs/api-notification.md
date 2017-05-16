@@ -117,8 +117,19 @@ The API operates on following notification data model fields:
     <td>
       <table>
         <tr><td>type</td><td>date</td></tr>
-        <tr><td>required</td><td>false</td></tr>
-        <tr><td>default</td><td>$now</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <p class="name">updated</p>
+      <p class="description">date and time of last update</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>date</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
   </tr>
@@ -304,6 +315,7 @@ POST /notifications
       "textBody": "This is a test"
     },
     "created": "2016-09-30T20:37:06.011Z",
+    "updated": "2016-09-30T20:37:06.011Z",
     "channel": "email",
     "isBroadcast": false,
     "id": "57eeccf23427b61a4820775e"

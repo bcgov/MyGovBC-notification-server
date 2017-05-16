@@ -108,8 +108,7 @@ The API operates on following subscription data model fields:
     <td>
       <table>
         <tr><td>type</td><td>date</td></tr>
-        <tr><td>required</td><td>false</td></tr>
-        <tr><td>default</td><td>$now</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
   </tr>
@@ -121,8 +120,7 @@ The API operates on following subscription data model fields:
     <td>
       <table>
         <tr><td>type</td><td>date</td></tr>
-        <tr><td>required</td><td>false</td></tr>
-        <tr><td>default</td><td>$now</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
   </tr>
@@ -264,6 +262,7 @@ POST /subscriptions
           "confirmationCode": "45304"
         },
         "created": "2016-10-03T17:35:40.202Z",
+        "updated": "2016-10-03T17:35:40.202Z",
         "id": "57f296ec7eead50554c61de7"
       }
     ```
@@ -277,6 +276,7 @@ POST /subscriptions
         "state": "unconfirmed",
         "userId": "<user_id>",
         "created": "2016-10-03T18:17:09.778Z",
+        "updated": "2016-10-03T18:17:09.778Z",
         "id": "57f2a0a5b1aa0e2d5009eced"
       }
     ```

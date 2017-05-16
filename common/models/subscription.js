@@ -31,14 +31,6 @@ module.exports = function (Subscription) {
     next()
   })
 
-  Subscription.observe('before save', function updateTimestamp(ctx, next) {
-    if (ctx.instance) {
-      ctx.instance.updated = new Date()
-    } else if (ctx.data) {
-      ctx.data.updated = new Date()
-    }
-    next()
-  })
   /**
    * hide confirmation request field, especially confirmation code
    */

@@ -86,4 +86,17 @@ module.exports = function (Model, options) {
     }
     return output
   }
+
+  Model.observe('before save', function updateTimestamp(ctx, next) {
+    try {
+      if (ctx.instance) {
+        ctx.instance.updated = new Date()
+      } else if (ctx.data) {
+        ctx.data.updated = new Date()
+      }
+    }
+    catch (ex) {
+    }
+    next()
+  })
 }
