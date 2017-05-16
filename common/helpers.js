@@ -44,7 +44,7 @@ module.exports.cronTask = function (app) {
   var retentionDays
 
   // delete all non-inApp old notifications
-  retentionDays = cronConfig.pushNotificationRetentionDays || cronConfig.defaultRetentionDays || 30
+  retentionDays = cronConfig.pushNotificationRetentionDays || cronConfig.defaultRetentionDays
   app.models.Notification.destroyAll({
     channel: {neq: 'inApp'},
     created: {lt: Date.now() - retentionDays * 86400000}
@@ -55,7 +55,7 @@ module.exports.cronTask = function (app) {
   })
 
   // delete all expired inApp notifications
-  retentionDays = cronConfig.expiredInAppNotificationRetentionDays || cronConfig.defaultRetentionDays || 30
+  retentionDays = cronConfig.expiredInAppNotificationRetentionDays || cronConfig.defaultRetentionDays
   app.models.Notification.destroyAll({
     channel: 'inApp',
     validTill: {lt: Date.now() - retentionDays * 86400000}
@@ -75,11 +75,11 @@ module.exports.cronTask = function (app) {
     }
   })
 
-  // delete all old unconfirmed subscriptions
-  retentionDays = cronConfig.unconfirmedSubscriptionRetentionDays || cronConfig.defaultRetentionDays || 30
+  // delete all old non-confirmed subscriptions
+  retentionDays = cronConfig.nonConfirmedSubscriptionRetentionDays || cronConfig.defaultRetentionDays
   app.models.Subscription.destroyAll({
-    state: 'unconfirmed',
-    created: {lt: Date.now() - retentionDays * 86400000}
+    state: {neq: 'confirmed'},
+    updated: {lt: Date.now() - retentionDays * 86400000}
   }, function (err, data) {
     if (!err && data && data.count > 0) {
       console.log(new Date().toLocaleString() + ': Deleted ' + data.count + ' items.')

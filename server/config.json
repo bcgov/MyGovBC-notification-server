@@ -46,12 +46,12 @@
       "required": true,
       "regex": "\\d{5}"
     },
-    "acknowledgements":{
+    "acknowledgements": {
       "onScreen": {
         "successMessage": "You have been un-subscribed.",
         "failureMessage": "Error happened while un-subscribing."
       },
-      "notification":{
+      "notification": {
         "email": {
           "from": "no_reply@example.com",
           "subject": "Un-subscription acknowledgement",
@@ -60,8 +60,15 @@
       }
     }
   },
-  "anonymousUndoUnsubscription":{
+  "anonymousUndoUnsubscription": {
     "successMessage": "You have been re-subscribed.",
     "failureMessage": "Error happened while re-subscribing."
+  },
+  "cron": {
+    "timeSpec": "0 0 1 * * *",
+    "pushNotificationRetentionDays": 30,
+    "expiredInAppNotificationRetentionDays": 30,
+    "nonConfirmedSubscriptionRetentionDays": 30,
+    "defaultRetentionDays": 30
   }
 }

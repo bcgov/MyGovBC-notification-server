@@ -137,8 +137,8 @@ To prevent *NotifyBC* from being used as spam engine, when a subscription reques
 ## Anonymous Unsubscription
 For anonymous subscription, *NotifyBC* supports one-click opt-out by allowing unsubscription URL provided in notifications. To thwart unauthorized unsubscription attempts, *NotifyBC* implemented and enabled by default two security measurements 
 
-* Anonymous unsubscription request requires unsubscription code, which is a random string generated at subscription time. Unsubscription code reduces brute force attack risk by increasing size of key space. Without it, an attacker only needs to guess subscription id. Be aware, however, the unsubscription code has to be embedded in unsubscription link. If the user forwarded a notification to other people, he/she is still vulnerable to unauthorized unsubscription.
-* Acknowledgement notification - a (final) notification is sent to user acknowledging unsubscription, and offers a link to revert had the change been made unauthorized. 
+* Anonymous unsubscription request requires unsubscription code, which is a random string generated at subscription time. Unsubscription code reduces brute force attack risk by increasing size of key space. Without it, an attacker only needs to successfully guess subscription id. Be aware, however, the unsubscription code has to be embedded in unsubscription link. If the user forwarded a notification to other people, he/she is still vulnerable to unauthorized unsubscription.
+* Acknowledgement notification - a (final) notification is sent to user acknowledging unsubscription, and offers a link to revert had the change been made unauthorized. A deleted subscription (unsubscription) may have a limited lifetime (30 days by default) according to retention policy defined in [cron job](#cron-job) so the reversion can only be performed within the lifetime.  
 
 You can customize anonymous unsubscription settings by changing the *anonymousUnsubscription* configuration. Following is the default settings defined in [config.json](https://github.com/bcgov/MyGovBC-notification-server/blob/master/server/config.json)
  
@@ -224,27 +224,38 @@ When NotifyBC starts up, it checks if two files containing a RSA key pair exists
 </div>
 
 ## Cron Job
-*NotifyBC* runs a cron job to purge old notifications and subscriptions. You can change the frequency of cron job and retention policy by adding following *cron* config object to */server/config.local.json*
+*NotifyBC* runs a cron job to purge old notifications and subscriptions. The default frequency of cron job and retention policy are defined by *cron* config object in file */server/config.json*
 
-```
+```json
  {
    "cron": {
     "timeSpec": "0 0 1 * * *",
     "pushNotificationRetentionDays" : 30,
     "expiredInAppNotificationRetentionDays" : 30,
-    "unconfirmedSubscriptionRetentionDays" : 30,
+    "nonConfirmedSubscriptionRetentionDays" : 30,
     "defaultRetentionDays": 30
    }
  }
  ```
 
-The values shown above are default ones if the corresponding config item is omitted. The config items are
+The config items are
 
 * timeSpec: a space separated fields conformed to [unix crontab format](https://www.freebsd.org/cgi/man.cgi?crontab(5)) with an optional left-most seconds field. See [allowed ranges](https://github.com/kelektiv/node-cron#cron-ranges) of each field
 * pushNotificationRetentionDays: the retention days of push notifications
 * expiredInAppNotificationRetentionDays: the retention days of expired inApp notifications
-* unconfirmedSubscriptionRetentionDays: the retention days of unconfirmed subscriptions 
+* nonConfirmedSubscriptionRetentionDays: the retention days of non-confirmed subscriptions, i.e. all unconfirmed and deleted subscriptions
 * defaultRetentionDays: if any of the above retention day config item is omitted, default retention days is used as fall back.
+
+To change a config item, set the config item in file */server/config.local.json*. For example, to run cron jobs at 2am daily, add following object to */server/config.local.json*
+
+```json
+ {
+   "cron": {
+    "timeSpec": "0 0 2 * * *"
+   }
+ }
+ ```
+
 
 By default cron job is enabled. In a multi-node deployment, cron job should only run on one node. This can be achieved by setting environment variable *NOTIFYBC_SKIP_CRON* on all other nodes to *true*.
 
