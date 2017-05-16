@@ -135,7 +135,7 @@ To prevent *NotifyBC* from being used as spam engine, when a subscription reques
   This template is merged with service-specific template, if defined. 
 
 ## Anonymous Unsubscription
-For anonymous subscription, *NotifyBC* supports one-click opt-out by allowing unsubscription URL provided in notifications. To mitigate unsubscription made by unauthorized users, *NotifyBC* implemented and enabled by default two security measurements 
+For anonymous subscription, *NotifyBC* supports one-click opt-out by allowing unsubscription URL provided in notifications. To thwart unauthorized unsubscription attempts, *NotifyBC* implemented and enabled by default two security measurements 
 
 * Anonymous unsubscription request requires unsubscription code, which is a random string generated at subscription time. Unsubscription code reduces brute force attack risk by increasing size of key space. Without it, the attacker only needs to guess subscription id.   
 * Acknowledgement notification - a (final) notification is sent to user acknowledging unsubscription, and offers a link to revert had the change been made unauthorized. 
