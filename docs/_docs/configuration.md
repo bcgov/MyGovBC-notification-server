@@ -165,7 +165,7 @@ You can customize anonymous unsubscription settings by changing the *anonymousUn
 ```
 The settings control whether or not unsubscription code is required, its RegEx pattern, and acknowledgement message templates, both on-screen and push notifications. Customization should be made to file */server/config.local.json*.
 
-For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For exmaple, to redirect on-screen acknowledgement to a page in your app, create following config in file */server/config.local.json* 
+For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app, create following config in file */server/config.local.json* 
 
 ```json
 "anonymousUnsubscription": {
