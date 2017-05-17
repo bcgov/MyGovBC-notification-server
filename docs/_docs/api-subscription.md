@@ -389,13 +389,13 @@ GET /subscriptions/{id}/unsubscribe
   ```
   {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe?unsubscriptionCode={unsubscription_code}
   ```    
-  All placeholders enclosed in {} will be replaced dynamically when sending notification.
+  [Mail merge](../overview/#mail-merge) is performed on tokens enclosed in `{}` when sending notification.
      
 ## Un-deleteing a Subscription
 ```
 GET /subscriptions/{id}/unsubscribe/undo
 ```
-This API allows an anonymous subscriber to undo an unauthorized unsubscription.
+This API allows an anonymous subscriber to undo an unsubscription.
 
 * inputs
   * subscription id
@@ -427,4 +427,4 @@ This API allows an anonymous subscriber to undo an unauthorized unsubscription.
   ```
   {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe/undo?unsubscriptionCode={unsubscription_code}
   ```    
-  All placeholders enclosed in {} will be replaced dynamically when sending notification.
+  [Mail merge](../overview/#mail-merge) is performed on tokens enclosed in `{}` when sending notification.
