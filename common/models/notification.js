@@ -135,12 +135,17 @@ module.exports = function (Notification) {
     if (ctx.method.name === 'deleteItemById') {
       ctx.args.data = {state: 'deleted'}
     }
+    var currUser = Notification.getCurrentUser(ctx)
     // only allow changing state for non-admin requests
     if (!Notification.isAdminReq(ctx)) {
+      if (!currUser) {
+        var error = new Error('Forbidden')
+        error.status = 403
+        return next(error)
+      }
       ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
     }
     if (ctx.instance.isBroadcast) {
-      var currUser = Notification.getCurrentUser(ctx) || 'unknown'
       switch (ctx.args.data.state) {
         case 'read':
           ctx.args.data.readBy = ctx.instance.readBy || []
