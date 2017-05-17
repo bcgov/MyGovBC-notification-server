@@ -82,8 +82,10 @@ module.exports = function (Notification) {
       channel: data.channel,
     }
     if (data.userChannelId) {
-      // todo: email address check should be case insensitive
-      whereClause.userChannelId = data.userChannelId
+      // email address check should be case insensitive
+      var escapedUserChannelId = data.userChannelId.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+      var escapedUserChannelIdRegExp = new RegExp(escapedUserChannelId, "i")
+      whereClause.userChannelId = {regexp: escapedUserChannelIdRegExp}
     }
     if (data.userId) {
       whereClause.userId = data.userId
