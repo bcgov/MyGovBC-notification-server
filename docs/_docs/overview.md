@@ -29,7 +29,7 @@ NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure
   * verify confirmation code
 
 ### mail merge
-*NotifyBC* recognizes following tokens in push notification or subscription messages. They are replaced dynamically when sending the message
+*NotifyBC* recognizes following case-insensitive tokens in push notification or subscription messages. They are replaced dynamically when sending the message
  
 * {confirmation_code} - subscription confirmation code
 * {service_name} 
