@@ -80,7 +80,7 @@ module.exports = function (Model, options) {
       output = output.replace(/\{http_host\}/ig, httpCtx.req.protocol + '://' + httpCtx.req.get('host'))
       output = output.replace(/\{rest_api_root\}/ig, Model.app.get('restApiRoot'))
       output = output.replace(/\{subscription_id\}/ig, data.id)
-      output = output.replace(/\{unsubscriptionCode\}/ig, data.unsubscriptionCode)
+      output = output.replace(/\{unsubscription_code\}/ig, data.unsubscriptionCode)
     }
     catch (ex) {
     }
