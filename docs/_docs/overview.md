@@ -35,7 +35,7 @@ NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure
 * {service_name} 
 * {http_host} - http host in the form *http(s)://\<host_name\>:\<port\>*
 * {rest_api_root} - configured Loopback [Root URI of REST API](https://loopback.io/doc/en/lb3/config.json.html#top-level-properties)
-* {subscriptionId} 
+* {subscription_id} 
 * {unsubscriptionCode} - for anonymous subscriptions 
 
 ## Architecture

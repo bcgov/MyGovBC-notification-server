@@ -387,7 +387,7 @@ GET /subscriptions/{id}/unsubscribe
   To allow an anonymous subscriber to unsubscribe, provide following link in notification messages
 
   ```
-  {http_host}{rest_api_root}/subscriptions/{subscriptionId}/unsubscribe?unsubscriptionCode={unsubscriptionCode}
+  {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe?unsubscriptionCode={unsubscriptionCode}
   ```    
   All placeholders enclosed in {} will be replaced dynamically when sending notification.
      
@@ -425,6 +425,6 @@ This API allows an anonymous subscriber to undo an unauthorized unsubscription.
   To allow an anonymous subscriber to undo unsubscription, provide following link in unsubscription acknowledgement notification, which is by default set
 
   ```
-  {http_host}{rest_api_root}/subscriptions/{subscriptionId}/unsubscribe/undo?unsubscriptionCode={unsubscriptionCode}
+  {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe/undo?unsubscriptionCode={unsubscriptionCode}
   ```    
   All placeholders enclosed in {} will be replaced dynamically when sending notification.
