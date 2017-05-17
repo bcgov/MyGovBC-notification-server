@@ -77,7 +77,7 @@ module.exports = function (Model, options) {
     try {
       output = output.replace(/\{confirmation_code\}/ig, data.confirmationRequest.confirmationCode)
       output = output.replace(/\{service_name\}/ig, data.serviceName)
-      output = output.replace(/\{HTTP_HOST\}/ig, httpCtx.req.protocol + '://' + httpCtx.req.get('host'))
+      output = output.replace(/\{http_host\}/ig, httpCtx.req.protocol + '://' + httpCtx.req.get('host'))
       output = output.replace(/\{restApiRoot\}/ig, Model.app.get('restApiRoot'))
       output = output.replace(/\{subscriptionId\}/ig, data.id)
       output = output.replace(/\{unsubscriptionCode\}/ig, data.unsubscriptionCode)
