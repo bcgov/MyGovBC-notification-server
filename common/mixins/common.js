@@ -76,7 +76,7 @@ module.exports = function (Model, options) {
     var output = srcTxt
     try {
       output = output.replace(/\{confirmation_code\}/ig, data.confirmationRequest.confirmationCode)
-      output = output.replace(/\{serviceName\}/ig, data.serviceName)
+      output = output.replace(/\{service_name\}/ig, data.serviceName)
       output = output.replace(/\{HTTP_HOST\}/ig, httpCtx.req.protocol + '://' + httpCtx.req.get('host'))
       output = output.replace(/\{restApiRoot\}/ig, Model.app.get('restApiRoot'))
       output = output.replace(/\{subscriptionId\}/ig, data.id)

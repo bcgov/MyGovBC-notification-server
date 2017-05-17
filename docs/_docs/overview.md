@@ -32,7 +32,7 @@ NotifyBC facilitates both anonymous and SiteMinder authentication-enabled secure
 *NotifyBC* recognizes following tokens in push notification or subscription messages. They are replaced dynamically when sending the message
  
 * {confirmation_code} - subscription confirmation code
-* {serviceName} 
+* {service_name} 
 * {HTTP_HOST} - http host in the form *http(s)://\<host_name\>:\<port\>*
 * {restApiRoot} - configured Loopback [Root URI of REST API](https://loopback.io/doc/en/lb3/config.json.html#top-level-properties)
 * {subscriptionId} 
