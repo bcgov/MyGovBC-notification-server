@@ -5,7 +5,7 @@ permalink: /docs/api-notification/
 ---
 The notification API encapsulates the backend workflow of staging and dispatching a message to targeted user after receiving the message from event source. 
 
- Depending on whether an API call comes from user browser as a user request or from an authorized server application as an admin request, NotifyBC applies different permissions. Admin request allows full CRUD operations. An authenticated user request, on the other hand, are only allowed to get a list of in-app pull notifications targeted to the current user and changing the state of the notifications. An unauthenticated user request can not access any  API.
+ Depending on whether an API call comes from user browser as a user request or from an authorized server application as an admin request, *NotifyBC* applies different permissions. Admin request allows full CRUD operations. An authenticated user request, on the other hand, are only allowed to get a list of in-app pull notifications targeted to the current user and changing the state of the notifications. An unauthenticated user request can not access any  API.
  
 When a notification is created by the event source server application, the message is saved to database prior to responding to API caller. In addition, for push notification, the message is delivered immediately, i.e. the API call is synchronous. For in-app pull notification, the message, which by default is in state *new*, can be retrieved later on by browser user request. A user request can only get the list of in-app messages targeted to the current user. A user request can then change the message state to *read* or *deleted* depending on user action. A deleted message cannot be retrieved subsequently by user requests, but the state can be updated given the correct *id*. 
 <div class="note info">
@@ -273,7 +273,7 @@ POST /notifications
     * data type: object
 * outcome
 
-  NotifyBC performs following actions in sequence
+  *NotifyBC* performs following actions in sequence
   
   1. if it's a user request, error is returned
   2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, the recipient as identified by either *userChannelId* or *userId* must have a confirmed subscription if field *skipSubscriptionConfirmationCheck* is not set to true. If *skipSubscriptionConfirmationCheck* is set to true, then the subscription check is skipped, but in such case the request must contain *userChannelId*, not *userId* as subscription data is not queried to obtain *userChannelId* from *userId*.   
@@ -341,7 +341,7 @@ This API is mainly used for updating an inApp notification.
     * data type: object
 
 * outcome
-  * for user requests, NotifyBC performs following actions in sequence
+  * for user requests, *NotifyBC* performs following actions in sequence
     1. for unicast notification, if the notification is not targeted to current user, error is returned
     2. all fields except for *state* are discarded from the input
     3. for broadcast notification, current user id in appended to array *readBy* or *deletedBy*, depending on whether *state* is *read* or *deleted*, unless the user id is already in the array. The *state* field itself is then discarded

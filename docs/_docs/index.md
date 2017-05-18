@@ -6,12 +6,12 @@ redirect_from: /docs/index.html
 ---
 
 
-This site aims to be a comprehensive guide to NotifyBC. We’ll cover topics such
+This site aims to be a comprehensive guide to *NotifyBC*. We’ll cover topics such
 as getting your instance up and running, interacting with browser or other server components, deployment, and give you some advice on participating in the future
-development of NotifyBC itself.
+development of *NotifyBC* itself.
 
 ## Helpful Hints
-Throughout this guide there are a number of small-but-handy pieces of information that can make using NotifyBC easier, more interesting, and less hazardous. Here’s what to look out for.
+Throughout this guide there are a number of small-but-handy pieces of information that can make using *NotifyBC* easier, more interesting, and less hazardous. Here’s what to look out for.
 
 <div class="note">
   <h5>ProTips™ help you get more from NotifyBC</h5>

@@ -57,7 +57,7 @@ Browse your REST API at http://localhost:3000/explorer
 Now browse to <a href="http://localhost:3000/explorer" target="_blank">http://localhost:3000/explorer</a> the page displays StrongLoop API Explorer.
 
 ## Deploy Docker Container
-If you have git and Docker installed, you can run following command to deploy NotifyBC Docker container:
+If you have git and Docker installed, you can run following command to deploy *NotifyBC* Docker container:
 
 ```sh
 ~ $ git clone \

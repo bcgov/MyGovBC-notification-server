@@ -3,7 +3,7 @@ layout: docs
 title: Configuration
 permalink: /docs/configuration/
 ---
-There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). NotifyBC added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.json*.
+There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.json*.
 <div class="note info">
   <h5>Why Dynamic Configs?</h5>
   <p>dynamic configs that are saved to database are needed 
@@ -16,7 +16,7 @@ There are two types of configurations - static and dynamic. Static configuration
 
 
 ## Admin IP List
-By [design](../overview/#architecture), NotifyBC classifies incoming requests into admin and user types. By default, the classification is based on the presence of SiteMinder header alone. In order to support user subscription from an anonymous website, an admin ip list can be used to make the distinction. To enable, add following object to */server/config.local.json* containing a list of admin ip addresses.
+By [design](../overview/#architecture), *NotifyBC* classifies incoming requests into admin and user types. By default, the classification is based on the presence of SiteMinder header alone. In order to support user subscription from an anonymous website, an admin ip list can be used to make the distinction. To enable, add following object to */server/config.local.json* containing a list of admin ip addresses.
 
 ```
 {
@@ -200,7 +200,7 @@ You can customize message displayed on-screen when user clicks revert unsubscrip
 Again, you can redirect the message page by supplying *anonymousUndoUnsubscription.redirectUrl* in file */server/config.local.json* .
   
 ## Broadcast Notification Task Concurrency
-When handling a broadcast push notification, NotifyBC sends messages concurrently to improve performance. The configuration object *broadcastNotificationTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
+When handling a broadcast push notification, *NotifyBC* sends messages concurrently to improve performance. The configuration object *broadcastNotificationTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
 
 ```
 {
@@ -209,7 +209,7 @@ When handling a broadcast push notification, NotifyBC sends messages concurrentl
 ```
 
 ## Database
-By default NotifyBC uses in-memory database backed up by file in */server/database/data.json*. To use MongoDB, which is highly recommended for production deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
+By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json*. To use MongoDB, which is highly recommended for production deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
 
  ```
  {
@@ -264,7 +264,7 @@ To change a config item, set the config item in file */server/config.local.json*
 By default cron job is enabled. In a multi-node deployment, cron job should only run on the [master node](#node-roles). 
 
 ## RSA Keys
-When NotifyBC starts up, it checks if an RSA key pair exists in database as dynamic config. If not it will generate the dynamic config and save it to database. This RSA key pair is used to exchange confidential information with third party server applications through user's browser. For an example of use case, see [Subscription API](../api-subscription/). To make it work, send the public key to the third party and have their server app encrypt the data using the public key. To obtain public key, call the REST [Configuration API](..api-config/#get-configurations) from an admin ip, for example, by running *cURL* command
+When *NotifyBC* starts up, it checks if an RSA key pair exists in database as dynamic config. If not it will generate the dynamic config and save it to database. This RSA key pair is used to exchange confidential information with third party server applications through user's browser. For an example of use case, see [Subscription API](../api-subscription/). To make it work, send the public key to the third party and have their server app encrypt the data using the public key. To obtain public key, call the REST [Configuration API](..api-config/#get-configurations) from an admin ip, for example, by running *cURL* command
 ```bash
 ~ $ curl -X GET 'http://localhost:3000/api/configurations?filter=%7B%22where%22%3A%20%7B%22name%22%3A%20%22rsa%22%7D%7D'
 ```
