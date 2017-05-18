@@ -16,16 +16,17 @@ There are two types of configurations - static and dynamic. Static configuration
 
 
 ## Admin IP List
-By [design](../overview/#architecture), *NotifyBC* classifies incoming requests into admin and user types. By default, the classification is based on the presence of SiteMinder header alone. In order to support user subscription from an anonymous website, an admin ip list can be used to make the distinction. To enable, add following object to */server/config.local.json* containing a list of admin ip addresses.
+By [design](../overview/#architecture), *NotifyBC* classifies incoming requests into admin and user types. By default, the classification is based on the presence of SiteMinder header alone. In order to support user subscription from an anonymous website, an admin ip list can be used to make the distinction. By default, admin ip contains *localhost* only as defined in */server/config.json* 
 
 ```
 {
   "adminIps": [
-    "127.0.0.1",
-    "192.168.0.2"
+    "127.0.0.1"
   ]
 }
 ```
+to modify, create the config object with updated list in file */server/config.local.json* instead.
+
 
 ## SiteMinder Reverse Proxy IP List and Trusted Reverse Proxy IP List
 
