@@ -4,7 +4,7 @@ var boot = require('loopback-boot')
 var app = module.exports = loopback()
 
 app.start = function () {
-  if (process.env.NOTIFYBC_SKIP_CRON != 'true') {
+  if (process.env.NOTIFYBC_NODE_ROLE !== 'slave') {
     // start cron
     var cron = require('cron')
     var cronTask = require('../common/helpers').cronTask

@@ -11,25 +11,31 @@ module.exports = function (app, cb) {
    * for more info.
    */
 
-  // todo: update docs about how to get public rsa key
-  app.models.Configuration.find({where: {name: 'rsa'}}, (err, data) => {
-    var key = new NodeRSA()
-    if (!err && data.length > 0) {
-      key.importKey(data[0].value.private, 'private')
-      key.importKey(data[0].value.public, 'public')
-      module.exports.key = key
-      return cb()
-    }
-    key.generateKeyPair()
-    module.exports.key = key
-    app.models.Configuration.create({
-      name: 'rsa',
-      value: {
-        private: key.exportKey('private'),
-        public: key.exportKey('public')
+  (function getRSAKey() {
+    app.models.Configuration.findOne({where: {name: 'rsa'}}, (err, data) => {
+      var key = new NodeRSA()
+      if (!err && data) {
+        key.importKey(data.value.private, 'private')
+        key.importKey(data.value.public, 'public')
+        module.exports.key = key
+        return cb()
       }
-    }, function (err, data) {
-      cb()
+      if (process.env.NOTIFYBC_NODE_ROLE === 'slave') {
+        return setTimeout(getRSAKey, 5000)
+      }
+      // only the node with cron enabled, which is supposed to be a singleton,
+      // can generate RSA key pair by executing code below
+      key.generateKeyPair()
+      module.exports.key = key
+      app.models.Configuration.create({
+        name: 'rsa',
+        value: {
+          private: key.exportKey('private'),
+          public: key.exportKey('public')
+        }
+      }, function (err, data) {
+        return cb()
+      })
     })
-  })
+  })()
 }
