@@ -11,7 +11,7 @@ module.exports = function (Model, options) {
     // internal requests
     if (!httpCtx) return true
 
-    var adminIps = Model.app.get('adminIps')
+    var adminIps = Model.app.get('adminIps') || Model.app.get('defaultAdminIps')
     if (adminIps) {
       return adminIps.some(function (e, i) {
         return ipRangeCheck(httpCtx.req.ip, e)
