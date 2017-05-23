@@ -30,42 +30,48 @@
     "name": "localhost"
   },
   "smsServiceProvider": "twilio",
-  "subscriptionConfirmationRequest": {
-    "sms": {
-      "confirmationCodeRegex": "\\d{5}",
-      "sendRequest": true,
-      "textBody": "Enter {confirmation_code} on screen"
-    },
-    "email": {
-      "confirmationCodeRegex": "\\d{5}",
-      "sendRequest": true,
-      "from": "no_reply@example.com",
-      "subject": "Subscription confirmation",
-      "textBody": "Enter {confirmation_code} on screen"
-    }
-  },
-  "anonymousUnsubscription": {
-    "code": {
-      "required": true,
-      "regex": "\\d{5}"
-    },
-    "acknowledgements": {
-      "onScreen": {
-        "successMessage": "You have been un-subscribed.",
-        "failureMessage": "Error happened while un-subscribing."
+  "subscription": {
+    "confirmationRequest": {
+      "sms": {
+        "confirmationCodeRegex": "\\d{5}",
+        "sendRequest": true,
+        "textBody": "Enter {confirmation_code} on screen"
       },
-      "notification": {
-        "email": {
-          "from": "no_reply@example.com",
-          "subject": "Un-subscription acknowledgement",
-          "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for service {service_name}. If you did not authorize this change or if you changed your mind, click {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe/undo?unsubscriptionCode={unsubscription_code} to revert."
+      "email": {
+        "confirmationCodeRegex": "\\d{5}",
+        "sendRequest": true,
+        "from": "no_reply@example.com",
+        "subject": "Subscription confirmation",
+        "textBody": "Enter {confirmation_code} on screen"
+      }
+    },
+    "confirmationAcknowledgements": {
+      "successMessage": "You have been subscribed.",
+      "failureMessage": "Error happened while confirming subscription."
+    },
+    "anonymousUnsubscription": {
+      "code": {
+        "required": true,
+        "regex": "\\d{5}"
+      },
+      "acknowledgements": {
+        "onScreen": {
+          "successMessage": "You have been un-subscribed.",
+          "failureMessage": "Error happened while un-subscribing."
+        },
+        "notification": {
+          "email": {
+            "from": "no_reply@example.com",
+            "subject": "Un-subscription acknowledgement",
+            "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for service {service_name}. If you did not authorize this change or if you changed your mind, click {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe/undo?unsubscriptionCode={unsubscription_code} to revert."
+          }
         }
       }
+    },
+    "anonymousUndoUnsubscription": {
+      "successMessage": "You have been re-subscribed.",
+      "failureMessage": "Error happened while re-subscribing."
     }
-  },
-  "anonymousUndoUnsubscription": {
-    "successMessage": "You have been re-subscribed.",
-    "failureMessage": "Error happened while re-subscribing."
   },
   "cron": {
     "timeSpec": "0 0 1 * * *",

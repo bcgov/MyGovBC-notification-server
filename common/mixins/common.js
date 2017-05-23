@@ -1,6 +1,7 @@
 module.exports = function (Model, options) {
   'use strict'
   var ipRangeCheck = require("ip-range-check")
+  var _ = require("lodash")
   Model.createOptionsFromRemotingContext = function (ctx) {
     var base = this.base.createOptionsFromRemotingContext(ctx)
     base.httpContext = ctx
@@ -105,4 +106,29 @@ module.exports = function (Model, options) {
     }
     next()
   })
+
+  Model.getMergedConfig = function (configName, serviceName, next) {
+    Model.app.models.Configuration.findOne({
+      where: {
+        name: configName,
+        serviceName: serviceName
+      }
+    }, (err, data) => {
+      var res
+      if (err) {
+        return next(err, null)
+      }
+      try {
+        res = _.merge({}, Model.app.get(configName))
+      }
+      catch (ex) {
+      }
+      try {
+        res = _.merge({}, res, data.value)
+      }
+      catch (ex) {
+      }
+      return next(null, res)
+    })
+  }
 }

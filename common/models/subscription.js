@@ -82,7 +82,7 @@ module.exports = function (Subscription) {
     }
     else if (!Subscription.isAdminReq(ctx)) {
       // generate unsubscription code
-      var anonymousUnsubscription = Subscription.app.get('anonymousUnsubscription')
+      var anonymousUnsubscription = Subscription.app.get('subscription').anonymousUnsubscription
       if (anonymousUnsubscription.code && anonymousUnsubscription.code.required) {
         var unsubscriptionCodeRegex = new RegExp(anonymousUnsubscription.code.regex)
         data.unsubscriptionCode = new RandExp(unsubscriptionCodeRegex).gen()
@@ -105,22 +105,22 @@ module.exports = function (Subscription) {
     // use request without encrypted payload
     Subscription.app.models.Configuration.findOne({
       where: {
-        name: 'subscriptionConfirmationRequest',
+        name: 'subscription',
         serviceName: data.serviceName
       }
-    }, (err, overrideConfirmationRequest) => {
+    }, (err, overrideSubscription) => {
       if (err) {
         return next(err)
       }
       if (!Subscription.isAdminReq(ctx) || !data.confirmationRequest) {
 
         try {
-          data.confirmationRequest = _.merge({}, Subscription.app.get("subscriptionConfirmationRequest")[data.channel])
+          data.confirmationRequest = _.merge({}, Subscription.app.get("subscription").confirmationRequest[data.channel])
         }
         catch (ex) {
         }
         try {
-          data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideConfirmationRequest.value[data.channel])
+          data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideSubscription.value.confirmationRequest[data.channel])
         }
         catch (ex) {
         }
@@ -203,7 +203,7 @@ module.exports = function (Subscription) {
     }
     this.state = 'deleted'
     Subscription.replaceById(this.id, this, function (err, res) {
-      var anonymousUnsubscription = Subscription.app.get('anonymousUnsubscription')
+      var anonymousUnsubscription = Subscription.app.get('subscription').anonymousUnsubscription
       try {
         if (!err) {
           // send acknowledgement notification
