@@ -75,52 +75,41 @@ module.exports = function (Subscription) {
   }
 
   function beforeUpsert(ctx, unused, next) {
-    var userId = Subscription.getCurrentUser(ctx)
     var data = ctx.args.data
-    if (userId) {
-      data.userId = userId
-    }
-    else if (!Subscription.isAdminReq(ctx)) {
-      // generate unsubscription code
-      var anonymousUnsubscription = Subscription.app.get('subscription').anonymousUnsubscription
-      if (anonymousUnsubscription.code && anonymousUnsubscription.code.required) {
-        var unsubscriptionCodeRegex = new RegExp(anonymousUnsubscription.code.regex)
-        data.unsubscriptionCode = new RandExp(unsubscriptionCodeRegex).gen()
-      }
-    }
-    if (data.confirmationRequest && data.confirmationRequest.confirmationCodeEncrypted) {
-      var key = rsa.key
-      var decrypted
-      try {
-        decrypted = key.decrypt(data.confirmationRequest.confirmationCodeEncrypted, 'utf8')
-      }
-      catch (ex) {
-        return next(ex, null)
-      }
-      var decryptedData = decrypted.split(' ')
-      data.userChannelId = decryptedData[0]
-      data.confirmationRequest.confirmationCode = decryptedData[1]
-      return next()
-    }
-    // use request without encrypted payload
-    Subscription.app.models.Configuration.findOne({
-      where: {
-        name: 'subscription',
-        serviceName: data.serviceName
-      }
-    }, (err, overrideSubscription) => {
+    Subscription.getMergedConfig('subscription', data.serviceNam, (err, mergedSubscriptionConfig) => {
       if (err) {
         return next(err)
       }
-      if (!Subscription.isAdminReq(ctx) || !data.confirmationRequest) {
-
+      var userId = Subscription.getCurrentUser(ctx)
+      if (userId) {
+        data.userId = userId
+      }
+      else if (!Subscription.isAdminReq(ctx)) {
+        // generate unsubscription code
+        var anonymousUnsubscription = mergedSubscriptionConfig.anonymousUnsubscription
+        if (anonymousUnsubscription.code && anonymousUnsubscription.code.required) {
+          var unsubscriptionCodeRegex = new RegExp(anonymousUnsubscription.code.regex)
+          data.unsubscriptionCode = new RandExp(unsubscriptionCodeRegex).gen()
+        }
+      }
+      if (data.confirmationRequest && data.confirmationRequest.confirmationCodeEncrypted) {
+        var key = rsa.key
+        var decrypted
         try {
-          data.confirmationRequest = _.merge({}, Subscription.app.get("subscription").confirmationRequest[data.channel])
+          decrypted = key.decrypt(data.confirmationRequest.confirmationCodeEncrypted, 'utf8')
         }
         catch (ex) {
+          return next(ex, null)
         }
+        var decryptedData = decrypted.split(' ')
+        data.userChannelId = decryptedData[0]
+        data.confirmationRequest.confirmationCode = decryptedData[1]
+        return next()
+      }
+      // use request without encrypted payload
+      if (!Subscription.isAdminReq(ctx) || !data.confirmationRequest) {
         try {
-          data.confirmationRequest = _.merge({}, data.confirmationRequest, overrideSubscription.value.confirmationRequest[data.channel])
+          data.confirmationRequest = mergedSubscriptionConfig.confirmationRequest[data.channel]
         }
         catch (ex) {
         }
@@ -132,6 +121,7 @@ module.exports = function (Subscription) {
       }
       return next()
     })
+
   }
 
   Subscription.beforeRemote('create', function () {
@@ -202,44 +192,47 @@ module.exports = function (Subscription) {
       }
     }
     this.state = 'deleted'
-    Subscription.replaceById(this.id, this, function (err, res) {
-      var anonymousUnsubscription = Subscription.app.get('subscription').anonymousUnsubscription
-      try {
-        if (!err) {
-          // send acknowledgement notification
-          try {
-            switch (res.channel) {
-              case 'email':
-                var msg = anonymousUnsubscription.acknowledgements.notification[res.channel]
-                var subject = Subscription.mailMerge(msg.subject, res, options.httpContext)
-                var textBody = Subscription.mailMerge(msg.textBody, res, options.httpContext)
-                var htmlBody = Subscription.mailMerge(msg.htmlBody, res, options.httpContext)
-                Subscription.sendEmail(msg.from, res.userChannelId, subject, textBody, htmlBody)
-                break
+    Subscription.replaceById(this.id, this, function (writeErr, res) {
+      Subscription.getMergedConfig('subscription', res.serviceName, (configErr, mergedSubscriptionConfig) => {
+        var err = writeErr || configErr
+        var anonymousUnsubscription = mergedSubscriptionConfig.anonymousUnsubscription
+        try {
+          if (!err) {
+            // send acknowledgement notification
+            try {
+              switch (res.channel) {
+                case 'email':
+                  var msg = anonymousUnsubscription.acknowledgements.notification[res.channel]
+                  var subject = Subscription.mailMerge(msg.subject, res, options.httpContext)
+                  var textBody = Subscription.mailMerge(msg.textBody, res, options.httpContext)
+                  var htmlBody = Subscription.mailMerge(msg.htmlBody, res, options.httpContext)
+                  Subscription.sendEmail(msg.from, res.userChannelId, subject, textBody, htmlBody)
+                  break
+              }
+            }
+            catch (ex) {
             }
           }
-          catch (ex) {
+          if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
+            var redirectUrl = anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
+            if (err) {
+              redirectUrl += '?err=' + encodeURIComponent(err)
+            }
+            return options.httpContext.res.redirect(redirectUrl)
           }
-        }
-        if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
-          var redirectUrl = anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
-          if (err) {
-            redirectUrl += '?err=' + encodeURIComponent(err)
-          }
-          return options.httpContext.res.redirect(redirectUrl)
-        }
-        else {
-          options.httpContext.res.setHeader('Content-Type', 'text/plain')
+          else {
+            options.httpContext.res.setHeader('Content-Type', 'text/plain')
 
-          if (err) {
-            return options.httpContext.res.end(anonymousUnsubscription.acknowledgements.onScreen.failureMessage)
+            if (err) {
+              return options.httpContext.res.end(anonymousUnsubscription.acknowledgements.onScreen.failureMessage)
+            }
+            return options.httpContext.res.end(anonymousUnsubscription.acknowledgements.onScreen.successMessage)
           }
-          return options.httpContext.res.end(anonymousUnsubscription.acknowledgements.onScreen.successMessage)
         }
-      }
-      catch (ex) {
-      }
-      return cb(err, 1)
+        catch (ex) {
+        }
+        return cb(err, 1)
+      })
     })
   }
 
@@ -271,22 +264,25 @@ module.exports = function (Subscription) {
       }
     }
     this.state = 'confirmed'
-    Subscription.replaceById(this.id, this, function (err, res) {
-      var anonymousUndoUnsubscription = Subscription.app.get('anonymousUndoUnsubscription')
-      if (anonymousUndoUnsubscription.redirectUrl) {
-        var redirectUrl = anonymousUndoUnsubscription.redirectUrl
-        if (err) {
-          redirectUrl += '?err=' + encodeURIComponent(err)
+    Subscription.replaceById(this.id, this, function (writeErr, res) {
+      Subscription.getMergedConfig('subscription', res.serviceName, (configErr, mergedSubscriptionConfig) => {
+        var err = writeErr || configErr
+        var anonymousUndoUnsubscription = mergedSubscriptionConfig.anonymousUndoUnsubscription
+        if (anonymousUndoUnsubscription.redirectUrl) {
+          var redirectUrl = anonymousUndoUnsubscription.redirectUrl
+          if (err) {
+            redirectUrl += '?err=' + encodeURIComponent(err)
+          }
+          return options.httpContext.res.redirect(redirectUrl)
         }
-        return options.httpContext.res.redirect(redirectUrl)
-      }
-      else {
-        options.httpContext.res.setHeader('Content-Type', 'text/plain')
-        if (err) {
-          return options.httpContext.res.end(anonymousUndoUnsubscription.failureMessage)
+        else {
+          options.httpContext.res.setHeader('Content-Type', 'text/plain')
+          if (err) {
+            return options.httpContext.res.end(anonymousUndoUnsubscription.failureMessage)
+          }
+          return options.httpContext.res.end(anonymousUndoUnsubscription.successMessage)
         }
-        return options.httpContext.res.end(anonymousUndoUnsubscription.successMessage)
-      }
+      })
     })
   }
 }
