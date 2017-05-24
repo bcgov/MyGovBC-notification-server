@@ -322,7 +322,7 @@ GET /subscriptions/{id}/verify
   3. input parameter *confirmationCode* is checked against *confirmationRequest.confirmationCode*. If not match, error is returned; otherwise
   4. *state* is set to *confirmed*
   5. the subscription is saved back to database
-  6. returns HTTP status code 200 for success unless error occurs during saving
+  6. displays acknowledgement message according to [configuration](../configuration#confirmation-verification-acknowledgement-messages)
       
 ## Update a Subscription
 ```

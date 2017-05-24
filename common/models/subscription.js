@@ -236,17 +236,43 @@ module.exports = function (Subscription) {
     })
   }
 
-  Subscription.prototype.verify = function (confirmationCode, cb) {
-    var error
-    if (this.state !== 'unconfirmed'
-      || confirmationCode !== this.confirmationRequest.confirmationCode) {
-      error = new Error('Forbidden')
-      error.status = 403
-      return cb(error, "OK")
-    }
-    this.state = 'confirmed'
-    Subscription.replaceById(this.id, this, function (err, res) {
-      return cb(err, "OK")
+  Subscription.prototype.verify = function (options, confirmationCode, cb) {
+    Subscription.getMergedConfig('subscription', this.serviceName, (configErr, mergedSubscriptionConfig) => {
+      if (configErr) {
+        return cb(configErr)
+      }
+      function handleConfirmationAcknowledgement(err, message) {
+        if (!mergedSubscriptionConfig.confirmationAcknowledgements) {
+          return cb(err, message)
+        }
+        var redirectUrl = mergedSubscriptionConfig.confirmationAcknowledgements.redirectUrl
+        if (redirectUrl) {
+          if (err) {
+            redirectUrl += '?err=' + encodeURIComponent(err.toString())
+          }
+          return options.httpContext.res.redirect(redirectUrl)
+        }
+        else {
+          options.httpContext.res.setHeader('Content-Type', 'text/plain')
+          if (err) {
+            if(err.status){
+              options.httpContext.res.status(err.status)
+            }
+            return options.httpContext.res.end(mergedSubscriptionConfig.confirmationAcknowledgements.failureMessage)
+          }
+          return options.httpContext.res.end(mergedSubscriptionConfig.confirmationAcknowledgements.successMessage)
+        }
+      }
+      if (this.state !== 'unconfirmed'
+        || confirmationCode !== this.confirmationRequest.confirmationCode) {
+        var error = new Error('Forbidden')
+        error.status = 403
+        return handleConfirmationAcknowledgement(error)
+      }
+      this.state = 'confirmed'
+      Subscription.replaceById(this.id, this, function (err, res) {
+        return handleConfirmationAcknowledgement(err,"OK")
+      })
     })
   }
 

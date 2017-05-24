@@ -121,6 +121,11 @@
     "prototype.verify": {
       "accepts": [
         {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        },
+        {
           "arg": "confirmationCode",
           "type": "string",
           "required": true,

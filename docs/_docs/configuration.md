@@ -99,8 +99,8 @@ Add *sms.twilio* config object to file */server/config.local.json*
 ```
 Obtain *\<AccountSid\>*, *\<AuthToken\>* and *\<FromNumber\>* from your Twilio account.
 
-## Subscription
-Configs in this section customize behavior of subscription workflow. They are all sub-properties of config object *subscription*. This object can be defined as service-agnostic static config as well as service-specific dynamic config, which overrides the static one on a service-by-service basis. Default static config is defined in file */server/config.json*. There is no default dynamic config.
+## Subscription/Unsubscription
+Configs in this section customize behavior of subscription and unsubscription workflow. They are all sub-properties of config object *subscription*. This object can be defined as service-agnostic static config as well as service-specific dynamic config, which overrides the static one on a service-by-service basis. Default static config is defined in file */server/config.json*. There is no default dynamic config.
 
 To customize static config, create the config object *subscription* in file */server/config.local.json*
 
@@ -124,7 +124,7 @@ to create a service-specific dynamic config, use REST [config api](../configurat
     } \ 
  }' 'http://localhost:3000/api/configurations'
 ```
-Sub-properties denoted by ellipsis are documented below. A service should have at most one dynamic subscription config.
+Sub-properties denoted by ellipsis in the above two code blocks are documented below. A service can have at most one dynamic subscription config.
 
 ### Confirmation Request Message
 To prevent *NotifyBC* from being used as spam engine, when a subscription request is sent by user (as opposed to admin) without encryption, the content of confirmation request sent to user's notification channel has to come from a pre-configured template as opposed to be specified in subscription request. 
@@ -150,6 +150,34 @@ The following default subscription sub-property *confirmationRequest* defines co
   }
 }
 ```
+
+### Confirmation Verification Acknowledgement Messages
+You can customize *NotifyBC*'s on-screen response message to confirmation code verification requests. The following is the default settings
+
+```json
+"subscription": {
+  "confirmationAcknowledgements": {
+    "successMessage": "You have been subscribed.",
+    "failureMessage": "Error happened while confirming subscription."
+  }
+}
+```
+In addition to customizing the message, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app for service *myService*, create a dynamic config by calling REST config api  
+
+```sh
+~ $ curl -X POST --header 'Content-Type: application/json' \
+--header 'Accept: application/json' -d '{ \ 
+  "name": "subscription", \ 
+  "serivceName": "myService", \ 
+  "value": { \ 
+    "confirmationAcknowledgements": { \
+      "redirectUrl": "https://myapp/subscription/acknowledgement" \
+    } \
+  } \ 
+ }' 'http://localhost:3000/api/configurations'
+```
+If error happened during unsubscription, query string *?err=\<error\>* will be appended to *redirectUrl*.
+
 
 ### Anonymous Unsubscription
 For anonymous subscription, *NotifyBC* supports one-click opt-out by allowing unsubscription URL provided in notifications. To thwart unauthorized unsubscription attempts, *NotifyBC* implemented and enabled by default two security measurements 
@@ -184,10 +212,10 @@ You can customize anonymous unsubscription settings by changing the *anonymousUn
 ```
 The settings control whether or not unsubscription code is required, its RegEx pattern, and acknowledgement message templates, both on-screen and push notifications. Customization should be made to file */server/config.local.json*.
 
-For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app, create following config in file */server/config.local.json* 
+For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app for all services, create following config in file */server/config.local.json* 
 
 ```json
-"<subscription|value>":{
+"subscription":{
   "anonymousUnsubscription": {
     "acknowledgements":{
       "onScreen": {
