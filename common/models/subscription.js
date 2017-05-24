@@ -76,7 +76,7 @@ module.exports = function (Subscription) {
 
   function beforeUpsert(ctx, unused, next) {
     var data = ctx.args.data
-    Subscription.getMergedConfig('subscription', data.serviceNam, (err, mergedSubscriptionConfig) => {
+    Subscription.getMergedConfig('subscription', data.serviceName, (err, mergedSubscriptionConfig) => {
       if (err) {
         return next(err)
       }
