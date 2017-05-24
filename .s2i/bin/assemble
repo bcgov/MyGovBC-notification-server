@@ -1,6 +1,8 @@
 #!/bin/bash
 # make sure copy and mv applies to dot files
 shopt -s dotglob nullglob
+# fail fast
+set -e
 # restore build artifacts
 if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
     echo "---> restore build artifacts"
@@ -13,3 +15,5 @@ chmod -R a+rwx /tmp/src
 mv -f /tmp/src/* ./
 echo "---> Building your Node application from source"
 npm install
+echo "---> Run unit tests"
+npm test

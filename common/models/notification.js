@@ -55,15 +55,16 @@ module.exports = function (Notification) {
   })
 
   Notification.beforeRemote('create', function (ctx, unused, next) {
+    var error
     if (!Notification.isAdminReq(ctx)) {
-      var error = new Error('Forbidden')
+      error = new Error('Forbidden')
       error.status = 403
       return next(error)
     }
 
     var data = ctx.args.data
     if (!data.isBroadcast && data.skipSubscriptionConfirmationCheck && !data.userChannelId) {
-      var error = new Error('invalid user')
+      error = new Error('invalid user')
       error.status = 403
       return next(error)
     }
@@ -71,7 +72,7 @@ module.exports = function (Notification) {
       return next()
     }
     if (!data.userChannelId && !data.userId) {
-      var error = new Error('invalid user')
+      error = new Error('invalid user')
       error.status = 403
       return next(error)
     }

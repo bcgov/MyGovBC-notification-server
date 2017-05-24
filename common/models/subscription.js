@@ -1,3 +1,4 @@
+'use strict'
 const path = require('path')
 var rsaPath = path.resolve(__dirname, '../../server/boot/rsa.js')
 var rsa = require(rsaPath)
@@ -178,7 +179,7 @@ module.exports = function (Subscription) {
           forbidden = true
         }
       }
-      else if (this.unsubscriptionCode && unsubscriptionCode != this.unsubscriptionCode) {
+      else if (this.unsubscriptionCode && unsubscriptionCode !== this.unsubscriptionCode) {
         forbidden = true
       }
       if (this.state !== 'confirmed') {
@@ -255,7 +256,7 @@ module.exports = function (Subscription) {
         else {
           options.httpContext.res.setHeader('Content-Type', 'text/plain')
           if (err) {
-            if(err.status){
+            if (err.status) {
               options.httpContext.res.status(err.status)
             }
             return options.httpContext.res.end(mergedSubscriptionConfig.confirmationAcknowledgements.failureMessage)
@@ -263,28 +264,28 @@ module.exports = function (Subscription) {
           return options.httpContext.res.end(mergedSubscriptionConfig.confirmationAcknowledgements.successMessage)
         }
       }
-      if (this.state !== 'unconfirmed'
-        || confirmationCode !== this.confirmationRequest.confirmationCode) {
+
+      if (this.state !== 'unconfirmed' || confirmationCode !== this.confirmationRequest.confirmationCode) {
         var error = new Error('Forbidden')
         error.status = 403
         return handleConfirmationAcknowledgement(error)
       }
       this.state = 'confirmed'
       Subscription.replaceById(this.id, this, function (err, res) {
-        return handleConfirmationAcknowledgement(err,"OK")
+        return handleConfirmationAcknowledgement(err, "OK")
       })
     })
   }
 
   Subscription.prototype.unDeleteItemById = function (options, unsubscriptionCode, cb) {
     if (!Subscription.isAdminReq(options.httpContext)) {
-      if (this.unsubscriptionCode && unsubscriptionCode != this.unsubscriptionCode) {
-        var error = new Error('Forbidden')
+      if (this.unsubscriptionCode && unsubscriptionCode !== this.unsubscriptionCode) {
+        let error = new Error('Forbidden')
         error.status = 403
         return cb(error)
       }
       if (Subscription.getCurrentUser(options.httpContext) || this.state !== 'deleted') {
-        var error = new Error('Forbidden')
+        let error = new Error('Forbidden')
         error.status = 403
         return cb(error)
       }

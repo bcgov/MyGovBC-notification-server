@@ -4,6 +4,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
+    "test": "jasmine",
     "pretest": "jshint .",
     "posttest": "nsp check"
   },
@@ -28,6 +29,7 @@
     "twilio": "^2.11.1"
   },
   "devDependencies": {
+    "jasmine": "^2.6.0",
     "jshint": "^2.5.6",
     "nsp": "^2.1.0"
   },

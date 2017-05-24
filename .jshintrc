@@ -18,5 +18,6 @@
   "trailing": true,
   "sub": true,
   "maxlen": 0,
-  "asi": true
+  "asi": true,
+  "jasmine": true
 }
