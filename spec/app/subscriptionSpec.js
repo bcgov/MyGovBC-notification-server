@@ -1,10 +1,10 @@
 'use strict'
 var request = require('supertest')
+var loopback = require('loopback')
 var app = require('../../server/server.js')
 app.dataSources.db = loopback.createDataSource({
   connector: loopback.Memory
 })
-var loopback = require('loopback')
 
 beforeEach(() => {
   app.set('adminIps', [])
