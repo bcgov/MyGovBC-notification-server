@@ -8,6 +8,16 @@ beforeAll(() => {
 
 beforeEach(() => {
   app.set('adminIps', [])
+  spyOn(app.models.Subscription, 'sendEmail').and.callFake(() => {
+    let cb = arguments[arguments.length - 1]
+    console.log('faking sendEmail')
+    cb()
+  })
+  spyOn(app.models.Subscription, 'sendSMS').and.callFake(() => {
+    let cb = arguments[arguments.length - 1]
+    console.log('faking sendSMS')
+    cb()
+  })
 })
 
 describe('GET /subscriptions', function () {
@@ -38,13 +48,28 @@ describe('POST /subscriptions', function () {
         "serviceName": "foo",
         "channel": "email",
         "userChannelId": "foo@bar.com",
-        "confirmationRequest":{
+        "confirmationRequest": {
           "sendRequest": false
         }
       })
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
+        done()
+      })
+  })
+
+  it('should allow admin users create subscriptions and send confirmation request', function (done) {
+    app.set('adminIps', ['127.0.0.1'])
+    request(app).post('/api/subscriptions')
+      .send({
+        "serviceName": "foo",
+        "channel": "email",
+        "userChannelId": "foo@bar.com"
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(app.models.Subscription.sendEmail).toHaveBeenCalled()
         done()
       })
   })
