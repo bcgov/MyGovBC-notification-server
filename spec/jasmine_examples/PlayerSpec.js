@@ -1,3 +1,4 @@
+// todo: remove /spec/jasmine_examples, /lib and /spec/helpers/jasmine_examples after familiarized
 describe("Player", function() {
   var Player = require('../../lib/jasmine_examples/Player');
   var Song = require('../../lib/jasmine_examples/Song');

@@ -31,5 +31,21 @@ describe('GET /subscriptions', function () {
 
 
 describe('POST /subscriptions', function () {
-
+  it('should allow admin users create subscriptions without sending confirmation request', function (done) {
+    app.set('adminIps', ['127.0.0.1'])
+    request(app).post('/api/subscriptions')
+      .send({
+        "serviceName": "foo",
+        "channel": "email",
+        "userChannelId": "foo@bar.com",
+        "confirmationRequest":{
+          "sendRequest": false
+        }
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        done()
+      })
+  })
 })
