@@ -1,9 +1,9 @@
 'use strict'
 var request = require('supertest')
-var loopback = require('loopback')
 var app = require('../../server/server.js')
-app.dataSources.db = loopback.createDataSource({
-  connector: loopback.Memory
+
+beforeAll(() => {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
 })
 
 beforeEach(() => {
