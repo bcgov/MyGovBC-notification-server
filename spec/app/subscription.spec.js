@@ -6,17 +6,21 @@ beforeAll(() => {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
 })
 
-beforeEach(() => {
+beforeEach(function (done) {
   app.set('adminIps', [])
-  spyOn(app.models.Subscription, 'sendEmail').and.callFake(function(){
+  spyOn(app.models.Subscription, 'sendEmail').and.callFake(function () {
     let cb = arguments[arguments.length - 1]
     console.log('faking sendEmail')
     return cb(null, null)
   })
-  spyOn(app.models.Subscription, 'sendSMS').and.callFake(function(){
+  spyOn(app.models.Subscription, 'sendSMS').and.callFake(function () {
     let cb = arguments[arguments.length - 1]
     console.log('faking sendSMS')
     return cb(null, null)
+  })
+  app.dataSources.db.automigrate(function (err) {
+    expect(err).toBeUndefined()
+    done()
   })
 })
 
@@ -71,7 +75,15 @@ describe('POST /subscriptions', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).toHaveBeenCalled()
-        done()
+        app.models.Subscription.find({
+          where: {
+            serviceName: 'foo',
+            "userChannelId": "foo@bar.com"
+          }
+        }, function (err, data) {
+          expect(data.length).toBe(1)
+          done()
+        })
       })
   })
 })
