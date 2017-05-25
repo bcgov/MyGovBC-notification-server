@@ -17,11 +17,8 @@
 
 - title: Miscellaneous
   docs:
-  - continuous-integration
-  - troubleshooting
-  - resources
+  - developer-notes
 
 - title: Meta
   docs:
-  - contributing
   - conduct

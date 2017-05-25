@@ -10,7 +10,7 @@ beforeEach(() => {
   app.set('adminIps', [])
 })
 
-describe('subscription API', function () {
+describe('GET /subscriptions', function () {
   it('should forbid anonymous users get subscriptions', function (done) {
     request(app).get('/api/subscriptions')
       .end(function (err, res) {
@@ -27,4 +27,9 @@ describe('subscription API', function () {
         done()
       })
   })
+})
+
+
+describe('POST /subscriptions', function () {
+
 })
