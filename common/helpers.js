@@ -32,9 +32,8 @@ module.exports.disableAllMethods = function (model, methodsToExpose) {
         model.disableRemoteMethodByName(methodName)
       }
     })
-
     if (hiddenMethods.length > 0) {
-      console.log('\nRemote mehtods hidden for', modelName, ':', hiddenMethods.join(', '), '\n')
+      console.info('Remote mehtods hidden for', modelName, ':', hiddenMethods.join(', '))
     }
   }
 }

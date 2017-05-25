@@ -10,11 +10,20 @@ beforeEach(() => {
   app.set('adminIps', [])
 })
 
-describe('Subscription API', function () {
-  it('get subscriptions by anonymous users', function (done) {
+describe('subscription API', function () {
+  it('should forbid anonymous users get subscriptions', function (done) {
     request(app).get('/api/subscriptions')
       .end(function (err, res) {
         expect(res.statusCode).toBe(403)
+        done()
+      })
+  })
+
+  it('should allow admin users get subscriptions', function (done) {
+    app.set('adminIps', ['127.0.0.1'])
+    request(app).get('/api/subscriptions')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
         done()
       })
   })
