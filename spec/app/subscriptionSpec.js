@@ -4,7 +4,9 @@ var app = require('../../server/server.js')
 var loopback = require('loopback')
 
 beforeEach(() => {
-  app.dataSources.db.connector = loopback.Memory
+  app.dataSources.db = loopback.createDataSource({
+    connector: loopback.Memory
+  })
   app.set('adminIps', [])
 })
 
