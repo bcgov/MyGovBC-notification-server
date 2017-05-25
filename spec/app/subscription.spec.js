@@ -1,6 +1,6 @@
 'use strict'
 var request = require('supertest')
-var app = require('../../server/server.js')
+var app
 
 describe('API', function () {
   beforeAll(() => {
@@ -8,6 +8,7 @@ describe('API', function () {
   })
 
   beforeEach(function (done) {
+    app = require('../../server/server.js')
     app.set('adminIps', [])
     spyOn(app.models.Subscription, 'sendEmail').and.callFake(function () {
       let cb = arguments[arguments.length - 1]
