@@ -8,15 +8,15 @@ beforeAll(() => {
 
 beforeEach(() => {
   app.set('adminIps', [])
-  spyOn(app.models.Subscription, 'sendEmail').and.callFake(() => {
+  spyOn(app.models.Subscription, 'sendEmail').and.callFake(function(){
     let cb = arguments[arguments.length - 1]
     console.log('faking sendEmail')
-    cb()
+    return cb(null, null)
   })
-  spyOn(app.models.Subscription, 'sendSMS').and.callFake(() => {
+  spyOn(app.models.Subscription, 'sendSMS').and.callFake(function(){
     let cb = arguments[arguments.length - 1]
     console.log('faking sendSMS')
-    cb()
+    return cb(null, null)
   })
 })
 
@@ -69,6 +69,7 @@ describe('POST /subscriptions', function () {
       })
       .set('Accept', 'application/json')
       .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).toHaveBeenCalled()
         done()
       })
