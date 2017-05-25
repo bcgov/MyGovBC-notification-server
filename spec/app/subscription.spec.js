@@ -89,4 +89,38 @@ describe('API', function () {
         })
     })
   })
+
+  describe('PATCH /subscriptions/{id}', function () {
+    it('should allow sm users change their user channel id', function (done) {
+      app.models.Subscription.create({
+        "serviceName": "education",
+        "channel": "email",
+        "userId": "bar",
+        "userChannelId": "bar@foo.com",
+        "state": "confirmed",
+        "confirmationRequest": {
+          "confirmationCodeRegex": "\\d{5}",
+          "sendRequest": true,
+          "from": "no_reply@example.com",
+          "subject": "Subscription confirmation",
+          "textBody": "enter {confirmation_code} in this email",
+          "confirmationCode": "37688"
+        },
+        "unsubscriptionCode": "50032"
+      }, function (err, data) {
+        expect(err).toBeNull()
+        request(app).patch('/api/subscriptions/1')
+          .send({
+            "userChannelId": "baz@foo.com",
+          })
+          .set('Accept', 'application/json')
+          .set('SM_USER', 'bar')
+          .end(function (err, res) {
+            expect(res.body.state).toBe('unconfirmed')
+            expect(res.body.userChannelId).toBe('baz@foo.com')
+            done()
+          })
+      })
+    })
+  })
 })
