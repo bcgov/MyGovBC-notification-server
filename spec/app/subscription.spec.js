@@ -26,7 +26,31 @@ describe('API', function () {
   })
 
   describe('GET /subscriptions', function () {
-    it('should forbid anonymous users get subscriptions', function (done) {
+    var data
+    beforeEach(function (done) {
+      app.models.Subscription.create({
+        "serviceName": "education",
+        "channel": "email",
+        "userId": "bar",
+        "userChannelId": "bar@foo.com",
+        "state": "confirmed",
+        "confirmationRequest": {
+          "confirmationCodeRegex": "\\d{5}",
+          "sendRequest": true,
+          "from": "no_reply@example.com",
+          "subject": "Subscription confirmation",
+          "textBody": "enter {confirmation_code} in this email",
+          "confirmationCode": "37688"
+        },
+        "unsubscriptionCode": "50032"
+      }, function (err, res) {
+        expect(err).toBeNull()
+        data = res
+        done()
+      })
+    })
+
+    it('should be forbidden by anonymous user', function (done) {
       request(app).get('/api/subscriptions')
         .end(function (err, res) {
           expect(res.statusCode).toBe(403)
@@ -34,13 +58,39 @@ describe('API', function () {
         })
     })
 
-    it('should allow admin users get subscriptions', function (done) {
+    it('should return sm user\'s own subscript', function (done) {
+      request(app).get('/api/subscriptions')
+        .set('Accept', 'application/json')
+        .set('SM_USER', 'baz')
+        .end(function (err, res) {
+          expect(res.statusCode).toBe(200)
+          expect(res.body.length).toBe(0)
+          done()
+        })
+    })
+
+    it('should have confirmationRequest field removed for sm user requests', function (done) {
+      request(app).get('/api/subscriptions')
+        .set('Accept', 'application/json')
+        .set('SM_USER', 'bar')
+        .end(function (err, res) {
+          expect(res.statusCode).toBe(200)
+          expect(res.body.length).toBe(1)
+          expect(res.body[0].confirmationRequest).toBeUndefined()
+          done()
+        })
+    })
+
+
+    it('should be allowed by admin users', function (done) {
       spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
         return true
       })
       request(app).get('/api/subscriptions')
         .end(function (err, res) {
           expect(res.statusCode).toBe(200)
+          expect(res.body.length).toBe(1)
+          expect(res.body[0].confirmationRequest).not.toBeUndefined()
           done()
         })
     })
