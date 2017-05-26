@@ -1,15 +1,14 @@
 'use strict'
 var request = require('supertest')
-var app
+var app = require('../../server/server.js')
 
 describe('API', function () {
   beforeAll(() => {
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
+    app.set('adminIps', [])
   })
 
   beforeEach(function (done) {
-    app = require('../../server/server.js')
-    app.set('adminIps', [])
     spyOn(app.models.Subscription, 'sendEmail').and.callFake(function () {
       let cb = arguments[arguments.length - 1]
       console.log('faking sendEmail')
@@ -36,7 +35,9 @@ describe('API', function () {
     })
 
     it('should allow admin users get subscriptions', function (done) {
-      app.set('adminIps', ['127.0.0.1'])
+      spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
+        return true
+      })
       request(app).get('/api/subscriptions')
         .end(function (err, res) {
           expect(res.statusCode).toBe(200)
@@ -48,7 +49,9 @@ describe('API', function () {
 
   describe('POST /subscriptions', function () {
     it('should allow admin users create subscriptions without sending confirmation request', function (done) {
-      app.set('adminIps', ['127.0.0.1'])
+      spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
+        return true
+      })
       request(app).post('/api/subscriptions')
         .send({
           "serviceName": "foo",
@@ -66,7 +69,9 @@ describe('API', function () {
     })
 
     it('should allow admin users create subscriptions and send confirmation request', function (done) {
-      app.set('adminIps', ['127.0.0.1'])
+      spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
+        return true
+      })
       request(app).post('/api/subscriptions')
         .send({
           "serviceName": "foo",
