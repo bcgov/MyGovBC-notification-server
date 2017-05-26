@@ -118,23 +118,30 @@ describe('API', function () {
         })
     })
 
-    it('should allow admin users create subscriptions and send confirmation request', function (done) {
+    it('should allow admin users create subscriptions and send confirmation request with proper mail merge', function (done) {
       spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
         return true
       })
       request(app).post('/api/subscriptions')
         .send({
-          "serviceName": "foo",
+          "serviceName": "myService",
           "channel": "email",
-          "userChannelId": "foo@bar.com"
+          "userChannelId": "foo@bar.com",
+          "confirmationRequest":{
+            "from": "a@b.com",
+            "subject": "subject",
+            "sendRequest": true,
+            "textBody":"{service_name}"
+          }
         })
         .set('Accept', 'application/json')
         .end(function (err, res) {
           expect(res.statusCode).toBe(200)
           expect(app.models.Subscription.sendEmail).toHaveBeenCalled()
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)).toContain('myService')
           app.models.Subscription.find({
             where: {
-              serviceName: 'foo',
+              serviceName: 'myService',
               "userChannelId": "foo@bar.com"
             }
           }, function (err, data) {
