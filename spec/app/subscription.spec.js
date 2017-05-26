@@ -127,18 +127,31 @@ describe('API', function () {
           "serviceName": "myService",
           "channel": "email",
           "userChannelId": "foo@bar.com",
-          "confirmationRequest":{
+          "unsubscriptionCode": "54321",
+          "confirmationRequest": {
             "from": "a@b.com",
             "subject": "subject",
             "sendRequest": true,
-            "textBody":"{service_name}"
+            "textBody": "{confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}",
+            "confirmationCode": "12345"
           }
         })
         .set('Accept', 'application/json')
         .end(function (err, res) {
           expect(res.statusCode).toBe(200)
           expect(app.models.Subscription.sendEmail).toHaveBeenCalled()
-          expect(app.models.Subscription.sendEmail.calls.argsFor(0)).toContain('myService')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{confirmation_code}')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{service_name}')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{http_host}')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{rest_api_root}')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{subscription_id}')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{unsubscription_code}')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('12345')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('myService')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('http://127.0.0.1')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('/api')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('1 ')
+          expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('54321')
           app.models.Subscription.find({
             where: {
               serviceName: 'myService',
