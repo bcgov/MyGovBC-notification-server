@@ -20,6 +20,8 @@ beforeEach(function (done) {
 
   spyOn(app.models.Subscription, 'sendEmail').and.callFake(failSendEmail)
   spyOn(app.models.Subscription, 'sendSMS').and.callFake(failSendSMS)
+  spyOn(app.models.Notification, 'sendEmail').and.callFake(failSendEmail)
+  spyOn(app.models.Notification, 'sendSMS').and.callFake(failSendSMS)
   app.dataSources.db.automigrate(function (err) {
     expect(err).toBeUndefined()
     done()

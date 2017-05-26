@@ -7,7 +7,7 @@ describe('GET /subscriptions', function () {
   var data
   beforeEach(function (done) {
     app.models.Subscription.create({
-      "serviceName": "education",
+      "serviceName": "myService",
       "channel": "email",
       "userId": "bar",
       "userChannelId": "bar@foo.com",
@@ -147,7 +147,7 @@ describe('PATCH /subscriptions/{id}', function () {
   var data
   beforeEach(function (done) {
     app.models.Subscription.create({
-      "serviceName": "education",
+      "serviceName": "myService",
       "channel": "email",
       "userId": "bar",
       "userChannelId": "bar@foo.com",
