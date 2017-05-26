@@ -96,7 +96,8 @@ describe('API', function () {
   })
 
   describe('PATCH /subscriptions/{id}', function () {
-    it('should allow sm users change their user channel id', function (done) {
+    var data
+    beforeEach(function (done) {
       app.models.Subscription.create({
         "serviceName": "education",
         "channel": "email",
@@ -112,20 +113,47 @@ describe('API', function () {
           "confirmationCode": "37688"
         },
         "unsubscriptionCode": "50032"
-      }, function (err, data) {
+      }, function (err, res) {
         expect(err).toBeNull()
-        request(app).patch('/api/subscriptions/1')
-          .send({
-            "userChannelId": "baz@foo.com",
-          })
-          .set('Accept', 'application/json')
-          .set('SM_USER', 'bar')
-          .end(function (err, res) {
-            expect(res.body.state).toBe('unconfirmed')
-            expect(res.body.userChannelId).toBe('baz@foo.com')
-            done()
-          })
+        data = res
+        done()
       })
+    })
+    it('should allow sm users change their user channel id', function (done) {
+      request(app).patch('/api/subscriptions/1')
+        .send({
+          "userChannelId": "baz@foo.com",
+        })
+        .set('Accept', 'application/json')
+        .set('SM_USER', 'bar')
+        .end(function (err, res) {
+          expect(res.body.state).toBe('unconfirmed')
+          expect(res.body.userChannelId).toBe('baz@foo.com')
+          done()
+        })
+    })
+    it('should deny sm user from changing other user\'s subscription', function (done) {
+      request(app).patch('/api/subscriptions/1')
+        .send({
+          "userChannelId": "baz@foo.com",
+        })
+        .set('Accept', 'application/json')
+        .set('SM_USER', 'baz')
+        .end(function (err, res) {
+          expect(res.statusCode).toBe(404)
+          done()
+        })
+    })
+    it('should deny anonymous user\'s access', function (done) {
+      request(app).patch('/api/subscriptions/1')
+        .send({
+          "userChannelId": "baz@foo.com",
+        })
+        .set('Accept', 'application/json')
+        .end(function (err, res) {
+          expect(res.statusCode).toBe(403)
+          done()
+        })
     })
   })
 })
