@@ -65,6 +65,20 @@ describe('CRON', function () {
         }, function (err, res) {
           cb(err, res)
         })
+      },
+      function (cb) {
+        app.models.Notification.create({
+          "channel": "inApp",
+          "userId": "foo",
+          "message": {
+            "title": "test",
+            "body": "this is a test"
+          },
+          "serviceName": "deletedService",
+          "state": "deleted"
+        }, function (err, res) {
+          cb(err, res)
+        })
       }
     ], function (err, results) {
       expect(err).toBeNull()
@@ -100,13 +114,23 @@ describe('CRON', function () {
       expect(err).toBeNull()
       parallel([
         function (cb) {
-          app.models.Notification.find({where: {serviceName: "nonexpiredService", channel: 'inApp'}}, function (err, data) {
+          app.models.Notification.find({
+            where: {
+              serviceName: "nonexpiredService",
+              channel: 'inApp'
+            }
+          }, function (err, data) {
             expect(data.length).toBe(1)
             cb(err, data)
           })
         },
         function (cb) {
-          app.models.Notification.find({where: {serviceName: "expiredService", channel: 'inApp'}}, function (err, data) {
+          app.models.Notification.find({
+            where: {
+              serviceName: "expiredService",
+              channel: 'inApp'
+            }
+          }, function (err, data) {
             expect(data.length).toBe(0)
             cb(err, data)
           })
@@ -117,4 +141,27 @@ describe('CRON', function () {
       })
     })
   })
+
+  it('should delete all deleted inApp notifications', function (done) {
+    cronTask(app, function (err, results) {
+      expect(err).toBeNull()
+      parallel([
+        function (cb) {
+          app.models.Notification.find({
+            where: {
+              serviceName: "deletedService",
+              channel: 'inApp'
+            }
+          }, function (err, data) {
+            expect(data.length).toBe(0)
+            cb(err, data)
+          })
+        }
+      ], function (err, results) {
+        expect(err).toBeNull()
+        done()
+      })
+    })
+  })
+
 })
