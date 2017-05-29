@@ -111,3 +111,39 @@ describe('POST /notifications', function () {
       })
   })
 })
+describe('PATCH /notifications/{id}', function () {
+  var data
+  beforeEach(function (done) {
+    app.models.Notification.create({
+      "channel": "inApp",
+      "isBroadcast": true,
+      "message": {
+        "title": "test",
+        "body": "this is a test"
+      },
+      "serviceName": "myService",
+      "state": "new"
+    }, function (err, res) {
+      expect(err).toBeNull()
+      data = res
+      done()
+    })
+  })
+  it('should set readBy field of broadcast inApp notifications for sm users', function (done) {
+    request(app).patch('/api/notifications/1')
+      .send({
+        "serviceName": "myService",
+        "state": "read"
+      })
+      .set('Accept', 'application/json')
+      .set('SM_USER', 'bar')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Notification.findById(1, function(err, data){
+          expect(data.readBy).toContain('bar')
+          expect(data.state).toBe('new')
+          done()
+        })
+      })
+  })
+})
