@@ -19,5 +19,6 @@
   "sub": true,
   "maxlen": 0,
   "asi": true,
-  "jasmine": true
+  "jasmine": true,
+  "expr": true
 }
