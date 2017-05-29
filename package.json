@@ -4,7 +4,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
-    "test": "cross-env NODE_ENV=test jasmine",
+    "test": "cross-env NODE_ENV=test istanbul cover node_modules/jasmine/bin/jasmine.js",
     "pretest": "jshint .",
     "posttest": "nsp check"
   },
@@ -30,6 +30,7 @@
     "twilio": "^2.11.1"
   },
   "devDependencies": {
+    "istanbul": "^0.4.5",
     "jasmine": "^2.6.0",
     "jshint": "^2.5.6",
     "nsp": "^2.1.0",
