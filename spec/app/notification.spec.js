@@ -137,7 +137,7 @@ describe('PATCH /notifications/{id}', function () {
       .set('SM_USER', 'bar')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Notification.findById(1, function(err, data){
+        app.models.Notification.findById(1, function (err, data) {
           expect(data.readBy).toContain('bar')
           expect(data.state).toBe('new')
           done()
@@ -163,18 +163,37 @@ describe('DELETE /notifications/{id}', function () {
   })
   it('should set deletedBy field of broadcast inApp notifications for sm users', function (done) {
     request(app).delete('/api/notifications/1')
-      .send({
-        "state": "read"
-      })
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Notification.findById(1, function(err, data){
+        app.models.Notification.findById(1, function (err, data) {
           expect(data.deletedBy).toContain('bar')
           expect(data.state).toBe('new')
           done()
         })
+      })
+  })
+  it('should set state field of broadcast inApp notifications for admin users', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app).delete('/api/notifications/1')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Notification.findById(1, function (err, data) {
+          expect(data.state).toBe('deleted')
+          done()
+        })
+      })
+  })
+  it('should deny anonymous user', function (done) {
+    request(app).delete('/api/notifications/1')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
       })
   })
 })

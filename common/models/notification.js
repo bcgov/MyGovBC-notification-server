@@ -138,30 +138,30 @@ module.exports = function (Notification) {
     if (ctx.method.name === 'deleteItemById') {
       ctx.args.data = {state: 'deleted'}
     }
-    var currUser = Notification.getCurrentUser(ctx)
     // only allow changing state for non-admin requests
     if (!Notification.isAdminReq(ctx)) {
+      var currUser = Notification.getCurrentUser(ctx)
       if (!currUser) {
         var error = new Error('Forbidden')
         error.status = 403
         return next(error)
       }
       ctx.args.data = ctx.args.data.state ? {state: ctx.args.data.state} : null
-    }
-    if (ctx.instance.isBroadcast) {
-      switch (ctx.args.data.state) {
-        case 'read':
-          ctx.args.data.readBy = ctx.instance.readBy || []
-          if (ctx.args.data.readBy.indexOf(currUser) < 0) {
-            ctx.args.data.readBy.push(currUser)
-          }
-          break
-        case 'deleted':
-          ctx.args.data.deletedBy = ctx.instance.deletedBy || []
-          if (ctx.args.data.deletedBy.indexOf(currUser) < 0) {
-            ctx.args.data.deletedBy.push(currUser)
-          }
-          break
+      if (ctx.instance.isBroadcast) {
+        switch (ctx.args.data.state) {
+          case 'read':
+            ctx.args.data.readBy = ctx.instance.readBy || []
+            if (ctx.args.data.readBy.indexOf(currUser) < 0) {
+              ctx.args.data.readBy.push(currUser)
+            }
+            break
+          case 'deleted':
+            ctx.args.data.deletedBy = ctx.instance.deletedBy || []
+            if (ctx.args.data.deletedBy.indexOf(currUser) < 0) {
+              ctx.args.data.deletedBy.push(currUser)
+            }
+            break
+        }
       }
       delete ctx.args.data.state
     }
