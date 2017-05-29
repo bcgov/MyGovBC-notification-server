@@ -144,6 +144,35 @@ describe('PATCH /notifications/{id}', function () {
         })
       })
   })
+  it('should set state field of broadcast inApp notifications for admin users', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app).patch('/api/notifications/1')
+      .send({
+        "state": "deleted"
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Notification.findById(1, function (err, data) {
+          expect(data.state).toBe('deleted')
+          done()
+        })
+      })
+  })
+  it('should deny anonymous user', function (done) {
+    request(app).patch('/api/notifications/1')
+      .send({
+        "serviceName": "myService",
+        "state": "read"
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
+      })
+  })
 })
 describe('DELETE /notifications/{id}', function () {
   beforeEach(function (done) {
