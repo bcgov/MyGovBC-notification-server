@@ -110,6 +110,44 @@ describe('POST /notifications', function () {
         })
       })
   })
+  it('should deny anonymous user', function (done) {
+    request(app).post('/api/notifications')
+      .send({
+        "serviceName": "myService",
+        "message": {
+          "from": "no_reply@bar.com",
+          "subject": "test",
+          "textBody": "This is a broadcast test"
+        },
+        "channel": "email",
+        "isBroadcast": true
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
+      })
+  })
+  it('should deny sm user', function (done) {
+    request(app).post('/api/notifications')
+      .send({
+        "serviceName": "myService",
+        "message": {
+          "from": "no_reply@bar.com",
+          "subject": "test",
+          "textBody": "This is a broadcast test"
+        },
+        "channel": "email",
+        "isBroadcast": true
+      })
+      .set('Accept', 'application/json')
+      .set('SM_USER', 'bar')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
+      })
+  })
+
 })
 describe('PATCH /notifications/{id}', function () {
   beforeEach(function (done) {
