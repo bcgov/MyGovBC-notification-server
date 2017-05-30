@@ -217,6 +217,64 @@ describe('POST /notifications', function () {
       })
   })
 
+  it('should deny skipSubscriptionConfirmationCheck unicast notification missing userChannelId', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app).post('/api/notifications')
+      .send({
+        "serviceName": "myService",
+        "message": {
+          "from": "no_reply@bar.com",
+          "subject": "test",
+          "textBody": "This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}"
+        },
+        "channel": "email",
+        "userId": "bar",
+        "skipSubscriptionConfirmationCheck": true
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        app.models.Notification.find({
+          where: {
+            serviceName: 'myService',
+          }
+        }, function (err, data) {
+          expect(data.length).toBe(0)
+          done()
+        })
+      })
+  })
+
+  it('should deny unicast notification missing both userChannelId and userId', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app).post('/api/notifications')
+      .send({
+        "serviceName": "myService",
+        "message": {
+          "from": "no_reply@bar.com",
+          "subject": "test",
+          "textBody": "This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}"
+        },
+        "channel": "email"
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        app.models.Notification.find({
+          where: {
+            serviceName: 'myService',
+          }
+        }, function (err, data) {
+          expect(data.length).toBe(0)
+          done()
+        })
+      })
+  })
+
   it('should deny anonymous user', function (done) {
     request(app).post('/api/notifications')
       .send({
