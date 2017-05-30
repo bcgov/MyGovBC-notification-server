@@ -358,9 +358,9 @@ describe('DELETE /subscriptions/{id}', function () {
     request(app).get('/api/subscriptions/' + data[1].id + '/unsubscribe?unsubscriptionCode=50033')
       .set('Accept', 'application/json')
       .end(function (err, res) {
-        expect(res.statusCode).toBe(200)
+        expect(res.statusCode).toBe(403)
         app.models.Subscription.findById(data[1].id, function (err, res) {
-          expect(res.state).toBe('deleted')
+          expect(res.state).toBe('confirmed')
           done()
         })
       })
