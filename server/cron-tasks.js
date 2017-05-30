@@ -1,4 +1,5 @@
 'use strict'
+var parallel = require('async/parallel')
 module.exports.purgeData = function () {
   var app = arguments[0]
   var callback = arguments[arguments.length - 1]
@@ -7,7 +8,6 @@ module.exports.purgeData = function () {
   }
   var cronConfig = app.get('cron') || {}
   var retentionDays
-  var parallel = require('async/parallel')
 
   parallel([
     function (cb) {
@@ -61,6 +61,21 @@ module.exports.purgeData = function () {
         return cb(err, data)
       })
     }
+  ], function (err, results) {
+    callback && callback(err, results)
+  })
+}
+module.exports.publishGoLives = function () {
+  var app = arguments[0]
+  var callback = arguments[arguments.length - 1]
+  if (typeof callback !== 'function') {
+    callback = null
+  }
+  parallel([function (cb) {
+    app.models.Notification.find({state: 'new'}, function (err, data) {
+      cb(err, data)
+    })
+  }
   ], function (err, results) {
     callback && callback(err, results)
   })

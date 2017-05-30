@@ -5,8 +5,8 @@ var app = module.exports = loopback()
 
 app.start = function () {
   if (process.env.NOTIFYBC_NODE_ROLE !== 'slave') {
-    // start cron
     var cron = require('cron')
+    // start purgeData cron
     var cronTask = require('./cron-tasks').purgeData
     var cronConfig = app.get('cron') || {}
     var job = new cron.CronJob({

@@ -37,6 +37,9 @@ module.exports = function (Notification) {
         if (e.validTill && Date.parse(e.validTill) < new Date()) {
           return p
         }
+        if (e.invalidBefore && Date.parse(e.invalidBefore) > new Date()) {
+          return p
+        }
         if (e.deletedBy && e.deletedBy.indexOf(currUser) >= 0) {
           return p
         }
@@ -114,6 +117,9 @@ module.exports = function (Notification) {
     switch (res.channel) {
       case 'email':
       case 'sms':
+        if (res.invalidBefore && Date.parse(res.invalidBefore) > new Date()) {
+          return next()
+        }
         sendPushNotification(ctx, res, function (errSend) {
           if (errSend) {
             res.state = 'error'
