@@ -96,7 +96,6 @@ describe('POST /subscriptions', function () {
         done()
       })
   })
-
   it('should allow admin users create subscriptions and send confirmation request with proper mail merge', function (done) {
     spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
       return true
@@ -138,6 +137,27 @@ describe('POST /subscriptions', function () {
           }
         }, function (err, data) {
           expect(data.length).toBe(1)
+          done()
+        })
+      })
+  })
+  it('should allow non-admin user create subscriptions', function (done) {
+    request(app).post('/api/subscriptions')
+      .send({
+        "serviceName": "myService",
+        "channel": "email",
+        "userChannelId": "foo@bar.com",
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Subscription.find({
+          where: {
+            serviceName: 'myService',
+            "userChannelId": "foo@bar.com"
+          }
+        }, function (err, data) {
+          expect(data[0].unsubscriptionCode).toMatch(/\d{5}/)
           done()
         })
       })
