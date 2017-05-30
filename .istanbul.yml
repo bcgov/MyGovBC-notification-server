@@ -1,3 +1,4 @@
 instrumentation:
   excludes:
     - 'spec/**'
+    - 'server/server.js'

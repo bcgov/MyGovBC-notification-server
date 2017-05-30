@@ -1,23 +1,54 @@
 'use strict'
 var request = require('supertest')
 var app = require('../../server/server.js')
+var parallel = require('async/parallel')
 
 describe('GET /notifications', function () {
   var data
   beforeEach(function (done) {
-    app.models.Notification.create({
-      "channel": "inApp",
-      "isBroadcast": true,
-      "message": {
-        "title": "test",
-        "body": "this is a test"
+    parallel([
+      function (cb) {
+        app.models.Notification.create({
+          "channel": "inApp",
+          "isBroadcast": true,
+          "message": {
+            "title": "test",
+            "body": "this is a test"
+          },
+          "serviceName": "myService",
+          "validTill": "2000-01-01",
+          "state": "new"
+        }, cb)
       },
-      "serviceName": "myService",
-      "validTill": "2000-01-01",
-      "state": "new"
-    }, function (err, res) {
+      function (cb) {
+        app.models.Notification.create({
+          "channel": "inApp",
+          "isBroadcast": true,
+          "message": {
+            "title": "test",
+            "body": "this is a test"
+          },
+          "serviceName": "myService",
+          "readBy": ["bar"],
+          "state": "new"
+        }, cb)
+      },
+      function (cb) {
+        app.models.Notification.create({
+          "channel": "inApp",
+          "isBroadcast": true,
+          "message": {
+            "title": "test",
+            "body": "this is a test"
+          },
+          "serviceName": "myService",
+          "deletedBy": ["bar"],
+          "state": "new"
+        }, cb)
+      }
+    ], function (err, results) {
       expect(err).toBeNull()
-      data = res
+      data = results
       done()
     })
   })
@@ -30,13 +61,13 @@ describe('GET /notifications', function () {
       })
   })
 
-  it('should be allowed to sm user for non-expired inApp notifications', function (done) {
+  it('should be allowed to sm user for non-expired, non-deleted inApp notifications', function (done) {
     request(app).get('/api/notifications')
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        expect(res.body.length).toBe(0)
+        expect(res.body.length).toBe(1)
         done()
       })
   })
