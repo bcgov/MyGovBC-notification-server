@@ -366,3 +366,89 @@ describe('DELETE /subscriptions/{id}', function () {
       })
   })
 })
+
+describe('GET /subscriptions/{id}/unsubscribe/undo', function () {
+  let data
+  beforeEach(function (done) {
+    parallel([
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myService",
+          "channel": "email",
+          "userChannelId": "bar@foo.com",
+          "state": "deleted",
+          "confirmationRequest": {
+            "confirmationCodeRegex": "\\d{5}",
+            "sendRequest": true,
+            "from": "no_reply@example.com",
+            "subject": "Subscription confirmation",
+            "textBody": "enter {confirmation_code} in this email",
+            "confirmationCode": "37689"
+          },
+          "unsubscriptionCode": "50032"
+        }, function (err, res) {
+          cb(err, res)
+        })
+      },
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myService",
+          "channel": "email",
+          "userChannelId": "bar@foo.com",
+          "state": "unconfirmed",
+          "confirmationRequest": {
+            "confirmationCodeRegex": "\\d{5}",
+            "sendRequest": true,
+            "from": "no_reply@example.com",
+            "subject": "Subscription confirmation",
+            "textBody": "enter {confirmation_code} in this email",
+            "confirmationCode": "37689"
+          },
+          "unsubscriptionCode": "50032"
+        }, function (err, res) {
+          cb(err, res)
+        })
+      }
+    ], function (err, results) {
+      expect(err).toBeNull()
+      data = results
+      done()
+    })
+  })
+
+  it('should allow undelete subscription by anonymous user', function (done) {
+    request(app).get('/api/subscriptions/' + data[0].id + '/unsubscribe/undo?unsubscriptionCode=50032')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Subscription.findById(data[0].id, function (err, res) {
+          expect(res.state).toBe('confirmed')
+          done()
+        })
+      })
+  })
+
+  it('should forbid undelete subscription by anonymous user with incorrect unsubscriptionCode', function (done) {
+    request(app).get('/api/subscriptions/' + data[0].id + '/unsubscribe/undo?unsubscriptionCode=50033')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        app.models.Subscription.findById(data[0].id, function (err, res) {
+          expect(res.state).toBe('deleted')
+          done()
+        })
+      })
+  })
+
+  it('should forbid undelete subscription where state is not deleted', function (done) {
+    request(app).get('/api/subscriptions/' + data[1].id + '/unsubscribe/undo?unsubscriptionCode=50032')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        app.models.Subscription.findById(data[1].id, function (err, res) {
+          expect(res.state).toBe('unconfirmed')
+          done()
+        })
+      })
+  })
+})
