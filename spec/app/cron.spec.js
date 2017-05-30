@@ -1,6 +1,6 @@
 'use strict'
 var app = require('../../server/server.js')
-var cronTask = require('../../common/helpers').cronTask
+var cronTask = require('../../server/cron-tasks').purgeData
 var parallel = require('async/parallel')
 
 describe('CRON', function () {

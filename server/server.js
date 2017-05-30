@@ -7,7 +7,7 @@ app.start = function () {
   if (process.env.NOTIFYBC_NODE_ROLE !== 'slave') {
     // start cron
     var cron = require('cron')
-    var cronTask = require('../common/helpers').cronTask
+    var cronTask = require('./cron-tasks').purgeData
     var cronConfig = app.get('cron') || {}
     var job = new cron.CronJob({
       cronTime: cronConfig.timeSpec || '0 0 1 * * *',
