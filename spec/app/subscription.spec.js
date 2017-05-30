@@ -483,4 +483,27 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function () {
         })
       })
   })
+
+  it('should redirect response if set so', function (done) {
+    app.models.Configuration.create({
+      "name": "subscription",
+      "serviceName": "myService",
+      "value": {
+        "anonymousUndoUnsubscription": {
+          "redirectUrl": "http://nowhere"
+        }
+      }
+    }, function (err, res) {
+      request(app).get('/api/subscriptions/' + data[0].id + '/unsubscribe/undo?unsubscriptionCode=50032')
+        .end(function (err, res) {
+          expect(res.statusCode).toBe(302)
+          expect(res.headers.location).toBe('http://nowhere')
+          app.models.Subscription.findById(data[0].id, function (err, res) {
+            expect(res.state).toBe('confirmed')
+            done()
+          })
+        })
+
+    })
+  })
 })
