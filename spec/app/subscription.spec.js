@@ -298,6 +298,18 @@ describe('GET /subscriptions/{id}/verify', function () {
       })
   })
 
+  it('should deny incorrect confirmation code', function (done) {
+    request(app).get('/api/subscriptions/' + data[1].id + '/verify?confirmationCode=0000')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        app.models.Subscription.findById(data[1].id, function (err, res) {
+          expect(res.state).toBe('unconfirmed')
+          done()
+        })
+      })
+  })
+
 })
 
 describe('DELETE /subscriptions/{id}', function () {
