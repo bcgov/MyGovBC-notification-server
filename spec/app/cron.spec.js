@@ -79,6 +79,25 @@ describe('CRON', function () {
         }, function (err, res) {
           cb(err, res)
         })
+      },
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "unconfirmedService",
+          "channel": "email",
+          "userChannelId": "bar@foo.com",
+          "state": "unconfirmed",
+          "confirmationRequest": {
+            "confirmationCodeRegex": "\\d{5}",
+            "sendRequest": true,
+            "from": "no_reply@example.com",
+            "subject": "Subscription confirmation",
+            "textBody": "enter {confirmation_code} in email!",
+            "confirmationCode": "53007"
+          },
+          "updated": "2010-01-01",
+        }, function (err, res) {
+          cb(err, res)
+        })
       }
     ], function (err, results) {
       expect(err).toBeNull()
@@ -164,4 +183,26 @@ describe('CRON', function () {
     })
   })
 
+  xit('should delete all old non-confirmed subscriptions', function (done) {
+    cronTask(app, function (err, results) {
+      expect(err).toBeNull()
+      parallel([
+        function (cb) {
+          app.models.Subscription.find({
+            where: {
+              serviceName: "unconfirmedService",
+              channel: 'email'
+            }
+          }, function (err, data) {
+            // todo: need to disable 'before save' operation hook in common.js first
+            expect(data.length).toBe(0)
+            cb(err, data)
+          })
+        }
+      ], function (err, results) {
+        expect(err).toBeNull()
+        done()
+      })
+    })
+  })
 })
