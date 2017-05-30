@@ -110,6 +110,38 @@ describe('POST /notifications', function () {
         })
       })
   })
+
+  it('should send unicast email notification', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app).post('/api/notifications')
+      .send({
+        "serviceName": "myService",
+        "message": {
+          "from": "no_reply@bar.com",
+          "subject": "test",
+          "textBody": "This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}"
+        },
+        "channel": "email",
+        "userId": "bar",
+        "userChannelId": "bar@foo.COM"
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(app.models.Notification.sendEmail).toHaveBeenCalled()
+        app.models.Notification.find({
+          where: {
+            serviceName: 'myService',
+          }
+        }, function (err, data) {
+          expect(data.length).toBe(1)
+          done()
+        })
+      })
+  })
+
   it('should deny anonymous user', function (done) {
     request(app).post('/api/notifications')
       .send({
