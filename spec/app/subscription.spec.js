@@ -1,6 +1,7 @@
 'use strict'
 var request = require('supertest')
 var app = require('../../server/server.js')
+var parallel = require('async/parallel')
 
 
 describe('GET /subscriptions', function () {
@@ -144,7 +145,6 @@ describe('POST /subscriptions', function () {
 })
 
 describe('PATCH /subscriptions/{id}', function () {
-  var data
   beforeEach(function (done) {
     app.models.Subscription.create({
       "serviceName": "myService",
@@ -163,7 +163,6 @@ describe('PATCH /subscriptions/{id}', function () {
       "unsubscriptionCode": "50032"
     }, function (err, res) {
       expect(err).toBeNull()
-      data = res
       done()
     })
   })
@@ -203,4 +202,80 @@ describe('PATCH /subscriptions/{id}', function () {
         done()
       })
   })
+})
+
+describe('GET /subscriptions/{id}/verify', function () {
+  let data
+  beforeEach(function (done) {
+    parallel([
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myService",
+          "channel": "email",
+          "userId": "bar",
+          "userChannelId": "bar@foo.com",
+          "state": "unconfirmed",
+          "confirmationRequest": {
+            "confirmationCodeRegex": "\\d{5}",
+            "sendRequest": true,
+            "from": "no_reply@example.com",
+            "subject": "Subscription confirmation",
+            "textBody": "enter {confirmation_code} in this email",
+            "confirmationCode": "37688"
+          }
+        }, function (err, res) {
+          cb(err, res)
+        })
+      },
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myService",
+          "channel": "email",
+          "userChannelId": "bar@foo.com",
+          "state": "unconfirmed",
+          "confirmationRequest": {
+            "confirmationCodeRegex": "\\d{5}",
+            "sendRequest": true,
+            "from": "no_reply@example.com",
+            "subject": "Subscription confirmation",
+            "textBody": "enter {confirmation_code} in this email",
+            "confirmationCode": "37689"
+          },
+          "unsubscriptionCode": "50032"
+        }, function (err, res) {
+          cb(err, res)
+        })
+      }
+    ], function (err, results) {
+      expect(err).toBeNull()
+      data = results
+      done()
+    })
+  })
+
+  it('should verify confirmation code sent by sm user', function (done) {
+    request(app).get('/api/subscriptions/' + data[0].id + '/verify?confirmationCode=37688')
+      .set('Accept', 'application/json')
+      .set('SM_USER', 'bar')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Subscription.findById(data[0].id, function (err, res) {
+          expect(res.state).toBe('confirmed')
+          done()
+        })
+      })
+  })
+
+  it('should verify confirmation code sent by anonymous user', function (done) {
+    request(app).get('/api/subscriptions/' + data[1].id + '/verify?confirmationCode=37689')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Subscription.findById(data[1].id, function (err, res) {
+          expect(res.state).toBe('confirmed')
+          done()
+        })
+      })
+  })
+
 })
