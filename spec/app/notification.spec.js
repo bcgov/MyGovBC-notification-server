@@ -45,6 +45,19 @@ describe('GET /notifications', function () {
           "deletedBy": ["bar"],
           "state": "new"
         }, cb)
+      },
+      function (cb) {
+        app.models.Notification.create({
+          "channel": "inApp",
+          "isBroadcast": true,
+          "message": {
+            "title": "test",
+            "body": "this is a test"
+          },
+          "serviceName": "myService",
+          "invalidBefore": "3017-05-30",
+          "state": "new"
+        }, cb)
       }
     ], function (err, results) {
       expect(err).toBeNull()
@@ -61,7 +74,7 @@ describe('GET /notifications', function () {
       })
   })
 
-  it('should be allowed to sm user for non-expired, non-deleted inApp notifications', function (done) {
+  it('should be allowed to sm user for current, non-expired, non-deleted inApp notifications', function (done) {
     request(app).get('/api/notifications')
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
