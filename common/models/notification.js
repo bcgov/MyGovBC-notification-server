@@ -112,7 +112,7 @@ module.exports = function (Notification) {
     })
   })
 
-  Notification.afterRemote('create', function (ctx, res, next) {
+  Notification.dispatchNotification = function (ctx, res, next) {
     // send non-inApp notifications immediately
     switch (res.channel) {
       case 'email':
@@ -136,7 +136,8 @@ module.exports = function (Notification) {
         next()
         break
     }
-  })
+  }
+  Notification.afterRemote('create', Notification.dispatchNotification)
 
   function beforePatchAttributes() {
     var ctx = arguments[0]
@@ -243,7 +244,7 @@ module.exports = function (Notification) {
               }
             }
           })
-          parallelLimit(tasks, Notification.app.get('broadcastNotificationTaskConcurrency') || 100, function (err, res) {
+          parallelLimit(tasks, (Notification.app.get('notification') && Notification.app.get('notification').broadcastTaskConcurrency) || 100, function (err, res) {
             cb(err)
           })
         })

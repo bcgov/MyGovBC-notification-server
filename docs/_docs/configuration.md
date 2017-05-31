@@ -247,29 +247,41 @@ You can customize message displayed on-screen when user clicks revert unsubscrip
 ```
 You can redirect the message page by defining *anonymousUndoUnsubscription.redirectUrl*.
   
-## Broadcast Notification Task Concurrency
-When handling a broadcast push notification, *NotifyBC* sends messages concurrently to improve performance. The configuration object *broadcastNotificationTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
+## Notification 
+Configs in this section customize the handling of notification request.  They are all sub-properties of config object *notification*. To change config, create config object *notification* in file */server/config.local.json*
 
-```
+```json
 {
-  "broadcastNotificationTaskConcurrency": 200
+  "notification": {
+    ...
+  }
+}
+```
+Sub-properties denoted by ellipsis in the above code block are documented below.
+
+### Broadcast Task Concurrency
+When handling a broadcast push notification, *NotifyBC* sends messages concurrently to improve performance. The configuration *broadcastTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
+
+```json-object
+"notification": {
+  "broadcastTaskConcurrency": 200
 }
 ```
 
 ## Database
 By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json* for local and docker deployment and MongoDB for OpenShift deployment. To use MongoDB for non-OpenShift deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
 
- ```
- {
-   "db": {
-     "name": "db",
-     "connector": "mongodb",
-     "host": "127.0.0.1",
-     "database": "notifyBC",
-     "port": 27017
-   }
+```json
+{
+ "db": {
+   "name": "db",
+   "connector": "mongodb",
+   "host": "127.0.0.1",
+   "database": "notifyBC",
+   "port": 27017
  }
- ```
+}
+```
 
 See [LoopBack MongoDB data source](https://docs.strongloop.com/display/public/LB/MongoDB+connector#MongoDBconnector-CreatingaMongoDBdatasource) for more configurable properties.
 
