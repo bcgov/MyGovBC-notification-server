@@ -3,7 +3,7 @@ layout: docs
 title: Configuration
 permalink: /docs/configuration/
 ---
-There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.json*. Dynamic configs are managed using REST [config api](../configuration/). 
+There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.json*. Dynamic configs are managed using REST [configuration api](../api-config/). 
 
 <div class="note info">
   <h5>Why Dynamic Configs?</h5>
@@ -28,6 +28,13 @@ By [design](../overview/#architecture), *NotifyBC* classifies incoming requests 
 ```
 to modify, create the config object with updated list in file */server/config.local.json* instead.
 
+
+<div class="note warning">
+  <h5>Define static array configs in one file only</h5>
+  <p>
+  Due to a <a href="https://github.com/strongloop/loopback-boot/issues/172">bug</a> in Loopback configs of array type such as <i>adminIps</i> cannot be merged if defined in multiple files with different length. To mitigate, only define the config in one file.
+  </p>
+</div>
 
 ## SiteMinder Reverse Proxy IP List and Trusted Reverse Proxy IP List
 
