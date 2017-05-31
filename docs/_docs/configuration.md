@@ -257,7 +257,7 @@ When handling a broadcast push notification, *NotifyBC* sends messages concurren
 ```
 
 ## Database
-By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json*. To use MongoDB, which is highly recommended for production deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
+By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json* for local and docker deployment and MongoDB for OpenShift deployment. To use MongoDB for non-OpenShift deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
 
  ```
  {

@@ -6,13 +6,13 @@ permalink: /docs/installation/
 
 *NotifyBC* can be installed in 3 ways:
 
-  1. from source code
+  1. deploying locally from source code
   2. deploying a Docker container
   3. deploying to OpenShift
 
 For small-scale production deployment or for the purpose of evaluation, both source code and docker container will do. For large-scale production deployment that requires horizontal scalability, deploying to OpenShift and running on a MongoDB cluster is recommended. To setup a development environment in order to contribute to *NotifyBC*, installing from source code is preferred.
 
-## Install from Source Code
+## Deploy Locally from Source Code
 
 ### System Requirements
 * Software
