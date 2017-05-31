@@ -127,7 +127,9 @@ module.exports = function (Subscription) {
 
   Subscription.beforeRemote('create', function () {
     var ctx = arguments[0]
-    delete ctx.args.data.state
+    if (!Subscription.isAdminReq(ctx)) {
+      delete ctx.args.data.state
+    }
     delete ctx.args.data.id
     beforeUpsert.apply(null, arguments)
   })

@@ -83,9 +83,10 @@ describe('POST /subscriptions', function () {
     })
     request(app).post('/api/subscriptions')
       .send({
-        "serviceName": "foo",
+        "serviceName": "myService",
         "channel": "email",
-        "userChannelId": "foo@bar.com",
+        "userChannelId": "bar@foo.com",
+        "state": "confirmed",
         "confirmationRequest": {
           "sendRequest": false
         }
@@ -93,7 +94,16 @@ describe('POST /subscriptions', function () {
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        done()
+        expect(app.models.Subscription.sendEmail).not.toHaveBeenCalled()
+        app.models.Subscription.find({
+          where: {
+            serviceName: 'myService',
+            "userChannelId": "bar@foo.com"
+          }
+        }, function (err, data) {
+          expect(data[0].state).toBe('confirmed')
+          done()
+        })
       })
   })
   it('should allow admin users create subscriptions and send confirmation request with proper mail merge', function (done) {
