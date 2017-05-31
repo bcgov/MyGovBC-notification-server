@@ -262,9 +262,11 @@ Sub-properties denoted by ellipsis in the above code block are documented below.
 ### Broadcast Task Concurrency
 When handling a broadcast push notification, *NotifyBC* sends messages concurrently to improve performance. The configuration *broadcastTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
 
-```json-object
-"notification": {
-  "broadcastTaskConcurrency": 200
+```json
+{
+  "notification": {
+    "broadcastTaskConcurrency": 200
+  }
 }
 ```
 
