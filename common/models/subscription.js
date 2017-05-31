@@ -174,12 +174,7 @@ module.exports = function (Subscription) {
     if (!Subscription.isAdminReq(options.httpContext)) {
       var forbidden = false
       var userId = Subscription.getCurrentUser(options.httpContext)
-      if (userId) {
-        if (this.userId !== userId) {
-          forbidden = true
-        }
-      }
-      else if (this.unsubscriptionCode && unsubscriptionCode !== this.unsubscriptionCode) {
+      if (!userId && this.unsubscriptionCode && unsubscriptionCode !== this.unsubscriptionCode) {
         forbidden = true
       }
       if (this.state !== 'confirmed') {

@@ -354,6 +354,24 @@ describe('DELETE /subscriptions/{id}', function () {
         }, function (err, res) {
           cb(err, res)
         })
+      },
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myService",
+          "channel": "email",
+          "userChannelId": "bar@foo.com",
+          "state": "unconfirmed",
+          "confirmationRequest": {
+            "confirmationCodeRegex": "\\d{5}",
+            "sendRequest": true,
+            "from": "no_reply@example.com",
+            "subject": "Subscription confirmation",
+            "textBody": "enter {confirmation_code} in this email",
+            "confirmationCode": "37689"
+          }
+        }, function (err, res) {
+          cb(err, res)
+        })
       }
     ], function (err, results) {
       expect(err).toBeNull()
@@ -393,6 +411,31 @@ describe('DELETE /subscriptions/{id}', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(403)
         app.models.Subscription.findById(data[1].id, function (err, res) {
+          expect(res.state).toBe('confirmed')
+          done()
+        })
+      })
+  })
+
+  it('should deny unsubscription if state is not confirmed', function (done) {
+    request(app).get('/api/subscriptions/' + data[2].id + '/unsubscribe?unsubscriptionCode=50033')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        app.models.Subscription.findById(data[2].id, function (err, res) {
+          expect(res.state).toBe('unconfirmed')
+          done()
+        })
+      })
+  })
+
+  it('should deny unsubscription by another sm user', function (done) {
+    request(app).delete('/api/subscriptions/' + data[0].id)
+      .set('Accept', 'application/json')
+      .set('SM_USER', 'baz')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(404)
+        app.models.Subscription.findById(data[0].id, function (err, res) {
           expect(res.state).toBe('confirmed')
           done()
         })
