@@ -145,16 +145,17 @@ describe('POST /subscriptions', function () {
     request(app).post('/api/subscriptions')
       .send({
         "serviceName": "myService",
-        "channel": "email",
-        "userChannelId": "foo@bar.com",
+        "channel": "sms",
+        "userChannelId": "12345",
       })
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
+        expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
         app.models.Subscription.find({
           where: {
             serviceName: 'myService',
-            "userChannelId": "foo@bar.com"
+            "userChannelId": "12345"
           }
         }, function (err, data) {
           expect(data[0].unsubscriptionCode).toMatch(/\d{5}/)
