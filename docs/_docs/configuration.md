@@ -30,9 +30,9 @@ to modify, create the config object with updated list in file */server/config.lo
 
 
 <div class="note warning">
-  <h5>Define static array configs in one file only</h5>
+  <h5>Define static array config in one file only</h5>
   <p>
-  Due to a <a href="https://github.com/strongloop/loopback-boot/issues/172">bug</a> in Loopback configs of array type such as <i>adminIps</i> cannot be merged if defined in multiple files with different length. To mitigate, only define the config in one file.
+  Due to a <a href="https://github.com/strongloop/loopback-boot/issues/172">bug</a> in Loopback a config of array type such as <i>adminIps</i> cannot be merged if defined in multiple files with different length. To mitigate, only define an array config in one file.
   </p>
 </div>
 
