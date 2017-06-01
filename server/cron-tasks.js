@@ -2,9 +2,9 @@
 var parallel = require('async/parallel')
 module.exports.purgeData = function () {
   var app = arguments[0]
-  var callback = arguments[arguments.length - 1]
-  if (typeof callback !== 'function') {
-    callback = null
+  var callback
+  if (arguments.length > 1) {
+    callback = arguments[arguments.length - 1]
   }
   var cronConfig = app.get('cron') || {}
   var retentionDays
