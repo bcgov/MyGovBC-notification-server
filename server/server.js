@@ -7,14 +7,22 @@ app.start = function () {
   if (process.env.NOTIFYBC_NODE_ROLE !== 'slave') {
     var cron = require('cron')
     // start purgeData cron
-    var cronTask = require('./cron-tasks').purgeData
+    var cronTasks = require('./cron-tasks')
     var cronConfig = app.get('cron') || {}
-    var job = new cron.CronJob({
+    new cron.CronJob({
       cronTime: cronConfig.timeSpec || '0 0 1 * * *',
       onTick: function () {
-        cronTask(app)
+        cronTasks.purgeData(app)
       },
       start: true
+    })
+    new cron.CronJob({
+      cronTime: '0 * * * * *',
+      onTick: function () {
+        cronTasks.publishLiveNotifications(app)
+      },
+      // todo: turn it on
+      start: false
     })
   }
 

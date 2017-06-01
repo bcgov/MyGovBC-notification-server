@@ -10,7 +10,9 @@ module.exports = function (Model, options) {
 
   Model.isAdminReq = function (httpCtx) {
     // internal requests
-    if (!httpCtx) return true
+    if (!httpCtx || !httpCtx.req) {
+      return true
+    }
 
     var adminIps = Model.app.get('adminIps') || Model.app.get('defaultAdminIps')
     if (adminIps) {

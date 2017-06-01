@@ -65,27 +65,45 @@ module.exports.purgeData = function () {
     callback && callback(err, results)
   })
 }
-module.exports.publishGoLives = function () {
+module.exports.publishLiveNotifications = function () {
   var app = arguments[0]
   var callback
   if (arguments.length > 1) {
     callback = arguments[arguments.length - 1]
   }
-  parallel([function (cb) {
-    app.models.Notification.find({
-      where: {
-        state: 'new',
-        channel: {neq: 'inApp'},
-        invalidBefore: {lt: Date.Now()}
+  app.models.Notification.find({
+    where: {
+      state: 'new',
+      channel: {neq: 'inApp'},
+      invalidBefore: {lt: Date.now()}
+    }
+  }, function (err, livePushNotifications) {
+    if (err) {
+      return callback && callback(err, livePushNotifications)
+    }
+    let notificationTasks = livePushNotifications.map(function (livePushNotification) {
+      return function (cb) {
+        livePushNotification.state = 'sending'
+        livePushNotification.save(function (errSave) {
+          if (errSave) {
+            return cb(errSave)
+          }
+          let ctx = {}
+          ctx.args = {}
+          ctx.args.data = livePushNotification
+          app.models.Notification.preCreationValidation(ctx, function (errPreCreationValidation) {
+            if (errPreCreationValidation) {
+              return cb(errPreCreationValidation)
+            }
+            app.models.Notification.dispatchNotification(ctx, livePushNotification, function (errDispatchNotification) {
+              return cb(errDispatchNotification)
+            })
+          })
+        })
       }
-    }, function (err, data) {
-      if (err) {
-        return cb(err, data)
-      }
-      return cb(err, data)
     })
-  }
-  ], function (err, results) {
-    callback && callback(err, results)
+    parallel(notificationTasks, function (err, results) {
+      return callback && callback(err, results)
+    })
   })
 }
