@@ -67,13 +67,22 @@ module.exports.purgeData = function () {
 }
 module.exports.publishGoLives = function () {
   var app = arguments[0]
-  var callback = arguments[arguments.length - 1]
-  if (typeof callback !== 'function') {
-    callback = null
+  var callback
+  if (arguments.length > 1) {
+    callback = arguments[arguments.length - 1]
   }
   parallel([function (cb) {
-    app.models.Notification.find({state: 'new'}, function (err, data) {
-      cb(err, data)
+    app.models.Notification.find({
+      where: {
+        state: 'new',
+        channel: {neq: 'inApp'},
+        invalidBefore: {lt: Date.Now()}
+      }
+    }, function (err, data) {
+      if (err) {
+        return cb(err, data)
+      }
+      return cb(err, data)
     })
   }
   ], function (err, results) {

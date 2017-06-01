@@ -1,3 +1,5 @@
+'use strict'
+
 var parallelLimit = require('async/parallelLimit')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
@@ -57,8 +59,10 @@ module.exports = function (Notification) {
     next()
   })
 
-  Notification.beforeRemote('create', function (ctx, unused, next) {
-    var error
+  Notification.preCreationValidation = function () {
+    let ctx = arguments[0]
+    let next = arguments[arguments.length - 1]
+    let error
     if (!Notification.isAdminReq(ctx)) {
       error = new Error('Forbidden')
       error.status = 403
@@ -110,7 +114,9 @@ module.exports = function (Notification) {
         return next()
       }
     })
-  })
+  }
+
+  Notification.beforeRemote('create', Notification.preCreationValidation)
 
   Notification.dispatchNotification = function (ctx, res, next) {
     // send non-inApp notifications immediately

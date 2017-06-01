@@ -77,16 +77,52 @@ module.exports = function (Model, options) {
     var output = srcTxt
     try {
       output = output.replace(/\{confirmation_code\}/ig, data.confirmationRequest.confirmationCode)
+    }
+    catch (ex) {
+    }
+    try {
       output = output.replace(/\{service_name\}/ig, data.serviceName)
+    }
+    catch (ex) {
+    }
+    try {
       output = output.replace(/\{http_host\}/ig, httpCtx.req.protocol + '://' + httpCtx.req.get('host'))
+    }
+    catch (ex) {
+    }
+    try {
       output = output.replace(/\{rest_api_root\}/ig, Model.app.get('restApiRoot'))
+    }
+    catch (ex) {
+    }
+    try {
       output = output.replace(/\{subscription_id\}/ig, data.id)
+    }
+    catch (ex) {
+    }
+    try {
       output = output.replace(/\{unsubscription_code\}/ig, data.unsubscriptionCode)
+    }
+    catch (ex) {
+    }
 
-      // for backward compability
+    // for backward compatibilities
+    try {
       output = output.replace(/\{serviceName\}/ig, data.serviceName)
+    }
+    catch (ex) {
+    }
+    try {
       output = output.replace(/\{restApiRoot\}/ig, Model.app.get('restApiRoot'))
+    }
+    catch (ex) {
+    }
+    try {
       output = output.replace(/\{subscriptionId\}/ig, data.id)
+    }
+    catch (ex) {
+    }
+    try {
       output = output.replace(/\{unsubscriptionCode\}/ig, data.unsubscriptionCode)
     }
     catch (ex) {

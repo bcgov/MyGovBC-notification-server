@@ -47,6 +47,9 @@
     },
     "validTill": {
       "type": "date"
+    },
+    "invalidBefore": {
+      "type": "date"
     }
   },
   "validations": [],
