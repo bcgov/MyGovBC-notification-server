@@ -229,6 +229,23 @@ describe('CRON dispatchLiveNotifications', function () {
         })
       },
       function (cb) {
+        app.models.Notification.create({
+          "channel": "email",
+          "message": {
+            "from": "admin@foo.com",
+            "subject": "test",
+            "textBody": "this is another test {http_host}"
+          },
+          "serviceName": "myService",
+          "httpHost": "http://foo.com",
+          "userChannelId": "bar@foo.com",
+          "invalidBefore": "3010-01-01",
+          "state": "new"
+        }, function (err, res) {
+          cb(err, res)
+        })
+      },
+      function (cb) {
         app.models.Subscription.create({
           "serviceName": "myService",
           "channel": "email",
@@ -247,17 +264,19 @@ describe('CRON dispatchLiveNotifications', function () {
   it('should send all live push notifications', function (done) {
     cronTasks.dispatchLiveNotifications(app, function (err, results) {
       expect(err).toBeNull()
+      expect(results.length).toBe(1)
       expect(app.models.Notification.sendEmail).toHaveBeenCalledWith('admin@foo.com', 'bar@foo.com', 'test', 'this is a test http://foo.com', undefined, jasmine.any(Function))
+      expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
       parallel([
         function (cb) {
           app.models.Notification.find({
             where: {
               serviceName: "myService",
-              channel: 'email'
+              channel: 'email',
+              state: 'sent'
             }
           }, function (err, data) {
             expect(data.length).toBe(1)
-            expect(data[0].state).toBe('sent')
             cb(err, data)
           })
         }
