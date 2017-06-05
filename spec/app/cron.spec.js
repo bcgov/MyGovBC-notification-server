@@ -1,6 +1,6 @@
 'use strict'
 var app = require('../../server/server.js')
-var cronTask = require('../../server/cron-tasks').purgeData
+var cronTasks = require('../../server/cron-tasks')
 var parallel = require('async/parallel')
 
 describe('CRON purgeData', function () {
@@ -106,7 +106,7 @@ describe('CRON purgeData', function () {
   })
 
   it('should deleted old non-inApp notifications', function (done) {
-    cronTask(app, function (err, results) {
+    cronTasks.purgeData(app, function (err, results) {
       expect(err).toBeNull()
       parallel([
         function (cb) {
@@ -129,7 +129,7 @@ describe('CRON purgeData', function () {
   })
 
   it('should delete all expired inApp notifications', function (done) {
-    cronTask(app, function (err, results) {
+    cronTasks.purgeData(app, function (err, results) {
       expect(err).toBeNull()
       parallel([
         function (cb) {
@@ -162,7 +162,7 @@ describe('CRON purgeData', function () {
   })
 
   it('should delete all deleted inApp notifications', function (done) {
-    cronTask(app, function (err, results) {
+    cronTasks.purgeData(app, function (err, results) {
       expect(err).toBeNull()
       parallel([
         function (cb) {
@@ -184,7 +184,7 @@ describe('CRON purgeData', function () {
   })
 
   xit('should delete all old non-confirmed subscriptions', function (done) {
-    cronTask(app, function (err, results) {
+    cronTasks.purgeData(app, function (err, results) {
       expect(err).toBeNull()
       parallel([
         function (cb) {
@@ -196,6 +196,68 @@ describe('CRON purgeData', function () {
           }, function (err, data) {
             // todo: need to figure out how to disable 'before save' operation hook in common.js first
             expect(data.length).toBe(0)
+            cb(err, data)
+          })
+        }
+      ], function (err, results) {
+        expect(err).toBeNull()
+        done()
+      })
+    })
+  })
+})
+
+
+describe('CRON dispatchLiveNotifications', function () {
+  beforeEach(function (done) {
+    parallel([
+      function (cb) {
+        app.models.Notification.create({
+          "channel": "email",
+          "message": {
+            "from": "admin@foo.com",
+            "subject": "test",
+            "textBody": "this is a test {http_host}"
+          },
+          "isBroadcast": true,
+          "serviceName": "myService",
+          "httpHost": "http://foo.com",
+          "invalidBefore": "2010-01-01",
+          "state": "new"
+        }, function (err, res) {
+          cb(err, res)
+        })
+      },
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myService",
+          "channel": "email",
+          "userChannelId": "bar@foo.com",
+          "state": "confirmed"
+        }, function (err, res) {
+          cb(err, res)
+        })
+      }
+    ], function (err, results) {
+      expect(err).toBeNull()
+      done()
+    })
+  })
+
+  it('should send all live push notifications', function (done) {
+    cronTasks.dispatchLiveNotifications(app, function (err, results) {
+      expect(err).toBeNull()
+      expect(app.models.Notification.sendEmail).toHaveBeenCalledWith('admin@foo.com', 'bar@foo.com', 'test', 'this is a test http://foo.com', undefined, jasmine.any(Function))
+      parallel([
+        function (cb) {
+          app.models.Notification.find({
+            where: {
+              serviceName: "myService",
+              channel: 'email'
+            }
+          }, function (err, data) {
+            expect(data.length).toBe(1)
+            expect(data[0].state).toBe('sent')
             cb(err, data)
           })
         }
