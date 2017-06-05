@@ -6,7 +6,7 @@ module.exports.purgeData = function () {
   if (arguments.length > 1) {
     callback = arguments[arguments.length - 1]
   }
-  var cronConfig = app.get('cron') || {}
+  var cronConfig = app.get('cron').purgeData || {}
   var retentionDays
 
   parallel([
@@ -65,7 +65,7 @@ module.exports.purgeData = function () {
     callback && callback(err, results)
   })
 }
-module.exports.publishLiveNotifications = function () {
+module.exports.dispatchLiveNotifications = function () {
   var app = arguments[0]
   var callback
   if (arguments.length > 1) {

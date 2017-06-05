@@ -71,10 +71,15 @@
     }
   },
   "cron": {
-    "timeSpec": "0 0 1 * * *",
-    "pushNotificationRetentionDays": 30,
-    "expiredInAppNotificationRetentionDays": 30,
-    "nonConfirmedSubscriptionRetentionDays": 30,
-    "defaultRetentionDays": 30
+    "purgeData": {
+      "timeSpec": "0 0 1 * * *",
+      "pushNotificationRetentionDays": 30,
+      "expiredInAppNotificationRetentionDays": 30,
+      "nonConfirmedSubscriptionRetentionDays": 30,
+      "defaultRetentionDays": 30
+    },
+    "dispatchLiveNotifications":{
+      "timeSpec": "0 * * * * *"
+    }
   }
 }

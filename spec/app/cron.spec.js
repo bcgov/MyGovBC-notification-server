@@ -3,7 +3,7 @@ var app = require('../../server/server.js')
 var cronTask = require('../../server/cron-tasks').purgeData
 var parallel = require('async/parallel')
 
-describe('CRON', function () {
+describe('CRON purgeData', function () {
   beforeEach(function (done) {
     parallel([
       function (cb) {
@@ -194,7 +194,7 @@ describe('CRON', function () {
               channel: 'email'
             }
           }, function (err, data) {
-            // todo: need to disable 'before save' operation hook in common.js first
+            // todo: need to figure out how to disable 'before save' operation hook in common.js first
             expect(data.length).toBe(0)
             cb(err, data)
           })

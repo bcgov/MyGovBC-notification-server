@@ -5,24 +5,25 @@ var app = module.exports = loopback()
 
 app.start = function () {
   if (process.env.NOTIFYBC_NODE_ROLE !== 'slave') {
-    var cron = require('cron')
+    var CronJob = require('cron').CronJob
     // start purgeData cron
     var cronTasks = require('./cron-tasks')
     var cronConfig = app.get('cron') || {}
-    new cron.CronJob({
-      cronTime: cronConfig.timeSpec || '0 0 1 * * *',
+    var cronConfigPurgeData = cronConfig.purgeData || {}
+    var cronConfigDispatchLiveNotifications = cronConfig.dispatchLiveNotifications || {}
+    new CronJob({
+      cronTime: cronConfigPurgeData.timeSpec,
       onTick: function () {
         cronTasks.purgeData(app)
       },
       start: true
     })
-    new cron.CronJob({
-      cronTime: '0 * * * * *',
+    new CronJob({
+      cronTime: cronConfigDispatchLiveNotifications.timeSpec,
       onTick: function () {
-        cronTasks.publishLiveNotifications(app)
+        cronTasks.dispatchLiveNotifications(app)
       },
-      // todo: turn it on
-      start: false
+      start: true
     })
   }
 

@@ -88,7 +88,7 @@ module.exports = function (Model, options) {
     catch (ex) {
     }
     try {
-      output = output.replace(/\{http_host\}/ig, httpCtx.req.protocol + '://' + httpCtx.req.get('host'))
+      output = output.replace(/\{http_host\}/ig, httpCtx.args && httpCtx.args.data && httpCtx.args.data.httpHost ? httpCtx.args.data.httpHost : httpCtx.req.protocol + '://' + httpCtx.req.get('host'))
     }
     catch (ex) {
     }

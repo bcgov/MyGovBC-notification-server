@@ -75,6 +75,13 @@ module.exports = function (Notification) {
       error.status = 403
       return next(error)
     }
+    if (!data.httpHost && data.channel !== 'inApp') {
+      if (data.invalidBefore && Date.parse(data.invalidBefore) > new Date()) {
+        if (ctx.req) {
+          data.httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
+        }
+      }
+    }
     if (data.channel === 'inApp' || data.skipSubscriptionConfirmationCheck || data.isBroadcast) {
       return next()
     }

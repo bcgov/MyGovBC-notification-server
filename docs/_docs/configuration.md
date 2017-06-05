@@ -290,17 +290,24 @@ See [LoopBack MongoDB data source](https://docs.strongloop.com/display/public/LB
 ## Node Roles
 In a multi-node deployment, some tasks should only be run by one node. That node is designated as *master*. The distinction is made using environment variable *NOTIFYBC_NODE_ROLE*. Setting to anything other than *slave*, including not set, will be regarded as *master*.
 
-## Cron Job
-*NotifyBC* runs a cron job to purge old notifications and subscriptions. The default frequency of cron job and retention policy are defined by *cron* config object in file */server/config.json*
+## Cron Jobs
+*NotifyBC* runs several cron jobs described below. These jobs are controlled by sub-properties defined in config object *cron*. To change config, create the object and properties in file */server/config.local*.
+
+By default cron jobs are enabled. In a multi-node deployment, cron jobs should only run on the [master node](#node-roles) to ensure single execution.
+
+### Purge Data
+This cron job purges old notifications and subscriptions. The default frequency of cron job and retention policy are defined by *cron.purgeData* config object in file */server/config.json*
 
 ```json
  {
    "cron": {
-    "timeSpec": "0 0 1 * * *",
-    "pushNotificationRetentionDays" : 30,
-    "expiredInAppNotificationRetentionDays" : 30,
-    "nonConfirmedSubscriptionRetentionDays" : 30,
-    "defaultRetentionDays": 30
+    "purgeData":{
+      "timeSpec": "0 0 1 * * *",
+      "pushNotificationRetentionDays" : 30,
+      "expiredInAppNotificationRetentionDays" : 30,
+      "nonConfirmedSubscriptionRetentionDays" : 30,
+      "defaultRetentionDays": 30
+    }
    }
  }
 ```
@@ -318,12 +325,26 @@ To change a config item, set the config item in file */server/config.local.json*
 ```json
  {
    "cron": {
-    "timeSpec": "0 0 2 * * *"
+    "purgeData":{
+      "timeSpec": "0 0 2 * * *"
+    }
    }
  }
 ```
 
-By default cron job is enabled. In a multi-node deployment, cron job should only run on the [master node](#node-roles). 
+### Dispatch Live Notifications
+This cron job handles future-dated notifications. The default config is defined by *cron.dispatchLiveNotifications* config object in file */server/config.json*
+
+```json
+ {
+   "cron": {
+    "dispatchLiveNotifications":{
+      "timeSpec": "0 * * * * *"
+    }
+   }
+ }
+```
+*timeSpec* follows the same syntax as purge data.
 
 ## RSA Keys
 When *NotifyBC* starts up, it checks if an RSA key pair exists in database as dynamic config. If not it will generate the dynamic config and save it to database. This RSA key pair is used to exchange confidential information with third party server applications through user's browser. For an example of use case, see [Subscription API](../api-subscription/). To make it work, send the public key to the third party and have their server app encrypt the data using the public key. To obtain public key, call the REST [Configuration API](..api-config/#get-configurations) from an admin ip, for example, by running *cURL* command
