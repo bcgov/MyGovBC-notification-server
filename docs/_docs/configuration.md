@@ -333,7 +333,7 @@ To change a config item, set the config item in file */server/config.local.json*
 ```
 
 ### Dispatch Live Notifications
-This cron job handles future-dated notifications. The default config is defined by *cron.dispatchLiveNotifications* config object in file */server/config.json*
+This cron job sends out future-dated notifications when the notification becomes current. The default config is defined by *cron.dispatchLiveNotifications* config object in file */server/config.json*
 
 ```json
  {

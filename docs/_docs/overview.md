@@ -17,6 +17,7 @@ permalink: /docs/overview/
 * Deliver push notifications to confirmed subscription channels (or force delivering to unconfirmed channels):
   * email
   * sms
+* Support future-dated notifications
 * For in-app pull notifications
   * support message states - read, deleted
   * support message expiration
@@ -33,7 +34,7 @@ permalink: /docs/overview/
  
 * {confirmation_code} - subscription confirmation code
 * {service_name} 
-* {http_host} - http host in the form *http(s)://\<host_name\>:\<port\>*
+* {http_host} - http host in the form *http(s)://\<host_name\>:\<port\>*. The value is obtained from the http request that triggers the message
 * {rest_api_root} - configured Loopback [Root URI of REST API](https://loopback.io/doc/en/lb3/config.json.html#top-level-properties)
 * {subscription_id} 
 * {unsubscription_code} - for anonymous subscriptions 
