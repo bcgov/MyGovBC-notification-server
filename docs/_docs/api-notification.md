@@ -289,12 +289,13 @@ POST /notifications
   
   1. if it's a user request, error is returned
   2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, the recipient as identified by either *userChannelId* or *userId* must have a confirmed subscription if field *skipSubscriptionConfirmationCheck* is not set to true. If *skipSubscriptionConfirmationCheck* is set to true, then the subscription check is skipped, but in such case the request must contain *userChannelId*, not *userId* as subscription data is not queried to obtain *userChannelId* from *userId*.   
-  3. the notification request is saved to database
-  4. if the notification is future-dated, then steps 5-7 below are skipped during request processing but carried out later on by the cron job. Otherwise, if the request is current
-  5. for unicast push notification, the message is sent to targeted user; for broadcast push notification, the message is sent to all confirmed subscribers of the service in the delivery channel. In both cases, [mail merge](../overview/#mail-merge) is performed on messages.
-  6. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains the list of *userChannelId*s the message failed to deliver to, but the state will still be set to *sent*
-  7. the updated notification is saved back to database
-  8. the saved record is returned unless there is an error saving to database, in which case error is returned
+  3. if the notification is future-dated, then the field *httpHost*, if empty, is populated based on request's http protocol and host. This field is used to replace token *{http_host}* in notification message during [mail merge](../overview/#mail-merge) when the notification is later dispatched.
+  4. the notification request is saved to database
+  5. if the notification is future-dated, then steps 6-8 below are skipped during request processing but carried out later on by the cron job when the notification becomes current. Otherwise, if the request is current
+  6. for unicast push notification, the message is sent to targeted user; for broadcast push notification, the message is sent to all confirmed subscribers of the service in the delivery channel. In both cases, mail merge is performed on messages.
+  7. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains the list of *userChannelId*s the message failed to deliver to, but the state will still be set to *sent*
+  8. the updated notification is saved back to database
+  9. the saved record is returned unless there is an error saving to database, in which case error is returned
 
 * example
 
