@@ -13,10 +13,14 @@ module.exports = function (Model, options) {
     if (!httpCtx || !httpCtx.req) {
       return true
     }
-    if(!ignoreAccessToken){
-      let token = httpCtx.args.options && httpCtx.args.options.accessToken
-      if (token && token.userId) {
-        return true
+    if (!ignoreAccessToken) {
+      try {
+        let token = httpCtx.args.options && httpCtx.args.options.accessToken
+        if (token && token.userId) {
+          return true
+        }
+      }
+      catch (ex) {
       }
     }
 

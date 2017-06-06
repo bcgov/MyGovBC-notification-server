@@ -2,7 +2,7 @@ var disableAllMethods = require('../../common/helpers.js').disableAllMethods
 module.exports = function (Configuration) {
   disableAllMethods(Configuration, ['find', 'create', 'patchAttributes', 'deleteById'])
   Configuration.beforeRemote('**', function (ctx, unused, next) {
-    if (Configuration.isAdminReq(ctx)) {
+    if (Configuration.isAdminReq(ctx, true)) {
       return next()
     }
     var error = new Error('Forbidden')
