@@ -8,10 +8,16 @@ module.exports = function (Model, options) {
     return base
   }
 
-  Model.isAdminReq = function (httpCtx) {
+  Model.isAdminReq = function (httpCtx, ignoreAccessToken) {
     // internal requests
     if (!httpCtx || !httpCtx.req) {
       return true
+    }
+    if(!ignoreAccessToken){
+      let token = httpCtx.args.options && httpCtx.args.options.accessToken
+      if (token && token.userId) {
+        return true
+      }
     }
 
     var adminIps = Model.app.get('adminIps') || Model.app.get('defaultAdminIps')

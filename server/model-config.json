@@ -24,5 +24,13 @@
   "configuration": {
     "dataSource": "db",
     "public": true
+  },
+  "AccessToken": {
+    "dataSource": "db",
+    "public": false
+  },
+  "administrator": {
+    "dataSource": "db",
+    "public": true
   }
 }
