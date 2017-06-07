@@ -3,7 +3,7 @@ var request = require('supertest')
 var app = require('../../server/server.js')
 
 describe('administrator', function () {
-  it('should allow create, login, and then use it to post notification', function (done) {
+  it('should be allowed to create, login, get access token, and then use it to post notification', function (done) {
     spyOn(app.models.Administrator, 'isAdminReq').and.callFake(function () {
       return true
     })
