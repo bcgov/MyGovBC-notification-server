@@ -3,7 +3,7 @@ layout: docs
 title: Configuration API
 permalink: /docs/api-config/
 ---
-The configuration API is used by administrators to define dynamic configurations, hence **the API is accessible by admin requests only**. Dynamic configuration is needed in situations like
+The configuration API, accessible by only super-admin requests, is used to define dynamic configurations. Dynamic configuration is needed in situations like
 
 * RSA key pair generated automatically at boot time if not present
 * service-specific subscription confirmation request message template

@@ -41,14 +41,18 @@ permalink: /docs/overview/
 
 ## Architecture
 
-*NotifyBC*, designed to be a microservice, doesn't use ACL to secure API calls. Instead, it classifies incoming requests into admin and user types according to following criteria:
+*NotifyBC*, designed to be a microservice, doesn't use full-blown ACL to secure API calls. Instead, it classifies incoming requests into admin and user types. Each type has two subtypes based on following criteria
 
-* If the request bears SiteMinder header, it is a user request;
-* If the source ip is in the admin ip list, it's an admin request.
+* super-admin, if the source ip of the request is in the admin ip list
+* admin, if the request is not super-admin but has valid access token that maps to an admin user created and logged in using the *administrator* api 
+* authenticated user, if the request is neither super-admin nor admin, but authenticated by SiteMinder, i.e. the request carries SiteMinder headers and is from trusted SiteMinder proxy
+* anonymous user, if the request doesn't meet any of the above criteria
 
+The only extra privileges that a super-admin has over admin are that super-admin can perform CRUD operations on *configuration* and *administrator* entities through REST API. In the remaining docs, when no further distinction is necessary, an admin request refers to both super-admin and admin request; a user request refers to both authenticated and anonymous request.
+ 
 An admin request carries full authorization whereas user request has limited access. For example, a user request is not allowed to
 
-* send message
+* send notification
 * bypass the delivery channel confirmation process when subscribing to a service
 * retrieve push notifications
 * retrieve in-app notifications that is not targeted to the current user

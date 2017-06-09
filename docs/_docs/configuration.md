@@ -17,22 +17,32 @@ There are two types of configurations - static and dynamic. Static configuration
 
 
 ## Admin IP List
-By [design](../overview/#architecture), *NotifyBC* classifies incoming requests into admin and user types. By default, the classification is based on the presence of SiteMinder header alone. In order to support user subscription from an anonymous website, an admin ip list can be used to make the distinction. By default, admin ip contains *localhost* only as defined in */server/config.json* 
+By [design](../overview/#architecture), *NotifyBC* classifies incoming requests into four types. For a request to be classified as super-admin, the request's source ip must be in admin ip list. By default, the list contains *localhost* only as defined by *defaultAdminIps* in */server/config.json* 
 
 ```
 {
-  "adminIps": [
+  "defaultAdminIps": [
     "127.0.0.1"
   ]
 }
 ```
-to modify, create the config object with updated list in file */server/config.local.json* instead.
+to modify, create config object *adminIps* with updated list in file */server/config.local.json* instead. For example, to add ip range *192.168.0.0/24* to the list
+
+```
+{
+  "adminIps": [
+    "127.0.0.1",
+    "192.168.0.0/24"
+  ]
+}
+```
 
 
 <div class="note warning">
   <h5>Define static array config in one file only</h5>
   <p>
   Due to a <a href="https://github.com/strongloop/loopback-boot/issues/172">bug</a> in Loopback a config of array type such as <i>adminIps</i> cannot be merged if defined in multiple files with different length. To mitigate, only define an array config in one file.
+  It is for this reason that the default admin ip list has to use a different name <i>defaultAdminIps</i> as shown above.
   </p>
 </div>
 
