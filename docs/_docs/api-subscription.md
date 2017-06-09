@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: Subscription API
+title: Subscription
 permalink: /docs/api-subscription/
 ---
 The subscription API encapsulates the backend workflow of user subscription and un-subscription of push notification service. Depending on whether a API call comes from user browser as a user request or from an authorized server as an admin request, *NotifyBC* applies different validation rules. For user requests, the notification channel entered by user is unconfirmed. A confirmation code will be associated with this request. The confirmation code  can be created in one of two ways:
