@@ -363,7 +363,7 @@ describe('POST /notifications', function () {
           }, 3000)
         })
       })
-  })
+  }, 10000)
 })
 
 describe('PATCH /notifications/{id}', function () {
