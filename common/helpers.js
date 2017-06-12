@@ -33,7 +33,7 @@ module.exports.disableAllMethods = function (model, methodsToExpose) {
       }
     })
     if (hiddenMethods.length > 0) {
-      console.info('Remote mehtods hidden for', modelName, ':', hiddenMethods.join(', '))
+      console.info('Remote methods hidden for', modelName, ':', hiddenMethods.join(', '))
     }
   }
 }

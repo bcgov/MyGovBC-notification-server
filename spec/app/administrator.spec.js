@@ -44,5 +44,5 @@ describe('administrator', function () {
               })
           })
       })
-  })
+  }, 10000)
 })
