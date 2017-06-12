@@ -195,7 +195,7 @@ The API operates on following notification data model fields:
           </li>
           <li>
             <div>
-              for email: <span class="name"> from, subject, textBody, htmlBody</span>
+              for email: <i>from, subject, textBody, htmlBody</i>
             </div> 
             <ul>
               <li>type: string</li>
@@ -206,7 +206,7 @@ The API operates on following notification data model fields:
           </li>
           <li>
             <div>
-              for sms: <span class="name"> textBody</span>
+              for sms: <i>textBody</i>
             </div> 
             <ul>
               <li>type: string</li>
