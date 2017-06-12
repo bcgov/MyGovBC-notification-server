@@ -136,7 +136,7 @@ The API operates on following notification data model fields:
   <tr>
     <td>
       <p class="name">isBroadcast</p>
-      <p class="description">whether it's a broadcast message. A broadcast message should omit <i>userChannelId</i> and set <i>isBroadcast</i> to true</p>
+      <p class="description">whether it's a broadcast message. A broadcast message should omit <i>userChannelId</i> and <i>userId</i>, in addition to setting <i>isBroadcast</i> to true</p>
     </td>
     <td>
       <table>
@@ -174,7 +174,7 @@ The API operates on following notification data model fields:
   <tr>
     <td>
       <p class="name">invalidBefore</p>
-      <p class="description">date-time after which the notification can be dispatched.</p>
+      <p class="description">date-time in the future after which the notification can be dispatched.</p>
     </td>
     <td>
       <table>
@@ -204,6 +204,17 @@ The API operates on following notification data model fields:
               </li>
             </ul>
           </li>
+          <li>
+            <div>
+              for sms: <span class="name"> textBody</span>
+            </div> 
+            <ul>
+              <li>type: string</li>
+              <li>
+                sms message template.
+              </li>
+            </ul>
+          </li>
         </ul>
       </div>
     </td>
@@ -211,6 +222,24 @@ The API operates on following notification data model fields:
       <table>
         <tr><td>type</td><td>object</td></tr>
         <tr><td>required</td><td>true</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <p class="name">asyncBroadcastPushNotification</p>
+      <div class="description">this field determines if the API call to create an immediate (i.e. not future-dated) broadcast push notification is asynchronous or not. If omitted, the API call is synchronous, i.e. the API call blocks until notifications have been sent to all subscribers. If set, valid values and corresponding behaviors are
+        <ul>
+          <li>true - async without callback</li>
+          <li>false - sync </li>
+          <li>a string contain callback url - async with callback of the supplied url upon completion</li>
+        </ul>
+      </div>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>string or boolean</td></tr>
+        <tr><td>required</td><td>false</td></tr>
       </table>
     </td>
   </tr>
@@ -291,11 +320,13 @@ POST /notifications
   2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, the recipient as identified by either *userChannelId* or *userId* must have a confirmed subscription if field *skipSubscriptionConfirmationCheck* is not set to true. If *skipSubscriptionConfirmationCheck* is set to true, then the subscription check is skipped, but in such case the request must contain *userChannelId*, not *userId* as subscription data is not queried to obtain *userChannelId* from *userId*.   
   3. if the notification is future-dated, then the field *httpHost*, if empty, is populated based on request's http protocol and host. This field is used to replace token *{http_host}* in notification message during [mail merge](../overview/#mail-merge) when the notification is later dispatched.
   4. the notification request is saved to database
-  5. if the notification is future-dated, then steps 6-8 below are skipped during request processing but carried out later on by the cron job when the notification becomes current. Otherwise, if the request is current
-  6. for unicast push notification, the message is sent to targeted user; for broadcast push notification, the message is sent to all confirmed subscribers of the service in the delivery channel. In both cases, mail merge is performed on messages.
-  7. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains the list of *userChannelId*s the message failed to deliver to, but the state will still be set to *sent*
-  8. the updated notification is saved back to database
-  9. the saved record is returned unless there is an error saving to database, in which case error is returned
+  5. if the notification is future-dated, then all subsequent request processing is skipped and response is sent back to user. Steps 7-10 below will be carried out later on by the cron job when the notification becomes current. 
+  6. if it's an async broadcast push notification, then response is sent back to user but steps 7-10 below is processed separately 
+  7. for unicast push notification, the message is sent to targeted user; for broadcast push notification, the message is sent to all confirmed subscribers of the service in the delivery channel. In both cases, mail merge is performed on messages.
+  8. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains the list of *userChannelId*s the message failed to deliver to, but the state will still be set to *sent*
+  9. the updated notification is saved back to database
+  10. if it's an async broadcast push notification with a callback url, then the url is called with POST verb containing the notification with updated status as the request body
+  11. for synchronous notification, the saved record is returned unless there is an error saving to database, in which case error is returned
 
 * example
 

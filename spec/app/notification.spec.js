@@ -396,7 +396,7 @@ describe('POST /notifications', function () {
       })
   })
 
-  it('should perform async callback for broadcast push notification if broadcastPushNotificationCallbackUrl is set', function (done) {
+  it('should perform async callback for broadcast push notification if asyncBroadcastPushNotification is set', function (done) {
     spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
@@ -419,7 +419,7 @@ describe('POST /notifications', function () {
         },
         "channel": "email",
         "isBroadcast": true,
-        "broadcastPushNotificationCallbackUrl": "http://foo.com"
+        "asyncBroadcastPushNotification": "http://foo.com"
       })
       .set('Accept', 'application/json')
       .end(function (err, res) {

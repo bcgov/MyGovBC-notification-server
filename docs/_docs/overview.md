@@ -22,6 +22,7 @@ permalink: /docs/overview/
   * support message states - read, deleted
   * support message expiration
   * deleted messages are not deleted immediately for auditing and recovery purposes
+* Support both sync and async API call for broadcast push notifications. For async API call, an optional callback url is supported.
 
 ### subscription and un-subscription
 * Verify the ownership of push notification subscription channel:

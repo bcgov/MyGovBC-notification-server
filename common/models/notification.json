@@ -51,8 +51,8 @@
     "invalidBefore": {
       "type": "date"
     },
-    "broadcastPushNotificationCallbackUrl": {
-      "type": "string"
+    "asyncBroadcastPushNotification": {
+      "type": "any"
     }
   },
   "validations": [],
