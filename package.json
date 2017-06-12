@@ -26,6 +26,7 @@
     "node-rsa": "^0.4.1",
     "nodemailer": "^2.5.0",
     "randexp": "^0.4.3",
+    "request": "^2.81.0",
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^1.0.1",
     "twilio": "^2.11.1"

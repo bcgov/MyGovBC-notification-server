@@ -137,6 +137,9 @@ module.exports = function (Notification) {
           if (errSend) {
             res.state = 'error'
           }
+          else if (res.isBroadcast && res.sendingBroadcastPushNotificationCallbackUrl) {
+            // async
+          }
           else {
             res.state = 'sent'
           }
@@ -258,9 +261,25 @@ module.exports = function (Notification) {
             }
           })
           parallelLimit(tasks, (Notification.app.get('notification') && Notification.app.get('notification').broadcastTaskConcurrency) || 100, function (err, res) {
-            cb(err)
+            if (!data.sendingBroadcastPushNotificationCallbackUrl) {
+              cb(err)
+            }
+            else {
+              if (err) {
+                data.state = 'error'
+              }
+              else {
+                data.state = 'sent'
+              }
+              data.save(function (errSave) {
+                require('request').post(data.sendingBroadcastPushNotificationCallbackUrl, data)
+              })
+            }
           })
         })
+        if (data.sendingBroadcastPushNotificationCallbackUrl) {
+          cb(null)
+        }
         break
     }
   }

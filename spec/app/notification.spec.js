@@ -186,7 +186,7 @@ describe('POST /notifications', function () {
       })
   })
 
-  it('should no send future-dated notification', function (done) {
+  it('should not send future-dated notification', function (done) {
     spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
@@ -313,7 +313,55 @@ describe('POST /notifications', function () {
       })
   })
 
+  it('should perform async callback for broadcast push notification if sendingBroadcastPushNotificationCallbackUrl is set', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    app.models.Notification.sendEmail = jasmine.createSpy().and.callFake(function () {
+      let cb = arguments[arguments.length - 1]
+      console.log('faking delayed sendEmail')
+      setTimeout(function () {
+        return cb(null, null)
+      }, 1000)
+    })
+    request(app).post('/api/notifications')
+      .send({
+        "serviceName": "myService",
+        "message": {
+          "from": "no_reply@bar.com",
+          "subject": "test",
+          "textBody": "This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}"
+        },
+        "channel": "email",
+        "isBroadcast": true,
+        "sendingBroadcastPushNotificationCallbackUrl": "http://foo.com"
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Notification.find({
+          where: {
+            serviceName: 'myService',
+          }
+        }, function (err, data) {
+          expect(data.length).toBe(1)
+          expect(data[0].state).toBe('new')
+          setTimeout(function () {
+            app.models.Notification.find({
+              where: {
+                serviceName: 'myService',
+              }
+            }, function (err, data) {
+              expect(data.length).toBe(1)
+              expect(data[0].state).toBe('sent')
+              done()
+            })
+          }, 3000)
+        })
+      })
+  })
 })
+
 describe('PATCH /notifications/{id}', function () {
   beforeEach(function (done) {
     app.models.Notification.create({

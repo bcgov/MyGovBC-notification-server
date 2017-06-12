@@ -51,7 +51,7 @@
     "invalidBefore": {
       "type": "date"
     },
-    "callbackUrl": {
+    "sendingBroadcastPushNotificationCallbackUrl": {
       "type": "string"
     }
   },
