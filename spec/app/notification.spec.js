@@ -2,6 +2,7 @@
 var request = require('supertest')
 var app = require('../../server/server.js')
 var parallel = require('async/parallel')
+var nodeReq = require('request')
 
 describe('GET /notifications', function () {
   var data
@@ -324,6 +325,8 @@ describe('POST /notifications', function () {
         return cb(null, null)
       }, 1000)
     })
+    spyOn(nodeReq, 'post')
+
     request(app).post('/api/notifications')
       .send({
         "serviceName": "myService",
@@ -354,6 +357,7 @@ describe('POST /notifications', function () {
             }, function (err, data) {
               expect(data.length).toBe(1)
               expect(data[0].state).toBe('sent')
+              expect(nodeReq.post).toHaveBeenCalledWith('http://foo.com', jasmine.any(Object))
               done()
             })
           }, 3000)
