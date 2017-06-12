@@ -137,7 +137,7 @@ module.exports = function (Notification) {
           if (errSend) {
             res.state = 'error'
           }
-          else if (res.isBroadcast && res.sendingBroadcastPushNotificationCallbackUrl) {
+          else if (res.isBroadcast && res.broadcastPushNotificationCallbackUrl) {
             // async
           }
           else {
@@ -261,7 +261,7 @@ module.exports = function (Notification) {
             }
           })
           parallelLimit(tasks, (Notification.app.get('notification') && Notification.app.get('notification').broadcastTaskConcurrency) || 100, function (err, res) {
-            if (!data.sendingBroadcastPushNotificationCallbackUrl) {
+            if (!data.broadcastPushNotificationCallbackUrl) {
               cb(err)
             }
             else {
@@ -272,12 +272,12 @@ module.exports = function (Notification) {
                 data.state = 'sent'
               }
               data.save(function (errSave) {
-                require('request').post(data.sendingBroadcastPushNotificationCallbackUrl, data)
+                require('request').post(data.broadcastPushNotificationCallbackUrl, data)
               })
             }
           })
         })
-        if (data.sendingBroadcastPushNotificationCallbackUrl) {
+        if (data.broadcastPushNotificationCallbackUrl) {
           cb(null)
         }
         break
