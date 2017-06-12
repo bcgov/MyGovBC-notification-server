@@ -50,6 +50,9 @@
     },
     "invalidBefore": {
       "type": "date"
+    },
+    "callbackUrl": {
+      "type": "string"
     }
   },
   "validations": [],

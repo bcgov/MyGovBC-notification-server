@@ -78,7 +78,7 @@
       "nonConfirmedSubscriptionRetentionDays": 30,
       "defaultRetentionDays": 30
     },
-    "dispatchLiveNotifications":{
+    "dispatchLiveNotifications": {
       "timeSpec": "0 * * * * *"
     }
   }
