@@ -32,5 +32,9 @@
   "administrator": {
     "dataSource": "db",
     "public": true
+  },
+  "rss": {
+    "dataSource": "db",
+    "public": false
   }
 }
