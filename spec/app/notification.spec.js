@@ -439,7 +439,7 @@ describe('POST /notifications', function () {
             }, function (err, data) {
               expect(data.length).toBe(1)
               expect(data[0].state).toBe('sent')
-              expect(nodeReq.post).toHaveBeenCalledWith('http://foo.com', jasmine.any(Object))
+              expect(nodeReq.post).toHaveBeenCalledWith(jasmine.any(Object))
               done()
             })
           }, 3000)

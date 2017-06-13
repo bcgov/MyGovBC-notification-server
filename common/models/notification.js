@@ -273,7 +273,14 @@ module.exports = function (Notification) {
               }
               data.save(function (errSave) {
                 if (typeof data.asyncBroadcastPushNotification === 'string') {
-                  require('request').post(data.asyncBroadcastPushNotification, data)
+                  let options = {
+                    uri: data.asyncBroadcastPushNotification,
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    json: data
+                  }
+                  require('request').post(options)
                 }
               })
             }
