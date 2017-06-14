@@ -85,7 +85,7 @@ module.exports = function (Subscription) {
       if (userId) {
         data.userId = userId
       }
-      else if (!Subscription.isAdminReq(ctx)) {
+      else if (!Subscription.isAdminReq(ctx) || !data.unsubscriptionCode) {
         // generate unsubscription code
         var anonymousUnsubscription = mergedSubscriptionConfig.anonymousUnsubscription
         if (anonymousUnsubscription.code && anonymousUnsubscription.code.required) {

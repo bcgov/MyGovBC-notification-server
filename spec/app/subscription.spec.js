@@ -161,6 +161,31 @@ describe('POST /subscriptions', function () {
         })
       })
   })
+  it('should generate unsubscription code for subscriptions created by admin user', function (done) {
+    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app).post('/api/subscriptions')
+      .send({
+        "serviceName": "myService",
+        "channel": "sms",
+        "userChannelId": "12345",
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
+        app.models.Subscription.find({
+          where: {
+            serviceName: 'myService',
+            "userChannelId": "12345"
+          }
+        }, function (err, data) {
+          expect(data[0].unsubscriptionCode).toMatch(/\d{5}/)
+          done()
+        })
+      })
+  })
   it('should allow non-admin user create subscriptions', function (done) {
     request(app).post('/api/subscriptions')
       .send({

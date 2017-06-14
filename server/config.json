@@ -39,7 +39,7 @@
         "sendRequest": true,
         "from": "no_reply@example.com",
         "subject": "Subscription confirmation",
-        "textBody": "Enter {confirmation_code} on screen"
+        "textBody": "Enter {subscription_confirmation_code} on screen"
       }
     },
     "confirmationAcknowledgements": {
