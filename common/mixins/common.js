@@ -86,9 +86,9 @@ module.exports = function (Model, options) {
   }
 
   Model.mailMerge = function (srcTxt, data, httpCtx) {
-    var output = srcTxt
+    let output = srcTxt
     try {
-      output = output.replace(/\{confirmation_code\}/ig, data.confirmationRequest.confirmationCode)
+      output = output.replace(/\{subscription_confirmation_code\}/ig, data.confirmationRequest.confirmationCode)
     }
     catch (ex) {
     }
@@ -97,8 +97,10 @@ module.exports = function (Model, options) {
     }
     catch (ex) {
     }
+    let httpHost
     try {
-      output = output.replace(/\{http_host\}/ig, httpCtx.args && httpCtx.args.data && httpCtx.args.data.httpHost ? httpCtx.args.data.httpHost : httpCtx.req.protocol + '://' + httpCtx.req.get('host'))
+      httpHost = httpCtx.args && httpCtx.args.data && httpCtx.args.data.httpHost ? httpCtx.args.data.httpHost : httpCtx.req.protocol + '://' + httpCtx.req.get('host')
+      output = output.replace(/\{http_host\}/ig, httpHost)
     }
     catch (ex) {
     }
@@ -117,8 +119,28 @@ module.exports = function (Model, options) {
     }
     catch (ex) {
     }
+    try {
+      output = output.replace(/\{unsubscription_url\}/ig, httpHost + Model.app.get('restApiRoot') + '/subscriptions/' + data.id + '/unsubscribe?unsubscriptionCode=' + data.unsubscriptionCode)
+    }
+    catch (ex) {
+    }
+    try {
+      output = output.replace(/\{subscription_confirmation_url\}/ig, httpHost + Model.app.get('restApiRoot') + '/subscriptions/' + data.id + '/verify?confirmationCode=' + data.confirmationRequest.confirmationCode)
+    }
+    catch (ex) {
+    }
+    try {
+      output = output.replace(/\{unsubscription_reversion_url\}/ig, httpHost + Model.app.get('restApiRoot') + '/subscriptions/' + data.id + '/unsubscribe/undo?unsubscriptionCode=' + data.unsubscriptionCode)
+    }
+    catch (ex) {
+    }
 
     // for backward compatibilities
+    try {
+      output = output.replace(/\{confirmation_code\}/ig, data.confirmationRequest.confirmationCode)
+    }
+    catch (ex) {
+    }
     try {
       output = output.replace(/\{serviceName\}/ig, data.serviceName)
     }

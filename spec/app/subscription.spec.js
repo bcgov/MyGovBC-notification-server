@@ -120,7 +120,7 @@ describe('POST /subscriptions', function () {
           "from": "a@b.com",
           "subject": "subject",
           "sendRequest": true,
-          "textBody": "{confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}",
+          "textBody": "{subscription_confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {unsubscription_url} {subscription_confirmation_url} {unsubscription_reversion_url}",
           "confirmationCode": "12345"
         }
       })
@@ -128,18 +128,28 @@ describe('POST /subscriptions', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).toHaveBeenCalled()
-        expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{confirmation_code}')
+        expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{subscription_confirmation_code}')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{service_name}')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{http_host}')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{rest_api_root}')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{subscription_id}')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{unsubscription_code}')
+        expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{unsubscription_url}')
+        expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{subscription_confirmation_url}')
+        expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).not.toContain('{unsubscription_reversion_url}')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('12345')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('myService')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('http://127.0.0.1')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('/api')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('1 ')
         expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('54321')
+        //unsubscription_url
+        expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('/api/subscriptions/1/unsubscribe?unsubscriptionCode=54321')
+        //subscription_confirmation_url
+        expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('/api/subscriptions/1/verify?confirmationCode=12345')
+        //unsubscription_reversion_url
+        expect(app.models.Subscription.sendEmail.calls.argsFor(0)[3]).toContain('/api/subscriptions/1/unsubscribe/undo?unsubscriptionCode=54321')
+
         app.models.Subscription.find({
           where: {
             serviceName: 'myService',

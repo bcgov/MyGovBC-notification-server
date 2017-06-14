@@ -33,12 +33,16 @@ permalink: /docs/overview/
 ### mail merge
 *NotifyBC* recognizes following case-insensitive tokens in push notification or subscription messages. They are replaced dynamically when sending the message
  
-* {confirmation_code} - subscription confirmation code
+* {subscription_confirmation_url}
+* {subscription_confirmation_code}
 * {service_name} 
 * {http_host} - http host in the form *http(s)://\<host_name\>:\<port\>*. The value is obtained from the http request that triggers the message
 * {rest_api_root} - configured Loopback [Root URI of REST API](https://loopback.io/doc/en/lb3/config.json.html#top-level-properties)
 * {subscription_id} 
-* {unsubscription_code} - for anonymous subscriptions 
+* anonymous unsubscription related tokens
+  * {unsubscription_url}
+  * {unsubscription_code}
+  * {unsubscription_reversion_url}
 
 ## Architecture
 

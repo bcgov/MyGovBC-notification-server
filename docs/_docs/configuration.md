@@ -220,7 +220,7 @@ You can customize anonymous unsubscription settings by changing the *anonymousUn
         "email": {
           "from": "no_reply@example.com",
           "subject": "Un-subscription acknowledgement",
-          "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for service {service_name}. If you did not authorize this change or if you changed your mind, click {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe/undo?unsubscriptionCode={unsubscription_code} to revert."
+          "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for service {service_name}. If you did not authorize this change or if you changed your mind, click {unsubscription_reversion_url} to revert."
         }
       }
     }

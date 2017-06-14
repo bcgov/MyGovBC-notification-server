@@ -384,12 +384,12 @@ GET /subscriptions/{id}/unsubscribe
     * for authenticated user or admin requests, number of records affected or error message if occurred.
 * <a name="unsubscription-example"></a> example 
 
-  To allow an anonymous subscriber to unsubscribe, provide following link in notification messages
+  To allow an anonymous subscriber to unsubscribe, provide following url token in notification messages
 
   ```
-  {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe?unsubscriptionCode={unsubscription_code}
+  {unsubscription_url}
   ```    
-  [Mail merge](../overview/#mail-merge) is performed on tokens enclosed in `{}` when sending notification.
+When sending notification,  [mail merge](../overview/#mail-merge) is performed on the token resolving to the GET API url and parameters.
      
 ## Un-deleteing a Subscription
 ```
@@ -422,9 +422,9 @@ This API allows an anonymous subscriber to undo an unsubscription.
   5. returns either the message or redirect as configured in *[anonymousUndoUnsubscription](../configuration/#anonymousUndoUnsubscription)*
 * example 
 
-  To allow an anonymous subscriber to undo unsubscription, provide following link in unsubscription acknowledgement notification, which is by default set
+  To allow an anonymous subscriber to undo unsubscription, provide following link token in unsubscription acknowledgement notification, which is by default set
 
   ```
-  {http_host}{rest_api_root}/subscriptions/{subscription_id}/unsubscribe/undo?unsubscriptionCode={unsubscription_code}
+  {unsubscription_reversion_url}
   ```    
-  [Mail merge](../overview/#mail-merge) is performed on tokens enclosed in `{}` when sending notification.
+When sending notification, [mail merge](../overview/#mail-merge) is performed on this token resolving to the API url and parameters.
