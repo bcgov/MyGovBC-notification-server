@@ -82,7 +82,16 @@ module.exports = function (Model, options) {
       text: textBody,
       html: htmlBody
     }
-    transporter.sendMail(mailOptions, cb)
+    transporter.sendMail(mailOptions, function (error, info) {
+      try {
+        if (!error && info.accepted.length < 1) {
+          error = new Error('delivery failed')
+        }
+      }
+      catch (ex) {
+      }
+      cb(error, info)
+    })
   }
 
   Model.mailMerge = function (srcTxt, data, httpCtx) {
