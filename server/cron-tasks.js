@@ -1,5 +1,9 @@
 'use strict'
 var parallel = require('async/parallel')
+var FeedParser = require('feedparser')
+var request = require('request')
+var _ = require('lodash')
+
 module.exports.purgeData = function () {
   var app = arguments[0]
   var callback
@@ -126,7 +130,6 @@ module.exports.checkRssConfigUpdates = function () {
           continue
         }
         if (!data.find(function (e) {
-            // todo: make sure works for in-memory db
             return e.id.toString() === key
           })) {
           rssTasks[key].stop()
@@ -138,7 +141,72 @@ module.exports.checkRssConfigUpdates = function () {
           rssTasks[e.id] = new CronJob({
             cronTime: e.value.rss.timeSpec,
             onTick: function () {
-              // todo: parse rss and send notification
+              app.models.Rss.findOrCreate({
+                where: {
+                  serviceName: e.serviceName
+                }
+              }, {
+                serviceName: e.serviceName,
+                items: []
+              }, function (err, lastSavedRssData) {
+                var lastSavedRssItems = []
+                try {
+                  lastSavedRssItems = lastSavedRssData.items
+                }
+                catch (ex) {
+
+                }
+                var req = request(e.value.rss.url)
+                var feedparser = new FeedParser({addmeta: false})
+
+                req.on('error', function (error) {
+                  // handle any request errors
+                })
+
+                req.on('response', function (res) {
+                  var stream = this // `this` is `req`, which is a stream
+
+                  if (res.statusCode !== 200) {
+                    this.emit('error', new Error('Bad status code'))
+                  }
+                  else {
+                    stream.pipe(feedparser)
+                  }
+                })
+
+                feedparser.on('error', function (error) {
+                  // always handle errors
+                  console.log(error)
+                })
+
+                var items = []
+                feedparser.on('readable', function () {
+                  // This is where the action is!
+                  var stream = this // `this` is `feedparser`, which is a stream
+                  var meta = this.meta // **NOTE** the "meta" is always available in the context of the feedparser instance
+                  var item
+                  while (item = stream.read()) {
+                    items.push(item)
+                  }
+                })
+                feedparser.on('end', function () {
+                  var newOrUpdatedItems = _.differenceWith(items, lastSavedRssItems, function (arrVal, othVal) {
+                    if (arrVal.guid !== othVal.guid) {
+                      return false
+                    }
+                    if (!e.value.rss.includeUpdatedItems) {
+                      return arrVal.guid === othVal.guid
+                    }
+                    let fieldsToCheckForUpdate = e.value.rss.fieldsToCheckForUpdate || ['pubDate']
+                    return !fieldsToCheckForUpdate.some((compareField) => {
+                      return arrVal[compareField] && othVal[compareField] && arrVal[compareField].toString() !== othVal[compareField].toString()
+                    })
+                  })
+                  // todo: notify newOrUpdatedItems
+                  lastSavedRssData.items = items
+                  lastSavedRssData.save()
+                })
+              })
             },
             start: true
           })
