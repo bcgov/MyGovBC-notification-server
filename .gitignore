@@ -20,3 +20,4 @@ npm-debug.log
 server/**/*.local.*
 server/id_rsa*
 /coverage/
+/server/database/data.json
