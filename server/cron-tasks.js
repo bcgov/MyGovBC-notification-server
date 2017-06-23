@@ -120,11 +120,13 @@ module.exports.checkRssConfigUpdates = function () {
       }
     }, function (err, data) {
       lastConfigCheck = Date.now()
+      /*jshint loopfunc: true */
       for (var key in rssTasks) {
         if (!rssTasks.hasOwnProperty(key)) {
           continue
         }
         if (!data.find(function (e) {
+            // todo: make sure works for in-memory db
             return e.id.toString() === key
           })) {
           rssTasks[key].stop()
