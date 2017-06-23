@@ -210,15 +210,16 @@ module.exports = function (Notification) {
   function sendPushNotification(ctx, data, cb) {
     switch (data.isBroadcast) {
       case false:
-        var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, ctx.subscription, ctx)
+        let tokenData = _.assignIn({}, ctx.subscription, {data: data.data})
+        var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, tokenData, ctx)
         switch (data.channel) {
           case 'sms':
             Notification.sendSMS(data.userChannelId,
               textBody, cb)
             break
           default:
-            var htmlBody = data.message.htmlBody && Notification.mailMerge(data.message.htmlBody, ctx.subscription, ctx)
-            var subject = data.message.subject && Notification.mailMerge(data.message.subject, ctx.subscription, ctx)
+            var htmlBody = data.message.htmlBody && Notification.mailMerge(data.message.htmlBody, tokenData, ctx)
+            var subject = data.message.subject && Notification.mailMerge(data.message.subject, tokenData, ctx)
             Notification.sendEmail(data.message.from,
               data.userChannelId, subject,
               textBody, htmlBody, cb)
@@ -245,15 +246,16 @@ module.exports = function (Notification) {
                 }
                 cb(null)
               }
-              var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, e, ctx)
+              let tokenData = _.assignIn({}, e, {data: data.data})
+              var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, tokenData, ctx)
               switch (e.channel) {
                 case 'sms':
                   Notification.sendSMS(e.userChannelId,
                     textBody, notificationMsgCB)
                   break
                 default:
-                  var subject = data.message.subject && Notification.mailMerge(data.message.subject, e, ctx)
-                  var htmlBody = data.message.htmlBody && Notification.mailMerge(data.message.htmlBody, e, ctx)
+                  var subject = data.message.subject && Notification.mailMerge(data.message.subject, tokenData, ctx)
+                  var htmlBody = data.message.htmlBody && Notification.mailMerge(data.message.htmlBody, tokenData, ctx)
                   Notification.sendEmail(data.message.from,
                     e.userChannelId, subject,
                     textBody, htmlBody, notificationMsgCB)

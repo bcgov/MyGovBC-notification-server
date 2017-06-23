@@ -170,6 +170,9 @@ module.exports = function (Model, options) {
     }
     catch (ex) {
     }
+    if (data.data) {
+      // todo: substitute all other tokens with matching data.data properties
+    }
     return output
   }
 

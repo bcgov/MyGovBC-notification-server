@@ -202,9 +202,31 @@ module.exports.checkRssConfigUpdates = function () {
                       return arrVal[compareField] && othVal[compareField] && arrVal[compareField].toString() !== othVal[compareField].toString()
                     })
                   })
+                  // notify new or updated items
+                  newOrUpdatedItems.forEach(function (newOrUpdatedItem) {
+                    for (var channel in rssNtfctnConfigItem.value.messageTemplates) {
+                      if (!rssNtfctnConfigItem.value.messageTemplates.hasOwnProperty(channel)) {
+                        continue
+                      }
+                      let notificationObject = {
+                        serviceName: rssNtfctnConfigItem.serviceName,
+                        channel: channel,
+                        isBroadcast: true,
+                        message: rssNtfctnConfigItem.value.messageTemplates[channel],
+                        data: newOrUpdatedItem
+                      }
+                      let options = {
+                        uri: rssNtfctnConfigItem.value.httpHost + app.get('restApiRoot') + '/notifications',
+                        headers: {
+                          'Content-Type': 'application/json'
+                        },
+                        json: notificationObject
+                      }
+                      request.post(options)
+                    }
+                  })
                   lastSavedRssData.items = items
                   lastSavedRssData.save()
-                  // todo: notify newOrUpdatedItems
                 })
               })
             },
