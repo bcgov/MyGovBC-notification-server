@@ -80,6 +80,9 @@
     },
     "dispatchLiveNotifications": {
       "timeSpec": "0 * * * * *"
+    },
+    "checkRssConfigUpdates": {
+      "timeSpec": "0 * * * * *"
     }
   }
 }

@@ -7,11 +7,10 @@ app.use(loopback.token())
 app.start = function () {
   if (process.env.NOTIFYBC_NODE_ROLE !== 'slave') {
     var CronJob = require('cron').CronJob
-    // start purgeData cron
     var cronTasks = require('./cron-tasks')
     var cronConfig = app.get('cron') || {}
+    // start purgeData cron
     var cronConfigPurgeData = cronConfig.purgeData || {}
-    var cronConfigDispatchLiveNotifications = cronConfig.dispatchLiveNotifications || {}
     new CronJob({
       cronTime: cronConfigPurgeData.timeSpec,
       onTick: function () {
@@ -19,10 +18,21 @@ app.start = function () {
       },
       start: true
     })
+    // start dispatchLiveNotifications cron
+    var cronConfigDispatchLiveNotifications = cronConfig.dispatchLiveNotifications || {}
     new CronJob({
       cronTime: cronConfigDispatchLiveNotifications.timeSpec,
       onTick: function () {
         cronTasks.dispatchLiveNotifications(app)
+      },
+      start: true
+    })
+    // start checkRssConfigUpdates cron
+    var cronConfigCheckRssConfigUpdates = cronConfig.checkRssConfigUpdates || {}
+    new CronJob({
+      cronTime: cronConfigCheckRssConfigUpdates.timeSpec,
+      onTick: function () {
+        cronTasks.checkRssConfigUpdates(app)
       },
       start: true
     })

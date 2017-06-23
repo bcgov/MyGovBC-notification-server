@@ -107,3 +107,41 @@ module.exports.dispatchLiveNotifications = function () {
     })
   })
 }
+
+var lastConfigCheck = new Date(0)
+var rssTasks = {}
+module.exports.checkRssConfigUpdates = function () {
+  var app = arguments[0]
+  var CronJob = require('cron').CronJob
+  app.models.Configuration.find({
+      where: {
+        name: 'notification',
+        "value.rss": {neq: null}
+      }
+    }, function (err, data) {
+      lastConfigCheck = Date.now()
+      for (var key in rssTasks) {
+        if (!rssTasks.hasOwnProperty(key)) {
+          continue
+        }
+        if (!data.find(function (e) {
+            return e.id == key
+          })) {
+          rssTasks[key].stop()
+          delete rssTasks[key]
+        }
+      }
+      data.forEach(function (e) {
+        if (!rssTasks[e.id]) {
+          rssTasks[e.id] = new CronJob({
+            cronTime: e.value.rss.timeSpec,
+            onTick: function () {
+              // todo: parse rss and send notification
+            },
+            start: true
+          })
+        }
+      })
+    }
+  )
+}
