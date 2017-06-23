@@ -125,7 +125,7 @@ module.exports.checkRssConfigUpdates = function () {
           continue
         }
         if (!data.find(function (e) {
-            return e.id == key
+            return e.id.toString() === key
           })) {
           rssTasks[key].stop()
           delete rssTasks[key]
