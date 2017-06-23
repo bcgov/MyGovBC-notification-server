@@ -122,31 +122,31 @@ module.exports.checkRssConfigUpdates = function () {
         name: 'notification',
         "value.rss": {neq: null}
       }
-    }, function (err, data) {
+    }, function (err, rssNtfctnConfigItems) {
       lastConfigCheck = Date.now()
       /*jshint loopfunc: true */
       for (var key in rssTasks) {
         if (!rssTasks.hasOwnProperty(key)) {
           continue
         }
-        if (!data.find(function (e) {
+        if (!rssNtfctnConfigItems.find(function (e) {
             return e.id.toString() === key
           })) {
           rssTasks[key].stop()
           delete rssTasks[key]
         }
       }
-      data.forEach(function (e) {
-        if (!rssTasks[e.id]) {
-          rssTasks[e.id] = new CronJob({
-            cronTime: e.value.rss.timeSpec,
+      rssNtfctnConfigItems.forEach(function (rssNtfctnConfigItem) {
+        if (!rssTasks[rssNtfctnConfigItem.id]) {
+          rssTasks[rssNtfctnConfigItem.id] = new CronJob({
+            cronTime: rssNtfctnConfigItem.value.rss.timeSpec,
             onTick: function () {
               app.models.Rss.findOrCreate({
                 where: {
-                  serviceName: e.serviceName
+                  serviceName: rssNtfctnConfigItem.serviceName
                 }
               }, {
-                serviceName: e.serviceName,
+                serviceName: rssNtfctnConfigItem.serviceName,
                 items: []
               }, function (err, lastSavedRssData) {
                 var lastSavedRssItems = []
@@ -156,7 +156,7 @@ module.exports.checkRssConfigUpdates = function () {
                 catch (ex) {
 
                 }
-                var req = request(e.value.rss.url)
+                var req = request(rssNtfctnConfigItem.value.rss.url)
                 var feedparser = new FeedParser({addmeta: false})
 
                 req.on('error', function (error) {
@@ -194,17 +194,17 @@ module.exports.checkRssConfigUpdates = function () {
                     if (arrVal.guid !== othVal.guid) {
                       return false
                     }
-                    if (!e.value.rss.includeUpdatedItems) {
+                    if (!rssNtfctnConfigItem.value.rss.includeUpdatedItems) {
                       return arrVal.guid === othVal.guid
                     }
-                    let fieldsToCheckForUpdate = e.value.rss.fieldsToCheckForUpdate || ['pubDate']
+                    let fieldsToCheckForUpdate = rssNtfctnConfigItem.value.rss.fieldsToCheckForUpdate || ['pubDate']
                     return !fieldsToCheckForUpdate.some((compareField) => {
                       return arrVal[compareField] && othVal[compareField] && arrVal[compareField].toString() !== othVal[compareField].toString()
                     })
                   })
-                  // todo: notify newOrUpdatedItems
                   lastSavedRssData.items = items
                   lastSavedRssData.save()
+                  // todo: notify newOrUpdatedItems
                 })
               })
             },
