@@ -284,7 +284,7 @@ For example, to notify subscribers of *myService* on updates to feed *http://my-
     "rss": {
       "url": "http://my-serivce/rss",
       "timeSpec": "* * * * *",
-      "itemKeyName": "guid",
+      "itemKeyField": "guid",
       "includeUpdatedItems": true,
       "fieldsToCheckForUpdate": [
         "title",

@@ -105,8 +105,14 @@ POST /configurations
     * parameter type: body
     * data type: object
 * outcome
+
+  *NotifyBC* performs following actions in sequence
   
-  For admin request, create the config item requested if all required fields are populated; forbidden for user request
+  1. if it’s a user request, error is returned
+  2. inputs are validated. For example, required fields without default values must be populated. If validation fails, error is returned
+  3. if config item is *notification* with field *value.rss* populated, and if the field *value.httpHost* is missing, it is generated using this request's HTTP protocol , host name and port.
+  4. item is saved to database
+
 
 * example
   
@@ -130,7 +136,7 @@ PATCH /configurations/{id}
 
 * outcome
   
-  For admin request, update the config item requested if all required fields are populated; forbidden for user request
+  Similar to *POST* except field *update* is always updated with current timestamp.
 
 
 ## Delete a Configuration
