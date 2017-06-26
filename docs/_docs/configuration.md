@@ -272,7 +272,7 @@ When handling a broadcast push notification, *NotifyBC* sends messages concurren
 ```
 
 ### RSS Feeds
-*NotifyBC* can generate notifications automatically by pulling RSS feeds periodically and detect changes between pull intervals. The pulling frequency, RSS url, RSS item change detection criteria, and message template can be defined in dynamic configs.  
+*NotifyBC* can generate notifications automatically by polling RSS feeds periodically and detect changes between poll intervals. The polling frequency, RSS url, RSS item change detection criteria, and message template can be defined in dynamic configs.  
 
 For example, to notify subscribers of *myService* on updates to feed *http://my-serivce/rss*, create following config item using [POST configuration API](../api-config/#create-a-configuration)
 
@@ -308,10 +308,10 @@ The config items in the *value* field are
 
 * rss
   * url: RSS url
-  * timeSpec: a space separated fields conformed to [unix crontab format](https://www.freebsd.org/cgi/man.cgi?crontab(5)) with an optional left-most seconds field. See [allowed ranges](https://github.com/kelektiv/node-cron#cron-ranges) of each field
+  * <a name="timeSpec"></a>timeSpec: RSS poll frequency, a space separated fields conformed to [unix crontab format](https://www.freebsd.org/cgi/man.cgi?crontab(5)) with an optional left-most seconds field. See [allowed ranges](https://github.com/kelektiv/node-cron#cron-ranges) of each field
   * itemKeyField: rss item's unique key field to identify new items. By default *guid*
   * includeUpdatedItems: whether to notify also updated items or just new items. By default *false*  
-  * fieldsToCheckForUpdate: list of fields to check for updates from last pull if *includeUpdatedItems* is *true*. By default *["pubDate"]*
+  * fieldsToCheckForUpdate: list of fields to check for updates from last poll if *includeUpdatedItems* is *true*. By default *["pubDate"]*
 * httpHost: the http protocol, host and port used by [mail merge](../overview/#mail-merge). If missing, the value is auto-populated based on the REST request that creates this config item.
 * messageTemplates: channel-specific message templates supporting dynamic token as shown
 
@@ -359,7 +359,7 @@ This cron job purges old notifications and subscriptions. The default frequency 
 
 The config items are
 
-* timeSpec: a space separated fields conformed to [unix crontab format](https://www.freebsd.org/cgi/man.cgi?crontab(5)) with an optional left-most seconds field. See [allowed ranges](https://github.com/kelektiv/node-cron#cron-ranges) of each field
+* timeSpec: follows [same syntax described above](#timeSpec).
 * pushNotificationRetentionDays: the retention days of push notifications
 * expiredInAppNotificationRetentionDays: the retention days of expired inApp notifications
 * nonConfirmedSubscriptionRetentionDays: the retention days of non-confirmed subscriptions, i.e. all unconfirmed and deleted subscriptions
@@ -389,7 +389,21 @@ This cron job sends out future-dated notifications when the notification becomes
    }
  }
 ```
-*timeSpec* follows the same syntax as purge data.
+*timeSpec* follows [same syntax described above](#timeSpec).
+
+### Check Rss Config Updates
+This cron job monitors RSS feed notification dynamic config items. If a config item is created, updated or deleted, the cron job starts, restarts, or stops the RSS-specific cron job. The default config is defined by *cron.checkRssConfigUpdates* config object in file */server/config.json*
+
+```json
+ {
+   "cron": {
+    "checkRssConfigUpdates": {
+      "timeSpec": "0 * * * * *"
+    }
+   }
+ }
+```
+*timeSpec* follows [same syntax described above](#timeSpec). Note this *timeSpec* doesn't control the RSS poll frequency (which is defined in dynamic configs and is service specific), instead it only controls the frequency to check for dynamic config changes. 
 
 ## RSA Keys
 When *NotifyBC* starts up, it checks if an RSA key pair exists in database as dynamic config. If not it will generate the dynamic config and save it to database. This RSA key pair is used to exchange confidential information with third party server applications through user's browser. For an example of use case, see [Subscription API](../api-subscription/). To make it work, send the public key to the third party and have their server app encrypt the data using the public key. To obtain public key, call the REST [Configuration API](..api-config/#get-configurations) from an admin ip, for example, by running *cURL* command
