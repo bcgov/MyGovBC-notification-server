@@ -22,7 +22,8 @@ permalink: /docs/overview/
   * support message states - read, deleted
   * support message expiration
   * deleted messages are not deleted immediately for auditing and recovery purposes
-* Support both sync and async API call for broadcast push notifications. For async API call, an optional callback url is supported.
+* Support both sync and async API call for broadcast push notifications. For async API call, an optional callback url is supported
+* Broadcast push notifications can be auto-generated from RSS feeds
 
 ### subscription and un-subscription
 * Verify the ownership of push notification subscription channel:
@@ -31,7 +32,9 @@ permalink: /docs/overview/
   * verify confirmation code
 
 ### mail merge
-*NotifyBC* recognizes following case-insensitive tokens in push notification or subscription messages. They are replaced dynamically when sending the message
+
+#### static tokens
+*NotifyBC* recognizes following case-insensitive static tokens in push notification or subscription messages. They are replaced when sending the message
  
 * {subscription_confirmation_url}
 * {subscription_confirmation_code}
@@ -43,6 +46,14 @@ permalink: /docs/overview/
   * {unsubscription_url}
   * {unsubscription_code}
   * {unsubscription_reversion_url}
+
+#### dynamic tokens
+If a notification request contains field *data* of type *object*, *NotifyBC* also substitutes dynamic tokens, which are strings enclosed in {} but don't match static tokens above, with corresponding sub-field of *data* if available. For example, if the string *{description}* appears in email body, it is replaced with field *data.description* of the notification request if populated.
+
+<div class="note info">
+  <h5>Notification by RSS feeds relies on dynamic token</h5>
+  <p>A notification created by RSS feeds relies on dynamic token to supply the context to message template. In this case the <i>data</i> field contains the RSS item.</p>
+</div>
 
 ## Architecture
 

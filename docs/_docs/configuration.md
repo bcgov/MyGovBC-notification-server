@@ -258,16 +258,7 @@ You can customize message displayed on-screen when user clicks revert unsubscrip
 You can redirect the message page by defining *anonymousUndoUnsubscription.redirectUrl*.
   
 ## Notification 
-Configs in this section customize the handling of notification request.  They are all sub-properties of config object *notification*. To change config, create config object *notification* in file */server/config.local.json*
-
-```json
-{
-  "notification": {
-    ...
-  }
-}
-```
-Sub-properties denoted by ellipsis in the above code block are documented below.
+Configs in this section customize the handling of notification request or generating notifications from RSS feeds.  They are all sub-properties of config object *notification*. Service-agnostic  configs are static and service-dependent configs are dynamic. 
 
 ### Broadcast Task Concurrency
 When handling a broadcast push notification, *NotifyBC* sends messages concurrently to improve performance. The configuration *broadcastTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
@@ -279,6 +270,50 @@ When handling a broadcast push notification, *NotifyBC* sends messages concurren
   }
 }
 ```
+
+### RSS Feeds
+*NotifyBC* can generate notifications automatically by pulling RSS feeds periodically and detect changes between pull intervals. The pulling frequency, RSS url, RSS item change detection criteria, and message template can be defined in dynamic configs.  
+
+For example, to notify subscribers of *myService* on updates to feed *http://my-serivce/rss*, create following config item using [POST configuration API](../api-config/#create-a-configuration)
+
+```json
+{
+  "name": "notification",
+  "serviceName": "myService",
+  "value": {
+    "rss": {
+      "url": "http://my-serivce/rss",
+      "timeSpec": "* * * * *",
+      "itemKeyName": "guid",
+      "includeUpdatedItems": true,
+      "fieldsToCheckForUpdate": [
+        "title",
+        "pubDate",
+        "description"
+      ]
+    },
+    "httpHost": "http://localhost:3000",
+    "messageTemplates": {
+      "email": {
+        "from": "no_reply@example.com",
+        "subject": "{title}",
+        "textBody": "{description}",
+        "htmlBody": "{description}"
+      }
+    }
+  }
+}
+```
+The config items in the *value* field are
+
+* rss
+  * url: RSS url
+  * timeSpec: a space separated fields conformed to [unix crontab format](https://www.freebsd.org/cgi/man.cgi?crontab(5)) with an optional left-most seconds field. See [allowed ranges](https://github.com/kelektiv/node-cron#cron-ranges) of each field
+  * itemKeyField: rss item's unique key field to identify new items. By default *guid*
+  * includeUpdatedItems: whether to notify also updated items or just new items. By default *false*  
+  * fieldsToCheckForUpdate: list of fields to check for updates from last pull if *includeUpdatedItems* is *true*. By default *["pubDate"]*
+* httpHost: the http protocol, host and port used by [mail merge](../overview/#mail-merge). If missing, the value is auto-populated based on the REST request that creates this config item.
+* messageTemplates: channel-specific message templates supporting dynamic token as shown
 
 ## Database
 By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json* for local and docker deployment and MongoDB for OpenShift deployment. To use MongoDB for non-OpenShift deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:

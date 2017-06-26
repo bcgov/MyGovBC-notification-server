@@ -193,11 +193,12 @@ module.exports.checkRssConfigUpdates = function () {
                 })
                 feedparser.on('end', function () {
                   var newOrUpdatedItems = _.differenceWith(items, lastSavedRssItems, function (arrVal, othVal) {
-                    if (arrVal.guid !== othVal.guid) {
+                    let itemKeyField = rssNtfctnConfigItem.value.rss.itemKeyField || 'guid'
+                    if (arrVal[itemKeyField] !== othVal[itemKeyField]) {
                       return false
                     }
                     if (!rssNtfctnConfigItem.value.rss.includeUpdatedItems) {
-                      return arrVal.guid === othVal.guid
+                      return arrVal[itemKeyField] === othVal[itemKeyField]
                     }
                     let fieldsToCheckForUpdate = rssNtfctnConfigItem.value.rss.fieldsToCheckForUpdate || ['pubDate']
                     return !fieldsToCheckForUpdate.some((compareField) => {
