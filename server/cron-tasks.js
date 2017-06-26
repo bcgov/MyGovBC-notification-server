@@ -112,7 +112,7 @@ module.exports.dispatchLiveNotifications = function () {
   })
 }
 
-var lastConfigCheck = new Date(0)
+var lastConfigCheck = 0
 var rssTasks = {}
 module.exports.checkRssConfigUpdates = function () {
   var app = arguments[0]
@@ -123,15 +123,17 @@ module.exports.checkRssConfigUpdates = function () {
         "value.rss": {neq: null}
       }
     }, function (err, rssNtfctnConfigItems) {
-      lastConfigCheck = Date.now()
       /*jshint loopfunc: true */
       for (var key in rssTasks) {
         if (!rssTasks.hasOwnProperty(key)) {
           continue
         }
-        if (!rssNtfctnConfigItems.find(function (e) {
-            return e.id.toString() === key
-          })) {
+
+        let rssNtfctnConfigItem = rssNtfctnConfigItems.find(function (e) {
+          return e.id.toString() === key
+        })
+
+        if (!rssNtfctnConfigItem || rssNtfctnConfigItem.updated.getTime() > lastConfigCheck) {
           rssTasks[key].stop()
           delete rssTasks[key]
         }
@@ -234,6 +236,7 @@ module.exports.checkRssConfigUpdates = function () {
           })
         }
       })
+      lastConfigCheck = Date.now()
     }
   )
 }
