@@ -171,7 +171,21 @@ module.exports = function (Model, options) {
     catch (ex) {
     }
     if (data.data) {
-      // todo: substitute all other tokens with matching data.data properties
+      // substitute all other tokens with matching data.data properties
+      let matches = output.match(/{.+?}/g)
+      if (matches) {
+        matches.forEach(function (e) {
+          try {
+            let token = e.match(/{(.+)}/)[1]
+            let val = _.get(data.data, token)
+            if (val) {
+              output = output.replace(e, val)
+            }
+          }
+          catch (ex) {
+          }
+        })
+      }
     }
     return output
   }
