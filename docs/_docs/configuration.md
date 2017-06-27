@@ -272,7 +272,13 @@ When handling a broadcast push notification, *NotifyBC* sends messages concurren
 ```
 
 ### RSS Feeds
-*NotifyBC* can generate notifications automatically by polling RSS feeds periodically and detect changes between poll intervals. The polling frequency, RSS url, RSS item change detection criteria, and message template can be defined in dynamic configs.  
+*NotifyBC* can generate notifications automatically by polling RSS feeds periodically and detect changes by comparing with an internally maintained history list. The polling frequency, RSS url, RSS item change detection criteria, and message template can be defined in dynamic configs.  
+
+<div class="note warning">
+  <h5>Only first page is retrived for paginated RSS feeds</h5>
+  <p>If a RSS feed is paginated, <i>NotifyBC</i> only retrives the first page rather than auto-fetch subsequent pages.</p>
+</div>
+
 
 For example, to notify subscribers of *myService* on updates to feed *http://my-serivce/rss*, create following config item using [POST configuration API](../api-config/#create-a-configuration)
 
@@ -285,6 +291,7 @@ For example, to notify subscribers of *myService* on updates to feed *http://my-
       "url": "http://my-serivce/rss",
       "timeSpec": "* * * * *",
       "itemKeyField": "guid",
+      "outdatedItemRetentionGenerations": 1,
       "includeUpdatedItems": true,
       "fieldsToCheckForUpdate": [
         "title",
@@ -310,8 +317,9 @@ The config items in the *value* field are
   * url: RSS url
   * <a name="timeSpec"></a>timeSpec: RSS poll frequency, a space separated fields conformed to [unix crontab format](https://www.freebsd.org/cgi/man.cgi?crontab(5)) with an optional left-most seconds field. See [allowed ranges](https://github.com/kelektiv/node-cron#cron-ranges) of each field
   * itemKeyField: rss item's unique key field to identify new items. By default *guid*
+  * outdatedItemRetentionGenerations: number of last consecutive polls an item has to be absent from which result before the item can be removed from the history list. This config is designed to prevent RSS feed from returning inconsistent results, usually due to a combination of pagination and lack of sorting. By default 1, meaning the history list only keeps the last poll result
   * includeUpdatedItems: whether to notify also updated items or just new items. By default *false*  
-  * fieldsToCheckForUpdate: list of fields to check for updates from last poll if *includeUpdatedItems* is *true*. By default *["pubDate"]*
+  * fieldsToCheckForUpdate: list of fields to check for updates if *includeUpdatedItems* is *true*. By default *["pubDate"]*
 * httpHost: the http protocol, host and port used by [mail merge](../overview/#mail-merge). If missing, the value is auto-populated based on the REST request that creates this config item.
 * messageTemplates: channel-specific message templates supporting dynamic token as shown
 

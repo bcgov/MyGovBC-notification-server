@@ -182,28 +182,48 @@ module.exports.checkRssConfigUpdates = function () {
                 })
 
                 var items = []
+                let ts = new Date()
                 feedparser.on('readable', function () {
                   // This is where the action is!
                   var stream = this // `this` is `feedparser`, which is a stream
                   var meta = this.meta // **NOTE** the "meta" is always available in the context of the feedparser instance
                   var item
                   while (!!(item = stream.read())) {
+                    item._notifyBCLastPoll = ts
                     items.push(item)
                   }
                 })
                 feedparser.on('end', function () {
+                  let itemKeyField = rssNtfctnConfigItem.value.rss.itemKeyField || 'guid'
+                  let fieldsToCheckForUpdate = rssNtfctnConfigItem.value.rss.fieldsToCheckForUpdate || ['pubDate']
                   var newOrUpdatedItems = _.differenceWith(items, lastSavedRssItems, function (arrVal, othVal) {
-                    let itemKeyField = rssNtfctnConfigItem.value.rss.itemKeyField || 'guid'
                     if (arrVal[itemKeyField] !== othVal[itemKeyField]) {
                       return false
                     }
                     if (!rssNtfctnConfigItem.value.rss.includeUpdatedItems) {
                       return arrVal[itemKeyField] === othVal[itemKeyField]
                     }
-                    let fieldsToCheckForUpdate = rssNtfctnConfigItem.value.rss.fieldsToCheckForUpdate || ['pubDate']
                     return !fieldsToCheckForUpdate.some((compareField) => {
                       return arrVal[compareField] && othVal[compareField] && arrVal[compareField].toString() !== othVal[compareField].toString()
                     })
+                  })
+                  let outdatedItemRetentionGenerations = rssNtfctnConfigItem.value.rss.outdatedItemRetentionGenerations || 1
+                  let lastPollInterval = ts.getTime()
+                  try {
+                    lastPollInterval = ts.getTime() - lastSavedRssData.lastPoll.getTime()
+                  }
+                  catch (ex) {
+                  }
+                  var retainedOutdatedItems = _.differenceWith(lastSavedRssItems, items, function (arrVal, othVal) {
+                    try {
+                      let age = ts.getTime() - arrVal._notifyBCLastPoll.getTime()
+                      if (Math.round(age / lastPollInterval) >= outdatedItemRetentionGenerations) {
+                        return true
+                      }
+                    }
+                    catch (ex) {
+                    }
+                    return arrVal[itemKeyField] === othVal[itemKeyField]
                   })
                   // notify new or updated items
                   newOrUpdatedItems.forEach(function (newOrUpdatedItem) {
@@ -228,7 +248,8 @@ module.exports.checkRssConfigUpdates = function () {
                       request.post(options)
                     }
                   })
-                  lastSavedRssData.items = items
+                  lastSavedRssData.items = items.concat(retainedOutdatedItems)
+                  lastSavedRssData.lastPoll = ts
                   lastSavedRssData.save()
                 })
               })
