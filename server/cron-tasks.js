@@ -6,6 +6,7 @@ var _ = require('lodash')
 
 module.exports.purgeData = function () {
   var app = arguments[0]
+  // for automated testing
   var callback
   if (arguments.length > 1) {
     callback = arguments[arguments.length - 1]
@@ -71,6 +72,7 @@ module.exports.purgeData = function () {
 }
 module.exports.dispatchLiveNotifications = function () {
   var app = arguments[0]
+  // for automated testing
   var callback
   if (arguments.length > 1) {
     callback = arguments[arguments.length - 1]
@@ -116,6 +118,11 @@ var lastConfigCheck = 0
 var rssTasks = {}
 module.exports.checkRssConfigUpdates = function () {
   var app = arguments[0]
+  // for automated testing
+  var callback
+  if (arguments.length > 1) {
+    callback = arguments[arguments.length - 1]
+  }
   var CronJob = require('cron').CronJob
   app.models.Configuration.find({
       where: {
@@ -156,7 +163,6 @@ module.exports.checkRssConfigUpdates = function () {
                   lastSavedRssItems = lastSavedRssData.items
                 }
                 catch (ex) {
-
                 }
                 var req = request(rssNtfctnConfigItem.value.rss.url)
                 var feedparser = new FeedParser({addmeta: false})
@@ -259,6 +265,7 @@ module.exports.checkRssConfigUpdates = function () {
         }
       })
       lastConfigCheck = Date.now()
+      return callback && callback(null, rssTasks)
     }
   )
 }

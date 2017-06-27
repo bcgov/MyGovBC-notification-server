@@ -207,7 +207,6 @@ describe('CRON purgeData', function () {
   })
 })
 
-
 describe('CRON dispatchLiveNotifications', function () {
   beforeEach(function (done) {
     parallel([
@@ -284,6 +283,67 @@ describe('CRON dispatchLiveNotifications', function () {
         expect(err).toBeNull()
         done()
       })
+    })
+  })
+})
+
+describe('CRON checkRssConfigUpdates', function () {
+  beforeEach(function (done) {
+    parallel([
+      function (cb) {
+        app.models.Configuration.create({
+          "name": "notification",
+          "serviceName": "myService",
+          "value": {
+            "rss": {
+              "url": "http://myService/rss",
+              "timeSpec": "0 0 1 0 0",
+              "outdatedItemRetentionGenerations": 1,
+              "includeUpdatedItems": true,
+              "fieldsToCheckForUpdate": [
+                "title"
+              ]
+            },
+            "messageTemplates": {
+              "email": {
+                "from": "no_reply@example.com",
+                "subject": "{title}",
+                "textBody": "{description}",
+                "htmlBody": "{description}"
+              }
+            }
+          }
+        }, function (err, res) {
+          cb(err, res)
+        })
+      },
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myService",
+          "channel": "email",
+          "userChannelId": "bar@foo.com",
+          "state": "confirmed",
+          "unsubscriptionCode": "12345"
+        }, function (err, res) {
+          cb(err, res)
+        })
+      }
+    ], function (err, results) {
+      expect(err).toBeNull()
+      done()
+    })
+  })
+
+  it('should create rss task', function (done) {
+    cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
+      expect(err).toBeNull()
+      expect(rssTasks["1"]).not.toBeNull()
+      try {
+        rssTasks["1"].stop()
+      }
+      catch (ex) {
+      }
+      done()
     })
   })
 })
