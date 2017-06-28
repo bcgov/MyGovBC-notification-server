@@ -185,7 +185,7 @@ The API operates on following notification data model fields:
   </tr>
   <tr>
     <td>
-      <p class="name">message</p>
+      <p class="name"><a name="field-message"></a>message</p>
       <div class="description">an object whose child fields are channel dependent:
         <ul>
           <li>

@@ -276,7 +276,7 @@ When handling a broadcast push notification, *NotifyBC* sends messages concurren
 
 <div class="note warning">
   <h5>Only first page is retrived for paginated RSS feeds</h5>
-  <p>If a RSS feed is paginated, <i>NotifyBC</i> only retrives the first page rather than auto-fetch subsequent pages. Hence paginated RSS feeds should be sorted in descending chronicle order. Refresh interval should be adjusted small enough such that all new or updated items are contained in first page.</p>
+  <p>If a RSS feed is paginated, <i>NotifyBC</i> only retrives the first page rather than auto-fetch subsequent pages. Hence paginated RSS feeds should be sorted descendingly by last modified timestamp. Refresh interval should be adjusted small enough such that all new or updated items are contained in first page.</p>
 </div>
 
 
@@ -321,7 +321,7 @@ The config items in the *value* field are
   * includeUpdatedItems: whether to notify also updated items or just new items. By default *false*  
   * fieldsToCheckForUpdate: list of fields to check for updates if *includeUpdatedItems* is *true*. By default *["pubDate"]*
 * httpHost: the http protocol, host and port used by [mail merge](../overview/#mail-merge). If missing, the value is auto-populated based on the REST request that creates this config item.
-* messageTemplates: channel-specific message templates supporting dynamic token as shown
+* messageTemplates: channel-specific message template supporting dynamic token as shown. Message template fields is same as those in [notification api](../api-notification/#field-message)
 
 ## Database
 By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json* for local and docker deployment and MongoDB for OpenShift deployment. To use MongoDB for non-OpenShift deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
