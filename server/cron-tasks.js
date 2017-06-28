@@ -4,6 +4,7 @@ var FeedParser = require('feedparser')
 var request = require('request')
 var _ = require('lodash')
 
+module.exports.request = request
 module.exports.purgeData = function () {
   var app = arguments[0]
   // for automated testing
@@ -164,7 +165,7 @@ module.exports.checkRssConfigUpdates = function () {
                 }
                 catch (ex) {
                 }
-                var req = request(rssNtfctnConfigItem.value.rss.url)
+                var req = module.exports.request(rssNtfctnConfigItem.value.rss.url)
                 var feedparser = new FeedParser({addmeta: false})
 
                 req.on('error', function (error) {
@@ -251,21 +252,22 @@ module.exports.checkRssConfigUpdates = function () {
                         },
                         json: notificationObject
                       }
-                      request.post(options)
+                      module.exports.request.post(options)
                     }
                   })
                   lastSavedRssData.items = items.concat(retainedOutdatedItems)
                   lastSavedRssData.lastPoll = ts
                   lastSavedRssData.save()
+                  return callback && callback(null, rssTasks)
                 })
               })
             },
-            start: true
+            start: true,
+            runOnInit: !!callback
           })
         }
       })
       lastConfigCheck = Date.now()
-      return callback && callback(null, rssTasks)
     }
   )
 }

@@ -2,6 +2,8 @@
 var app = require('../../server/server.js')
 var cronTasks = require('../../server/cron-tasks')
 var parallel = require('async/parallel')
+var path = require('path')
+var fs = require('fs')
 
 describe('CRON purgeData', function () {
   beforeEach(function (done) {
@@ -335,14 +337,18 @@ describe('CRON checkRssConfigUpdates', function () {
   })
 
   it('should create rss task', function (done) {
+    spyOn(cronTasks, 'request').and.callFake(function () {
+      var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
+      setTimeout(function () {
+        output.emit('response', {statusCode: 200})
+      }, 0)
+      return output
+    })
+    spyOn(cronTasks.request, 'post')
+
     cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
       expect(err).toBeNull()
       expect(rssTasks["1"]).not.toBeNull()
-      try {
-        rssTasks["1"].stop()
-      }
-      catch (ex) {
-      }
       done()
     })
   })
