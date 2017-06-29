@@ -31,5 +31,16 @@
   "validations": [],
   "relations": {},
   "acls": [],
-  "methods": {}
+  "methods": {},
+  "indexes": {
+    "name_service_unique_index": {
+      "keys": {
+        "name": 1,
+        "serviceName": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  }
 }
