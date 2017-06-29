@@ -12,8 +12,14 @@
     },
     "items": {
       "type": [
-        "object"
+        {
+          "_notifyBCLastPoll": "date",
+          "pubDate": "date"
+        }
       ]
+    },
+    "lastPoll": {
+      "type": "date"
     }
   },
   "validations": [],

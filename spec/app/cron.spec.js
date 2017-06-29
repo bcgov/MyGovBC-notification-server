@@ -309,7 +309,7 @@ describe('CRON checkRssConfigUpdates', function () {
               "url": "http://myService/rss",
               "timeSpec": "0 0 1 0 0",
               "outdatedItemRetentionGenerations": 1,
-              "includeUpdatedItems": true,
+              "includeUpdatedItems": false,
               "fieldsToCheckForUpdate": [
                 "title"
               ]
@@ -389,6 +389,40 @@ describe('CRON checkRssConfigUpdates', function () {
           expect(results[0].items[0].author).toBe('foo')
           done()
         })
+      })
+    })
+  })
+
+  it('should send notification for updated item', function (done) {
+    parallel([
+      function (cb) {
+        app.models.Configuration.findById(1, function (err, res) {
+          let newVal = res.value
+          newVal.rss.includeUpdatedItems = true
+          res.updateAttribute('value', newVal, cb)
+        })
+      },
+      function (cb) {
+        app.models.Rss.create({
+          "serviceName": "myService",
+          "items": [
+            {
+              "title": "Item",
+              "description": "lorem ipsum",
+              "pubDate": "1970-01-01T00:00:00.000Z",
+              "link": "http://myservice/1",
+              "guid": "1",
+              "author": "foo",
+              "_notifyBCLastPoll": "1970-01-01T00:00:00.000Z"
+            }
+          ],
+          "lastPoll": "1970-01-01T00:00:00.000Z"
+        }, cb)
+      }
+    ], function (err, results) {
+      cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
+        expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
+        done()
       })
     })
   })
