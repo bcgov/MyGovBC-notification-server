@@ -133,8 +133,12 @@ describe('POST /notifications', function () {
         "message": {
           "from": "no_reply@bar.com",
           "subject": "test",
-          "textBody": "This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}",
-          "htmlBody": "This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}"
+          "textBody": "{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}",
+          "htmlBody": "{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}"
+        },
+        "data": {
+          "1": "foo",
+          "2": "bar"
         },
         "channel": "email",
         "isBroadcast": true
@@ -155,6 +159,7 @@ describe('POST /notifications', function () {
         expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain('/api')
         expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain('1 ')
         expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain('54321')
+        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain('bar foo')
 
         expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).not.toContain('{confirmation_code}')
         expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).not.toContain('{service_name}')
@@ -168,6 +173,7 @@ describe('POST /notifications', function () {
         expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain('/api')
         expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain('1 ')
         expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain('54321')
+        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain('bar foo')
 
         app.models.Notification.find({
           where: {
@@ -190,7 +196,8 @@ describe('POST /notifications', function () {
         "message": {
           "from": "no_reply@bar.com",
           "subject": "test",
-          "textBody": "This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}"
+          "textBody": "This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}",
+          "htmlBody": "This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}"
         },
         "channel": "email",
         "userId": "bar",
