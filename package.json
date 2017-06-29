@@ -42,6 +42,7 @@
     "type": "",
     "url": ""
   },
-  "license": "UNLICENSED",
-  "description": "notification"
+  "license": "Apache-2.0",
+  "description": "notification",
+  "private": true
 }

@@ -291,6 +291,14 @@ describe('CRON dispatchLiveNotifications', function () {
 
 describe('CRON checkRssConfigUpdates', function () {
   beforeEach(function (done) {
+    spyOn(cronTasks, 'request').and.callFake(function () {
+      var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
+      setTimeout(function () {
+        output.emit('response', {statusCode: 200})
+      }, 0)
+      return output
+    })
+    spyOn(cronTasks.request, 'post')
     parallel([
       function (cb) {
         app.models.Configuration.create({
@@ -336,20 +344,52 @@ describe('CRON checkRssConfigUpdates', function () {
     })
   })
 
-  it('should create rss task', function (done) {
-    spyOn(cronTasks, 'request').and.callFake(function () {
-      var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
-      setTimeout(function () {
-        output.emit('response', {statusCode: 200})
-      }, 0)
-      return output
-    })
-    spyOn(cronTasks.request, 'post')
-
+  it('should create rss task and post notifications at initial run', function (done) {
     cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
       expect(err).toBeNull()
       expect(rssTasks["1"]).not.toBeNull()
-      done()
+      expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
+      app.models.Rss.find((err, results) => {
+        expect(results[0].items[0].author).toBe('foo')
+        done()
+      })
+    })
+  })
+
+  it('should avoid sending notification for unchanged items', function (done) {
+    app.models.Rss.create({
+      "serviceName": "myService",
+      "items": [
+        {
+          "title": "Item 2",
+          "description": "lorem ipsum",
+          "summary": "lorem ipsum",
+          "pubDate": "1970-01-01T00:00:00.000Z",
+          "link": "http://myservice/2",
+          "guid": "2",
+          "author": "foo",
+          "_notifyBCLastPoll": "1970-01-01T00:00:00.000Z"
+        },
+        {
+          "title": "Item 1",
+          "description": "lorem ipsum",
+          "summary": "lorem ipsum",
+          "pubDate": "1970-01-01T00:00:00.000Z",
+          "link": "http://myservice/1",
+          "guid": "1",
+          "author": "foo",
+          "_notifyBCLastPoll": "1970-01-01T00:00:00.000Z"
+        }
+      ],
+      "lastPoll": "1970-01-01T00:00:00.000Z"
+    }, function (err, res) {
+      cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
+        expect(cronTasks.request.post).not.toHaveBeenCalled()
+        app.models.Rss.find((err, results) => {
+          expect(results[0].items[0].author).toBe('foo')
+          done()
+        })
+      })
     })
   })
 })

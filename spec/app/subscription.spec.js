@@ -177,7 +177,7 @@ describe('POST /subscriptions', function () {
         expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
         app.models.Subscription.find({
           where: {
-            serviceName: 'myService',
+            "serviceName": 'myService',
             "userChannelId": "12345"
           }
         }, function (err, data) {

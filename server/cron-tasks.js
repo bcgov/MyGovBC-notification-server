@@ -257,12 +257,13 @@ module.exports.checkRssConfigUpdates = function () {
                   })
                   lastSavedRssData.items = items.concat(retainedOutdatedItems)
                   lastSavedRssData.lastPoll = ts
-                  lastSavedRssData.save()
-                  // for testing, call back on the first and supposedly sole rssNtfctnConfigItem
-                  if (callback && !callback.called) {
-                    callback.called = true
-                    return callback(null, rssTasks)
-                  }
+                  lastSavedRssData.save(() => {
+                    // for testing, call back on the first and supposedly sole rssNtfctnConfigItem
+                    if (callback && !callback.called) {
+                      callback.called = true
+                      return callback(null, rssTasks)
+                    }
+                  })
                 })
               })
             },
