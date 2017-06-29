@@ -399,6 +399,7 @@ describe('CRON checkRssConfigUpdates', function () {
         app.models.Configuration.findById(1, function (err, res) {
           let newVal = res.value
           newVal.rss.includeUpdatedItems = true
+          newVal.rss.outdatedItemRetentionGenerations = 100
           res.updateAttribute('value', newVal, cb)
         })
       },
@@ -424,6 +425,23 @@ describe('CRON checkRssConfigUpdates', function () {
         expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
         done()
       })
+    })
+  })
+
+
+  it('should handle error', function (done) {
+    cronTasks.request = jasmine.createSpy().and.callFake(function () {
+      var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
+      setTimeout(function () {
+        output.emit('response', {statusCode: 300})
+      }, 0)
+      return output
+    })
+
+    cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
+      expect(err).not.toBeNull()
+      expect(rssTasks["1"]).not.toBeNull()
+      done()
     })
   })
 })

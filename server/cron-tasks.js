@@ -169,7 +169,10 @@ module.exports.checkRssConfigUpdates = function () {
                 var feedparser = new FeedParser({addmeta: false})
 
                 req.on('error', function (error) {
-                  // handle any request errors
+                  if (callback) {
+                    callback.called = true
+                    return callback(error, rssTasks)
+                  }
                 })
 
                 req.on('response', function (res) {
