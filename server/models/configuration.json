@@ -14,7 +14,7 @@
       "required": true
     },
     "value": {
-      "type": "object"
+      "type": "any"
     },
     "serivceName": {
       "type": "string"

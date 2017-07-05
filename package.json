@@ -1,6 +1,7 @@
 {
   "name": "notification",
   "version": "1.0.0",
+  "dbSchemaVersion": "0.1.0",
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
@@ -27,6 +28,7 @@
     "nodemailer": "^2.5.0",
     "randexp": "^0.4.3",
     "request": "^2.81.0",
+    "semver": "^5.3.0",
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^1.0.1",
     "twilio": "^2.11.1"
