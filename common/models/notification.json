@@ -59,14 +59,50 @@
   "relations": {},
   "acls": [],
   "methods": {
-    "prototype.deleteItemById": {
+    "prototype.broadcastToChunkSubscribers": {
       "accepts": [
         {
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
+        },
+        {
+          "arg": "start",
+          "type": "number",
+          "required": true,
+          "description": "start index",
+          "http": {
+            "source": "query"
+          }
         }
       ],
+      "returns": [
+        {
+          "arg": "failedDeliveries",
+          "type": "array",
+          "root": true,
+          "description": "failed deliveries"
+        }
+      ],
+      "description": "dispatch broadcast notifications to a chunk of subscribers",
+      "http": [
+        {
+          "path": "/broadcastToChunkSubscribers",
+          "verb": "get"
+        }
+      ]
+    },
+    "prototype.deleteItemById": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "required": false,
+          "http": "optionsFromRequest",
+          "description": ""
+        }
+      ],
+      "returns": [],
       "description": "delete a notification by Id",
       "http": [
         {
