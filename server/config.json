@@ -22,6 +22,9 @@
   "defaultAdminIps": [
     "127.0.0.1"
   ],
+  "defaultSiteMinderReverseProxyIps": [
+    "127.0.0.1"
+  ],
   "smtp": {
     "direct": true,
     "name": "localhost"

@@ -37,10 +37,10 @@ module.exports = function (Model, options) {
     // internal requests
     if (!httpCtx) return null
 
-    var currUser = httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname')
-    var siteMinderReverseProxyIps = Model.app.get('siteMinderReverseProxyIps')
+    var currUser = httpCtx.req.get('SM_UNIVERSALID') || httpCtx.req.get('sm_user') || httpCtx.req.get('smgov_userdisplayname')
+    var siteMinderReverseProxyIps = Model.app.get('siteMinderReverseProxyIps') || Model.app.get('defaultSiteMinderReverseProxyIps')
     if (!siteMinderReverseProxyIps || siteMinderReverseProxyIps.length <= 0) {
-      return currUser
+      return null
     }
     // rely on express 'trust proxy' settings to obtain real ip
     var realIp = httpCtx.req.ip
