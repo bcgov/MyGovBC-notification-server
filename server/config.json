@@ -73,6 +73,10 @@
       "failureMessage": "Error happened while re-subscribing."
     }
   },
+  "notification": {
+    "broadcastSubscriberPartitionSize": 10000,
+    "broadcastTaskConcurrency": 1000
+  },
   "cron": {
     "purgeData": {
       "timeSpec": "0 0 1 * * *",

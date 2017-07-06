@@ -271,7 +271,7 @@ You can redirect the message page by defining *anonymousUndoUnsubscription.redir
 Configs in this section customize the handling of notification request or generating notifications from RSS feeds.  They are all sub-properties of config object *notification*. Service-agnostic  configs are static and service-dependent configs are dynamic. 
 
 ### Broadcast Task Concurrency
-When handling a broadcast push notification, *NotifyBC* sends messages concurrently to improve performance. The configuration *broadcastTaskConcurrency* defines the concurrency level. By default it is 100. To change, add following object to */server/config.local.json* :
+When handling a broadcast push notification, *NotifyBC* sends messages concurrently to improve performance. The configuration *broadcastTaskConcurrency* defines the concurrency level. By default it is 1000. To change, add following object to */server/config.local.json* :
 
 ```json
 {
