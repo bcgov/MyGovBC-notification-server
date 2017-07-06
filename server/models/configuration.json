@@ -33,7 +33,7 @@
   "acls": [],
   "methods": {},
   "indexes": {
-    "name_service_unique_index": {
+    "unique_name_serviceName": {
       "keys": {
         "name": 1,
         "serviceName": 1

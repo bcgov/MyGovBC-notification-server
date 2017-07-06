@@ -151,5 +151,14 @@
         }
       ]
     }
+  },
+  "indexes": {
+    "serviceName_state_channel": {
+      "keys": {
+        "serviceName": 1,
+        "state": 1,
+        "channel": 1
+      }
+    }
   }
 }

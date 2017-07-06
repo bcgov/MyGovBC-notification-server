@@ -1,7 +1,7 @@
 {
   "name": "notification",
   "version": "1.0.0",
-  "dbSchemaVersion": "0.1.0",
+  "dbSchemaVersion": "0.2.0",
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
