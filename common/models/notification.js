@@ -228,84 +228,93 @@ module.exports = function (Notification) {
       case true:
         let broadcastSubscriberChunkSize = Notification.app.get('notification').broadcastSubscriberChunkSize
         let startIdx = ctx.args.start
+        let broadcastToChunkSubscribers = () => {
+          Notification.app.models.Subscription.find({
+            where: {
+              serviceName: data.serviceName,
+              state: 'confirmed',
+              channel: data.channel
+            },
+            order: 'updated ASC',
+            skip: startIdx
+// todo: add limit back
+//          limit: broadcastSubscriberChunkSize
+          }, function (err, subscribers) {
+            var tasks = subscribers.map(function (e, i) {
+              return function (cb) {
+                var notificationMsgCB = function (err) {
+                  if (err) {
+                    data.errorWhenSendingToUsers = data.errorWhenSendingToUsers || []
+                    try {
+                      data.errorWhenSendingToUsers.push(e.userChannelId)
+                    }
+                    catch (ex) {
+                    }
+                  }
+                  cb(null)
+                }
+                let tokenData = _.assignIn({}, e, {data: data.data})
+                var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, tokenData, ctx)
+                switch (e.channel) {
+                  case 'sms':
+                    Notification.sendSMS(e.userChannelId,
+                      textBody, notificationMsgCB)
+                    break
+                  default:
+                    var subject = data.message.subject && Notification.mailMerge(data.message.subject, tokenData, ctx)
+                    var htmlBody = data.message.htmlBody && Notification.mailMerge(data.message.htmlBody, tokenData, ctx)
+                    Notification.sendEmail(data.message.from,
+                      e.userChannelId, subject,
+                      textBody, htmlBody, notificationMsgCB)
+                }
+              }
+            })
+            parallelLimit(tasks, (Notification.app.get('notification') && Notification.app.get('notification').broadcastTaskConcurrency) || 100, function (err, res) {
+              if (!data.asyncBroadcastPushNotification) {
+                cb(err)
+              }
+              else {
+                if (err) {
+                  data.state = 'error'
+                }
+                else {
+                  data.state = 'sent'
+                }
+                data.save(function (errSave) {
+                  if (typeof data.asyncBroadcastPushNotification === 'string') {
+                    let options = {
+                      uri: data.asyncBroadcastPushNotification,
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      json: data
+                    }
+                    require('request').post(options)
+                  }
+                })
+              }
+            })
+          })
+        }
         if (!startIdx) {
-          startIdx = 0
           Notification.app.models.Subscription.count({
             serviceName: data.serviceName,
             state: 'confirmed',
             channel: data.channel
           }, function (err, count) {
-            if (count > broadcastSubscriberChunkSize) {
-              // todo: call broadcastToChunkSubscribers
+            // todo: remove true
+            if (true || count <= broadcastSubscriberChunkSize) {
+              startIdx = 0
+              broadcastToChunkSubscribers()
+            }
+            else {
+              // todo: call broadcastToChunkSubscribers, coordinate output
             }
           })
         }
-        Notification.app.models.Subscription.find({
-          where: {
-            serviceName: data.serviceName,
-            state: 'confirmed',
-            channel: data.channel
-          },
-          order: 'updated ASC',
-          skip: startIdx
-// todo: add limit back
-//          limit: broadcastSubscriberChunkSize
-        }, function (err, subscribers) {
-          var tasks = subscribers.map(function (e, i) {
-            return function (cb) {
-              var notificationMsgCB = function (err) {
-                if (err) {
-                  data.errorWhenSendingToUsers = data.errorWhenSendingToUsers || []
-                  try {
-                    data.errorWhenSendingToUsers.push(e.userChannelId)
-                  }
-                  catch (ex) {
-                  }
-                }
-                cb(null)
-              }
-              let tokenData = _.assignIn({}, e, {data: data.data})
-              var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, tokenData, ctx)
-              switch (e.channel) {
-                case 'sms':
-                  Notification.sendSMS(e.userChannelId,
-                    textBody, notificationMsgCB)
-                  break
-                default:
-                  var subject = data.message.subject && Notification.mailMerge(data.message.subject, tokenData, ctx)
-                  var htmlBody = data.message.htmlBody && Notification.mailMerge(data.message.htmlBody, tokenData, ctx)
-                  Notification.sendEmail(data.message.from,
-                    e.userChannelId, subject,
-                    textBody, htmlBody, notificationMsgCB)
-              }
-            }
-          })
-          parallelLimit(tasks, (Notification.app.get('notification') && Notification.app.get('notification').broadcastTaskConcurrency) || 100, function (err, res) {
-            if (!data.asyncBroadcastPushNotification) {
-              cb(err)
-            }
-            else {
-              if (err) {
-                data.state = 'error'
-              }
-              else {
-                data.state = 'sent'
-              }
-              data.save(function (errSave) {
-                if (typeof data.asyncBroadcastPushNotification === 'string') {
-                  let options = {
-                    uri: data.asyncBroadcastPushNotification,
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    json: data
-                  }
-                  require('request').post(options)
-                }
-              })
-            }
-          })
-        })
+        else {
+          broadcastToChunkSubscribers()
+        }
         if (data.asyncBroadcastPushNotification) {
           cb(null)
         }
