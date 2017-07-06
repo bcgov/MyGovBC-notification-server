@@ -2,6 +2,17 @@
   "name": "configuration",
   "base": "PersistedModel",
   "idInjection": true,
+  "indexes": {
+    "unique_name_serviceName": {
+      "keys": {
+        "name": 1,
+        "serviceName": 1
+      },
+      "options": {
+        "unique": true
+      }
+    }
+  },
   "options": {
     "validateUpsert": true
   },
@@ -31,16 +42,5 @@
   "validations": [],
   "relations": {},
   "acls": [],
-  "methods": {},
-  "indexes": {
-    "unique_name_serviceName": {
-      "keys": {
-        "name": 1,
-        "serviceName": 1
-      },
-      "options": {
-        "unique": true
-      }
-    }
-  }
+  "methods": {}
 }

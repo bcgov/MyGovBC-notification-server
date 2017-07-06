@@ -2,6 +2,20 @@
   "name": "subscription",
   "base": "PersistedModel",
   "idInjection": true,
+  "indexes": {
+    "serviceName_state_channel": {
+      "keys": {
+        "serviceName": 1,
+        "state": 1,
+        "channel": 1
+      }
+    },
+    "updated": {
+      "keys": {
+        "updated": 1
+      }
+    }
+  },
   "options": {
     "validateUpsert": true,
     "replaceOnPUT": true
@@ -150,15 +164,6 @@
           "verb": "get"
         }
       ]
-    }
-  },
-  "indexes": {
-    "serviceName_state_channel": {
-      "keys": {
-        "serviceName": 1,
-        "state": 1,
-        "channel": 1
-      }
     }
   }
 }
