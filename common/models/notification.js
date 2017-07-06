@@ -226,12 +226,30 @@ module.exports = function (Notification) {
         }
         break
       case true:
+        let broadcastSubscriberChunkSize = Notification.app.get('notification').broadcastSubscriberChunkSize
+        let startIdx = ctx.args.start
+        if (!startIdx) {
+          startIdx = 0
+          Notification.app.models.Subscription.count({
+            serviceName: data.serviceName,
+            state: 'confirmed',
+            channel: data.channel
+          }, function (err, count) {
+            if (count > broadcastSubscriberChunkSize) {
+              // todo: call broadcastToChunkSubscribers
+            }
+          })
+        }
         Notification.app.models.Subscription.find({
           where: {
             serviceName: data.serviceName,
             state: 'confirmed',
             channel: data.channel
-          }
+          },
+          order: 'updated ASC',
+          skip: startIdx
+// todo: add limit back
+//          limit: broadcastSubscriberChunkSize
         }, function (err, subscribers) {
           var tasks = subscribers.map(function (e, i) {
             return function (cb) {
@@ -294,4 +312,17 @@ module.exports = function (Notification) {
         break
     }
   }
+
+  /**
+   * dispatch broadcast notifications to a chunk of subscribers
+   * @param {number} start start index
+   * @param {Function(Error, array)} callback
+   */
+
+  Notification.prototype.broadcastToChunkSubscribers = function (options, start, callback) {
+    var failedDeliveries;
+    // TODO
+    callback(null, failedDeliveries);
+  };
+
 }

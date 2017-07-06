@@ -74,7 +74,7 @@
     }
   },
   "notification": {
-    "broadcastSubscriberPartitionSize": 10000,
+    "broadcastSubscriberChunkSize": 10000,
     "broadcastTaskConcurrency": 1000
   },
   "cron": {
