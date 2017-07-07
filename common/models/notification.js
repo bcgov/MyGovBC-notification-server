@@ -270,6 +270,7 @@ module.exports = function (Notification) {
             })
             parallelLimit(tasks, (Notification.app.get('notification') && Notification.app.get('notification').broadcastTaskConcurrency) || 100, function (err, res) {
               if (!data.asyncBroadcastPushNotification || typeof ctx.args.start === 'number') {
+                _.remove(res, (e) => e === null)
                 cb(err, res)
               }
               else {
@@ -318,7 +319,12 @@ module.exports = function (Notification) {
                 let startIdx = i * broadcastSubscriberChunkSize
                 let chunkReqtask = (cb) => {
                   let uri = httpHost + Notification.app.get('restApiRoot') + '/notifications/' + data.id + '/broadcastToChunkSubscribers?start=' + startIdx
-                  request(uri, function (error, response, body) {
+                  let options = {
+                    method: 'get',
+                    json: true,
+                    uri: uri
+                  }
+                  request(options, function (error, response, body) {
                     cb(null, body)
                   })
                 }
@@ -327,7 +333,10 @@ module.exports = function (Notification) {
               }
               parallel(chunkRequests, function (error, errorWhenSendingToUsers) {
                 if (errorWhenSendingToUsers) {
-                  data.errorWhenSendingToUsers = [].concat.apply([], errorWhenSendingToUsers)
+                  let flattened = [].concat.apply([], errorWhenSendingToUsers)
+                  if (flattened.length > 0) {
+                    data.errorWhenSendingToUsers = flattened
+                  }
                 }
                 if (!data.asyncBroadcastPushNotification) {
                   cb(error)
