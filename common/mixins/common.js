@@ -108,7 +108,15 @@ module.exports = function (Model, options) {
     }
     let httpHost
     try {
-      httpHost = httpCtx.args && httpCtx.args.data && httpCtx.args.data.httpHost ? httpCtx.args.data.httpHost : httpCtx.req.protocol + '://' + httpCtx.req.get('host')
+      if (httpCtx.req) {
+        httpHost = httpCtx.req.protocol + '://' + httpCtx.req.get('host')
+      }
+      if (httpCtx.args && httpCtx.args.data && httpCtx.args.data.httpHost) {
+        httpHost = httpCtx.args.data.httpHost
+      }
+      else if (httpCtx.instance && httpCtx.instance && httpCtx.instance.httpHost) {
+        httpHost = httpCtx.instance.httpHost
+      }
       output = output.replace(/\{http_host\}/ig, httpHost)
     }
     catch (ex) {
