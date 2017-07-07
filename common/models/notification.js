@@ -1,8 +1,10 @@
 'use strict'
 
 var parallelLimit = require('async/parallelLimit')
+var parallel = require('async/parallel')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
+var request = require('request')
 
 module.exports = function (Notification) {
   disableAllMethods(Notification, ['find', 'create', 'patchAttributes', 'deleteItemById'])
@@ -76,10 +78,8 @@ module.exports = function (Notification) {
       return next(error)
     }
     if (!data.httpHost && data.channel !== 'inApp') {
-      if (data.invalidBefore && Date.parse(data.invalidBefore) > new Date()) {
-        if (ctx.req) {
-          data.httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
-        }
+      if (ctx.req) {
+        data.httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
       }
     }
     if (data.channel === 'inApp' || data.skipSubscriptionConfirmationCheck || data.isBroadcast) {
@@ -236,9 +236,8 @@ module.exports = function (Notification) {
               channel: data.channel
             },
             order: 'updated ASC',
-            skip: startIdx
-// todo: add limit back
-//          limit: broadcastSubscriberChunkSize
+            skip: startIdx,
+            limit: broadcastSubscriberChunkSize
           }, function (err, subscribers) {
             var tasks = subscribers.map(function (e, i) {
               return function (cb) {
@@ -251,7 +250,7 @@ module.exports = function (Notification) {
                     catch (ex) {
                     }
                   }
-                  cb(null)
+                  cb(null, err && e.userChannelId)
                 }
                 let tokenData = _.assignIn({}, e, {data: data.data})
                 var textBody = data.message.textBody && Notification.mailMerge(data.message.textBody, tokenData, ctx)
@@ -270,8 +269,8 @@ module.exports = function (Notification) {
               }
             })
             parallelLimit(tasks, (Notification.app.get('notification') && Notification.app.get('notification').broadcastTaskConcurrency) || 100, function (err, res) {
-              if (!data.asyncBroadcastPushNotification) {
-                cb(err)
+              if (!data.asyncBroadcastPushNotification || typeof ctx.args.start === 'number') {
+                cb(err, res)
               }
               else {
                 if (err) {
@@ -289,26 +288,71 @@ module.exports = function (Notification) {
                       },
                       json: data
                     }
-                    require('request').post(options)
+                    request.post(options)
                   }
                 })
               }
             })
           })
         }
-        if (!startIdx) {
+        if (typeof startIdx !== 'number') {
           Notification.app.models.Subscription.count({
             serviceName: data.serviceName,
             state: 'confirmed',
             channel: data.channel
           }, function (err, count) {
-            // todo: remove true
-            if (true || count <= broadcastSubscriberChunkSize) {
+            if (count <= broadcastSubscriberChunkSize) {
               startIdx = 0
               broadcastToChunkSubscribers()
             }
             else {
-              // todo: call broadcastToChunkSubscribers, coordinate output
+              // call broadcastToChunkSubscribers, coordinate output
+              let chunks = Math.ceil(count / broadcastSubscriberChunkSize)
+              let i = 0, chunkRequests = []
+              /*jshint loopfunc: true */
+              let httpHost = Notification.app.get('internalHttpHost')
+              if (!httpHost) {
+                httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
+              }
+              while (i < chunks) {
+                let startIdx = i * broadcastSubscriberChunkSize
+                let chunkReqtask = (cb) => {
+                  let uri = httpHost + Notification.app.get('restApiRoot') + '/notifications/' + data.id + '/broadcastToChunkSubscribers?start=' + startIdx
+                  request(uri, function (error, response, body) {
+                    cb(null, body)
+                  })
+                }
+                chunkRequests.push(chunkReqtask)
+                i++
+              }
+              parallel(chunkRequests, function (error, errorWhenSendingToUsers) {
+                if (errorWhenSendingToUsers) {
+                  data.errorWhenSendingToUsers = [].concat.apply([], errorWhenSendingToUsers)
+                }
+                if (!data.asyncBroadcastPushNotification) {
+                  cb(error)
+                }
+                else {
+                  if (error) {
+                    data.state = 'error'
+                  }
+                  else {
+                    data.state = 'sent'
+                  }
+                  data.save(function (errSave) {
+                    if (typeof data.asyncBroadcastPushNotification === 'string') {
+                      let options = {
+                        uri: data.asyncBroadcastPushNotification,
+                        headers: {
+                          'Content-Type': 'application/json'
+                        },
+                        json: data
+                      }
+                      request.post(options)
+                    }
+                  })
+                }
+              })
             }
           })
         }
@@ -329,9 +373,8 @@ module.exports = function (Notification) {
    */
 
   Notification.prototype.broadcastToChunkSubscribers = function (options, start, callback) {
-    var failedDeliveries;
-    // TODO
-    callback(null, failedDeliveries);
-  };
-
+    sendPushNotification(options.httpContext, this, (err, data) => {
+      callback(err, data)
+    })
+  }
 }

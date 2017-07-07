@@ -318,7 +318,7 @@ POST /notifications
   
   1. if it's a user request, error is returned
   2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, the recipient as identified by either *userChannelId* or *userId* must have a confirmed subscription if field *skipSubscriptionConfirmationCheck* is not set to true. If *skipSubscriptionConfirmationCheck* is set to true, then the subscription check is skipped, but in such case the request must contain *userChannelId*, not *userId* as subscription data is not queried to obtain *userChannelId* from *userId*.   
-  3. if the notification is future-dated, then the field *httpHost*, if empty, is populated based on request's http protocol and host. This field is used to replace token *{http_host}* in notification message during [mail merge](../overview/#mail-merge) when the notification is later dispatched.
+  3. for push notification, if field *httpHost* is empty, it is populated based on request's http protocol and host. This field is used to replace token *{http_host}* in notification message during [mail merge](../overview/#mail-merge).
   4. the notification request is saved to database
   5. if the notification is future-dated, then all subsequent request processing is skipped and response is sent back to user. Steps 7-10 below will be carried out later on by the cron job when the notification becomes current. 
   6. if it's an async broadcast push notification, then response is sent back to user but steps 7-10 below is processed separately 

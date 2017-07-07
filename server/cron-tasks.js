@@ -237,6 +237,7 @@ module.exports.checkRssConfigUpdates = function () {
                   })
                   // notify new or updated items
                   newOrUpdatedItems.forEach(function (newOrUpdatedItem) {
+                    newOrUpdatedItem.httpHost = rssNtfctnConfigItem.value.httpHost
                     for (var channel in rssNtfctnConfigItem.value.messageTemplates) {
                       if (!rssNtfctnConfigItem.value.messageTemplates.hasOwnProperty(channel)) {
                         continue
@@ -248,8 +249,9 @@ module.exports.checkRssConfigUpdates = function () {
                         message: rssNtfctnConfigItem.value.messageTemplates[channel],
                         data: newOrUpdatedItem
                       }
+                      let httpHost = app.get('internalHttpHost') || rssNtfctnConfigItem.value.httpHost
                       let options = {
-                        uri: rssNtfctnConfigItem.value.httpHost + app.get('restApiRoot') + '/notifications',
+                        uri: httpHost + app.get('restApiRoot') + '/notifications',
                         headers: {
                           'Content-Type': 'application/json'
                         },
