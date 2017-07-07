@@ -227,6 +227,19 @@ The API operates on following notification data model fields:
   </tr>
   <tr>
     <td>
+      <p class="name">httpHost</p>
+      <p class="description">This field is used to replace token <i>{http_host}</i> in push notification message template during <a href="../overview/#mail-merge">mail merge</a>.</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>string</td></tr>
+        <tr><td>required</td><td>false</td></tr>
+        <tr><td>default</td><td>&lt;http protocol, host and port of current request&gt; for push notification</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
       <p class="name">asyncBroadcastPushNotification</p>
       <div class="description">this field determines if the API call to create an immediate (i.e. not future-dated) broadcast push notification is asynchronous or not. If omitted, the API call is synchronous, i.e. the API call blocks until notifications have been sent to all subscribers. If set, valid values and corresponding behaviors are
         <ul>
@@ -318,7 +331,7 @@ POST /notifications
   
   1. if it's a user request, error is returned
   2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, the recipient as identified by either *userChannelId* or *userId* must have a confirmed subscription if field *skipSubscriptionConfirmationCheck* is not set to true. If *skipSubscriptionConfirmationCheck* is set to true, then the subscription check is skipped, but in such case the request must contain *userChannelId*, not *userId* as subscription data is not queried to obtain *userChannelId* from *userId*.   
-  3. for push notification, if field *httpHost* is empty, it is populated based on request's http protocol and host. This field is used to replace token *{http_host}* in notification message during [mail merge](../overview/#mail-merge).
+  3. for push notification, if field *httpHost* is empty, it is populated based on request's http protocol and host.
   4. the notification request is saved to database
   5. if the notification is future-dated, then all subsequent request processing is skipped and response is sent back to user. Steps 7-10 below will be carried out later on by the cron job when the notification becomes current. 
   6. if it's an async broadcast push notification, then response is sent back to user but steps 7-10 below is processed separately 
