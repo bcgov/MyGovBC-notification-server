@@ -10,9 +10,9 @@
         "channel": 1
       }
     },
-    "updated": {
+    "created": {
       "keys": {
-        "updated": 1
+        "created": 1
       }
     }
   },

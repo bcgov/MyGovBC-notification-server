@@ -235,7 +235,7 @@ module.exports = function (Notification) {
               state: 'confirmed',
               channel: data.channel
             },
-            order: 'updated ASC',
+            order: 'created ASC',
             skip: startIdx,
             limit: broadcastSubscriberChunkSize
           }, function (err, subscribers) {
