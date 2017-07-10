@@ -74,8 +74,8 @@
     }
   },
   "notification": {
-    "broadcastSubscriberChunkSize": 10000,
-    "broadcastTaskConcurrency": 1000
+    "broadcastSubscriberChunkSize": 1000,
+    "broadcastSubRequestBatchSize": 10
   },
   "cron": {
     "purgeData": {

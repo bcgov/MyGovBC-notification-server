@@ -270,16 +270,22 @@ You can redirect the message page by defining *anonymousUndoUnsubscription.redir
 ## Notification 
 Configs in this section customize the handling of notification request or generating notifications from RSS feeds.  They are all sub-properties of config object *notification*. Service-agnostic  configs are static and service-dependent configs are dynamic. 
 
-### Broadcast Task Concurrency
-When handling a broadcast push notification, *NotifyBC* sends messages concurrently to improve performance. The configuration *broadcastTaskConcurrency* defines the concurrency level. By default it is 1000. To change, add following object to */server/config.local.json* :
+### Broadcast Concurrency
+When a broadcast push notification request is received, *NotifyBC* divides subscribers into chunks and generates a HTTP sub-request for each chunk.  The sub-requests are submitted in batches back to ( preferably load-balanced) server cluster to achieve horizontal scaling. Sub-requests in a batch are submitted concurrently. Batches are processed serially, i.e. a batch is held until previous batch is completed. The chunk and batch size is determined by config *broadcastSubscriberChunkSize* and *broadcastSubRequestBatchSize* respectively with default value defined in */server/config.json*
 
 ```json
 {
   "notification": {
-    "broadcastTaskConcurrency": 200
+    "broadcastSubscriberChunkSize": 1000,
+    "broadcastSubRequestBatchSize": 10
   }
 }
 ```
+
+To customize, create the config with updated value in file */server/config.local.json*.
+
+*NotifyBC* processes all subscribers in a chunk concurrently. If total number of subscribers is less than *broadcastSubscriberChunkSize*, then no sub-requests are generated. Instead, the main request dispatches all notifications. 
+
 
 ### RSS Feeds
 *NotifyBC* can generate notifications automatically by polling RSS feeds periodically and detect changes by comparing with an internally maintained history list. The polling frequency, RSS url, RSS item change detection criteria, and message template can be defined in dynamic configs.  

@@ -227,6 +227,7 @@ module.exports = function (Notification) {
         break
       case true:
         let broadcastSubscriberChunkSize = Notification.app.get('notification').broadcastSubscriberChunkSize
+        let broadcastSubRequestBatchSize = Notification.app.get('notification').broadcastSubRequestBatchSize
         let startIdx = ctx.args.start
         let broadcastToChunkSubscribers = () => {
           Notification.app.models.Subscription.find({
@@ -268,7 +269,7 @@ module.exports = function (Notification) {
                 }
               }
             })
-            parallelLimit(tasks, (Notification.app.get('notification') && Notification.app.get('notification').broadcastTaskConcurrency) || 100, function (err, res) {
+            parallel(tasks, function (err, res) {
               if (!data.asyncBroadcastPushNotification || typeof ctx.args.start === 'number') {
                 _.remove(res, (e) => e === null)
                 cb(err, res)
@@ -331,7 +332,7 @@ module.exports = function (Notification) {
                 chunkRequests.push(chunkReqtask)
                 i++
               }
-              parallel(chunkRequests, function (error, errorWhenSendingToUsers) {
+              parallelLimit(chunkRequests, broadcastSubRequestBatchSize, function (error, errorWhenSendingToUsers) {
                 if (errorWhenSendingToUsers) {
                   let flattened = [].concat.apply([], errorWhenSendingToUsers)
                   if (flattened.length > 0) {
