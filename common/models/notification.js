@@ -321,11 +321,10 @@ module.exports = function (Notification) {
                 let chunkReqtask = (cb) => {
                   let uri = httpHost + Notification.app.get('restApiRoot') + '/notifications/' + data.id + '/broadcastToChunkSubscribers?start=' + startIdx
                   let options = {
-                    method: 'get',
                     json: true,
                     uri: uri
                   }
-                  request(options, function (error, response, body) {
+                  request.get(options, function (error, response, body) {
                     cb(null, body)
                   })
                 }

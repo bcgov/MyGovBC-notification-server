@@ -530,6 +530,17 @@ describe('POST /notifications', function () {
       }
     })
     spyOn(nodeReq, 'post')
+    spyOn(nodeReq, 'get').and.callFake(function (options, cb) {
+      let uri = options.uri.substring(options.uri.indexOf('/api/notifications'))
+      request(app)
+        .get(uri)
+        .set('Accept', 'application/json')
+        .expect('Content-Type', /json/)
+        .end(function (err, res) {
+          cb(err, res, res.body)
+        })
+
+    })
 
     request(app).post('/api/notifications')
       .send({
@@ -562,8 +573,7 @@ describe('POST /notifications', function () {
               expect(data.length).toBe(1)
               expect(data[0].state).toBe('sent')
               expect(nodeReq.post).toHaveBeenCalledWith(jasmine.any(Object))
-              // spawned requests are not called
-              // expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
+              expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
               done()
             })
           }, 3000)
