@@ -513,6 +513,63 @@ describe('POST /notifications', function () {
       })
   })
 
+  it('should send chunked async broadcast email notifications', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    let realGet = app.models.Notification.app.get
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
+      if (param === 'notification') {
+        return {
+          broadcastSubscriberChunkSize: 1,
+          broadcastSubRequestBatchSize: 10
+        }
+      }
+      else {
+        return realGet.call(app, param)
+      }
+    })
+    spyOn(nodeReq, 'post')
+
+    request(app).post('/api/notifications')
+      .send({
+        "serviceName": "myChunkedBroadcastService",
+        "message": {
+          "from": "no_reply@bar.com",
+          "subject": "test",
+          "textBody": "test"
+        },
+        "channel": "email",
+        "isBroadcast": true,
+        "asyncBroadcastPushNotification": "http://foo.com"
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Notification.find({
+          where: {
+            serviceName: 'myChunkedBroadcastService',
+          }
+        }, function (err, data) {
+          expect(data.length).toBe(1)
+          expect(data[0].state).toBe('new')
+          setTimeout(function () {
+            app.models.Notification.find({
+              where: {
+                serviceName: 'myChunkedBroadcastService',
+              }
+            }, function (err, data) {
+              expect(data.length).toBe(1)
+              expect(data[0].state).toBe('sent')
+              expect(nodeReq.post).toHaveBeenCalledWith(jasmine.any(Object))
+              // spawned requests are not called
+              // expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
+              done()
+            })
+          }, 3000)
+        })
+      })
+  })
 })
 
 describe('PATCH /notifications/{id}', function () {

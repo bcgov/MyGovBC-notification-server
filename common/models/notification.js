@@ -365,12 +365,12 @@ module.exports = function (Notification) {
               })
             }
           })
+          if (data.asyncBroadcastPushNotification) {
+            cb(null)
+          }
         }
         else {
           broadcastToChunkSubscribers()
-        }
-        if (data.asyncBroadcastPushNotification) {
-          cb(null)
         }
         break
     }
