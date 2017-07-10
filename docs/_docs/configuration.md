@@ -159,20 +159,22 @@ To prevent *NotifyBC* from being used as spam engine, when a subscription reques
 The following default subscription sub-property *confirmationRequest* defines confirmation request message settings for different channels 
 
 ```json
-"subscription": {
-  "confirmationRequest": {
-    "sms": {
-      "confirmationCodeRegex": "\\d{5}",
-      "sendRequest": true,
-      "textBody": "Enter {confirmation_code} on screen"
-    },
-    "email": {
-      "confirmationCodeRegex": "\\d{5}",
-      "sendRequest": true,
-      "from": "no_reply@example.com",
-      "subject": "Subscription confirmation",
-      "textBody": "Enter {confirmation_code} on screen",
-      "htmlBody": "Enter {confirmation_code} on screen"
+{
+  "subscription": {
+    "confirmationRequest": {
+      "sms": {
+        "confirmationCodeRegex": "\\d{5}",
+        "sendRequest": true,
+        "textBody": "Enter {confirmation_code} on screen"
+      },
+      "email": {
+        "confirmationCodeRegex": "\\d{5}",
+        "sendRequest": true,
+        "from": "no_reply@example.com",
+        "subject": "Subscription confirmation",
+        "textBody": "Enter {confirmation_code} on screen",
+        "htmlBody": "Enter {confirmation_code} on screen"
+      }
     }
   }
 }
@@ -182,10 +184,12 @@ The following default subscription sub-property *confirmationRequest* defines co
 You can customize *NotifyBC*'s on-screen response message to confirmation code verification requests. The following is the default settings
 
 ```json
-"subscription": {
-  "confirmationAcknowledgements": {
-    "successMessage": "You have been subscribed.",
-    "failureMessage": "Error happened while confirming subscription."
+{
+  "subscription": {
+    "confirmationAcknowledgements": {
+      "successMessage": "You have been subscribed.",
+      "failureMessage": "Error happened while confirming subscription."
+    }
   }
 }
 ```
@@ -215,22 +219,24 @@ For anonymous subscription, *NotifyBC* supports one-click opt-out by allowing un
 You can customize anonymous unsubscription settings by changing the *anonymousUnsubscription* configuration. Following is the default settings defined in [config.json](https://github.com/bcgov/MyGovBC-notification-server/blob/master/server/config.json)
  
 ```json
-"subscription": {
-  "anonymousUnsubscription": {
-    "code": {
-      "required": true,
-      "regex": "\\d{5}"
-    },
-    "acknowledgements":{
-      "onScreen": {
-        "successMessage": "You have been un-subscribed.",
-        "failureMessage": "Error happened while un-subscribing."
+{
+  "subscription": {
+    "anonymousUnsubscription": {
+      "code": {
+        "required": true,
+        "regex": "\\d{5}"
       },
-      "notification":{
-        "email": {
-          "from": "no_reply@example.com",
-          "subject": "Un-subscription acknowledgement",
-          "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for service {service_name}. If you did not authorize this change or if you changed your mind, click {unsubscription_reversion_url} to revert."
+      "acknowledgements":{
+        "onScreen": {
+          "successMessage": "You have been un-subscribed.",
+          "failureMessage": "Error happened while un-subscribing."
+        },
+        "notification":{
+          "email": {
+            "from": "no_reply@example.com",
+            "subject": "Un-subscription acknowledgement",
+            "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for service {service_name}. If you did not authorize this change or if you changed your mind, click {unsubscription_reversion_url} to revert."
+          }
         }
       }
     }
@@ -242,11 +248,13 @@ The settings control whether or not unsubscription code is required, its RegEx p
 For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app for all services, create following config in file */server/config.local.json* 
 
 ```json
-"subscription":{
-  "anonymousUnsubscription": {
-    "acknowledgements":{
-      "onScreen": {
-        "redirectUrl": "https://myapp/unsubscription/acknowledgement"
+{
+  "subscription":{
+    "anonymousUnsubscription": {
+      "acknowledgements":{
+        "onScreen": {
+          "redirectUrl": "https://myapp/unsubscription/acknowledgement"
+        }
       }
     }
   }
@@ -258,10 +266,12 @@ If error happened during unsubscription, query string *?err=\<error\>* will be a
 You can customize message displayed on-screen when user clicks revert unsubscription link in the acknowledgement notification. The default settings are
 
 ```json
-"subscription": {
-  "anonymousUndoUnsubscription":{
-    "successMessage": "You have been re-subscribed.",
-    "failureMessage": "Error happened while re-subscribing."
+{
+  "subscription": {
+    "anonymousUndoUnsubscription":{
+      "successMessage": "You have been re-subscribed.",
+      "failureMessage": "Error happened while re-subscribing."
+    }
   }
 }
 ```
@@ -284,7 +294,9 @@ When a broadcast push notification request is received, *NotifyBC* divides subsc
 
 To customize, create the config with updated value in file */server/config.local.json*.
 
-*NotifyBC* processes all subscribers in a chunk concurrently. If total number of subscribers is less than *broadcastSubscriberChunkSize*, then no sub-requests are generated. Instead, the main request dispatches all notifications. 
+When handling a sub-request, *NotifyBC* dispatches notifications to all subscribers in the chunk concurrently. 
+
+If total number of subscribers is less than *broadcastSubscriberChunkSize*, then no sub-requests are spawned. Instead, the main request dispatches all notifications. 
 
 
 ### RSS Feeds
@@ -463,4 +475,22 @@ In a multi-node deployment, when the cluster is first started up, database is em
 <div class="note warning">
   <h5>Expose RSA public key to only trusted party</h5>
   <p>Dispite of the adjective public, NotifyBC's public key should only be distributed to trusted third party. The trusted third party should only use the public key at server backend. Using the public key in client-side JavaScript poses a security loophole.</p>
+</div>
+
+## Internal Http Host
+By default, HTTP requests submitted by *NotifyBC* back to itself will be sent to the host of the incoming HTTP request that spawns such internal requests. But if config *internalHttpHost*, which has no default value, is defined, for example in file */server/config.local.json*
+  
+```json
+{
+  "internalHttpHost" : "http://notifybc:3000"
+}
+```
+then the HTTP request will be sent to the configured host. An internal request can be generated, for example, as a [sub-request of broadcast push notification](#broadcast-concurrency) described above. *internalHttpHost* shouldn't be accessible from internet. 
+
+All internal requests are supposed to be admin requests. The purpose of *internalHttpHost* is to facilitate identifying the internal server ip as admin ip.
+ 
+
+<div class="note">
+  <h5>ProTips™ User Case</h5>
+  <p>When running in OpenShift, <i>internalHttpHost</i> should be set to the OpenShift service url of <i>NotifyBC</i>. The source ip in such case would be in a private OpenShift ip range. This private ip range should then be defined in <a href="#admin-ip-list">admin ip list</a>.</p>
 </div>
