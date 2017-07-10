@@ -116,6 +116,22 @@ describe('POST /notifications', function () {
           "userChannelId": "12345",
           "state": "confirmed",
         }, cb)
+      },
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myChunkedBroadcastService",
+          "channel": "email",
+          "userChannelId": "bar1@foo.com",
+          "state": "confirmed",
+        }, cb)
+      },
+      function (cb) {
+        app.models.Subscription.create({
+          "serviceName": "myChunkedBroadcastService",
+          "channel": "email",
+          "userChannelId": "bar2@foo.com",
+          "state": "confirmed",
+        }, cb)
       }
     ], function (err, results) {
       expect(err).toBeNull()
@@ -453,6 +469,50 @@ describe('POST /notifications', function () {
         })
       })
   }, 10000)
+
+  it('should send chunked sync broadcast email notifications', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    let realGet = app.models.Notification.app.get
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
+      if (param === 'notification') {
+        return {
+          broadcastSubscriberChunkSize: 1,
+          broadcastSubRequestBatchSize: 10
+        }
+      }
+      else {
+        return realGet.call(app, param)
+      }
+    })
+
+    request(app).post('/api/notifications')
+      .send({
+        "serviceName": "myChunkedBroadcastService",
+        "message": {
+          "from": "no_reply@bar.com",
+          "subject": "test",
+          "textBody": "test"
+        },
+        "channel": "email",
+        "isBroadcast": true
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
+        app.models.Notification.find({
+          where: {
+            serviceName: 'myChunkedBroadcastService',
+          }
+        }, function (err, data) {
+          expect(data.length).toBe(1)
+          done()
+        })
+      })
+  })
+
 })
 
 describe('PATCH /notifications/{id}', function () {
