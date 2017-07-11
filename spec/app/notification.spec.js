@@ -129,7 +129,7 @@ describe('POST /notifications', function () {
         app.models.Subscription.create({
           "serviceName": "myChunkedBroadcastService",
           "channel": "email",
-          "userChannelId": "bar2@foo.com",
+          "userChannelId": "bar2@invalid",
           "state": "confirmed",
         }, cb)
       }
@@ -468,7 +468,7 @@ describe('POST /notifications', function () {
           }, 3000)
         })
       })
-  }, 10000)
+  })
 
   it('should send chunked sync broadcast email notifications', function (done) {
     spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
@@ -541,7 +541,16 @@ describe('POST /notifications', function () {
         })
 
     })
-
+    app.models.Notification.sendEmail = jasmine.createSpy().and.callFake(function () {
+      let cb = arguments[arguments.length - 1]
+      let from = arguments[1]
+      let error = null
+      if (from.indexOf('invalid') >= 0) {
+        error = from
+      }
+      console.log('faking sendEmail with error for invalid recipient')
+      return cb(error, null)
+    })
     request(app).post('/api/notifications')
       .send({
         "serviceName": "myChunkedBroadcastService",
@@ -574,6 +583,8 @@ describe('POST /notifications', function () {
               expect(data[0].state).toBe('sent')
               expect(nodeReq.post).toHaveBeenCalledWith(jasmine.any(Object))
               expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
+              expect(data[0].errorWhenSendingToUsers.length).toBe(1)
+              expect(data[0].errorWhenSendingToUsers[0]).toBe('bar2@invalid')
               done()
             })
           }, 3000)
