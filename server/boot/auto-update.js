@@ -24,4 +24,5 @@ module.exports = function (app, cb) {
       }
     })
   }
+  cb()
 }
