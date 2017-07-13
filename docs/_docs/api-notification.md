@@ -345,7 +345,7 @@ POST /notifications
 
   To send a unicast email push notification, copy and paste following json object to the data value box in API explorer, change email addresses as needed, and click *Try it out!* button:
   
-  ```
+  ```json
   {
     "serviceName": "education",
     "userChannelId": "foo@bar.com",
@@ -361,7 +361,7 @@ POST /notifications
 
   As the result, *foo@bar.com* should receive an email notification even if the user is not a confirmed subscriber, and following json object is returned to caller upon sending the email successfully:
   
-  ```
+  ```json
   {
     "serviceName": "education",
     "state": "sent",

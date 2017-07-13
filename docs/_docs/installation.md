@@ -90,16 +90,16 @@ If using Jenkins, all the software are pre-installed on OpenShift provided Jenki
 ### Hosting Environment Setup
 
 1. Install the templates
-```sh
-~ $ git clone \
-https://github.com/bcgov/MyGovBC-notification-server.git \
-notifyBC
-~ $ cd notifyBC
-~ $ oc login -u <username> -p <password> <openshift-console-url>
-~ $ oc create -f .opensift-templates/notify-bc-build.yml -n <yourprojectname-tools>
-~ $ oc create -f .opensift-templates/notify-bc.yml -n <yourprojectname-<env>>
-``` 
-After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc* in the *\<yourprojectname-\<env\>>* project.
+    ```bash
+    ~ $ git clone \
+    https://github.com/bcgov/MyGovBC-notification-server.git \
+    notifyBC
+    ~ $ cd notifyBC
+    ~ $ oc login -u <username> -p <password> <openshift-console-url>
+    ~ $ oc create -f .opensift-templates/notify-bc-build.yml -n <yourprojectname-tools>
+    ~ $ oc create -f .opensift-templates/notify-bc.yml -n <yourprojectname-<env>>
+    ```
+  After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc* in the *\<yourprojectname-\<env\>>* project.
 2. create OpenShift instant apps by clicking *notify-bc-build* and *notify-bc* template from *Add to Project* in web console of respective projects (Tip: you may need to click *See all* link in Instant Apps section to reveal the template). Adjust parameters as you see fit.
 3. (optional) create instance-specific [configuration](../configuration) files for each runtime environment and upload to OpenShift via [configMap](https://docs.openshift.org/latest/dev_guide/configmaps.html) named *notify-bc*. To do so, 
     * create a temporary directory for each environment *\<env\>/*, say *dev/* 

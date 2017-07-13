@@ -491,6 +491,6 @@ All internal requests are supposed to be admin requests. The purpose of *interna
  
 
 <div class="note">
-  <h5>ProTips™ User Case</h5>
-  <p>When running in OpenShift, <i>internalHttpHost</i> should be set to the OpenShift service url of <i>NotifyBC</i>. The source ip in such case would be in a private OpenShift ip range. This private ip range should then be defined in <a href="#admin-ip-list">admin ip list</a>.</p>
+  <h5>ProTips™ OpenShift Use Case</h5>
+  <p>The OpenShift deployment script has set <i>internalHttpHost</i> to service url <i>http://notify-bc:3000</i> in file <a href="https://github.com/bcgov/MyGovBC-notification-server/blob/master/.s2i/configs/config.production.json">config.production.json</a> so you shouldn't re-define it in <i>/server/config.local.json</i>. The source ip in such case would be in a private OpenShift ip range. You should add this private ip range to <a href="#admin-ip-list">admin ip list</a>. The private ip range varies from OpenShift installation. In BCGov's cluster, it starts with octet 172.</p>
 </div>
