@@ -1,44 +1,61 @@
 {
-  "folders": [
-  {
-    "path": "."
-  }],
   "build_systems": [
   {
+    "cmd": [
+      "bundle.bat",
+      "exec",
+      "jekyll",
+      "s"
+    ],
     "name": "docs",
-    "cmd": ["bundle.bat", "exec", "jekyll", "s"],
     "working_dir": "${project_path}/docs"
   },
   {
+    "cmd": [
+      "npm.cmd",
+      "test"
+    ],
     "name": "npm-run-test",
-    "cmd": ["npm.cmd", "test"],
-    "working_dir": "${project_path}",
+    "working_dir": "${project_path}"
   },
   {
+    "cmd": [
+      "node.exe",
+      "server/server.js"
+    ],
+    "env":
+    {
+      "NOTIFYBC_NODE_ROLE": "master"
+    },
     "name": "node-app",
-    "cmd": ["node.exe", "server/server.js"],
-    "working_dir": "${project_path}",
+    "working_dir": "${project_path}"
+  },
+  {
+    "cmd": [
+      "node-debug.cmd",
+      "server/server.js"
+    ],
     "env":
     {
       "NOTIFYBC_NODE_ROLE": "master"
-    }
-  },
-  {
+    },
     "name": "debug-app",
-    "cmd": ["node-debug.cmd", "server/server.js"],
-    "working_dir": "${project_path}",
-    "env":
-    {
-      "NOTIFYBC_NODE_ROLE": "master"
-    }
+    "working_dir": "${project_path}"
   },
   {
-    "name": "debug-jasmine",
-    "cmd": ["node-debug.cmd", "node_modules/jasmine/bin/jasmine.js"],
-    "working_dir": "${project_path}",
+    "cmd": [
+      "node-debug.cmd",
+      "node_modules/jasmine/bin/jasmine.js"
+    ],
     "env":
     {
       "NODE_ENV": "test"
-    }
+    },
+    "name": "debug-jasmine",
+    "working_dir": "${project_path}"
+  }],
+  "folders": [
+  {
+    "path": "."
   }]
 }

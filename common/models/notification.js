@@ -241,6 +241,8 @@ module.exports = function (Notification) {
             limit: broadcastSubscriberChunkSize
           }, function (err, subscribers) {
             var tasks = subscribers.map(function (e, i) {
+              // todo: if there is e.filter, then evaluate e.filter against data
+              // and return function if match
               return function (cb) {
                 var notificationMsgCB = function (err) {
                   if (err) {
