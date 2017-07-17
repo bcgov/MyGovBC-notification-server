@@ -5,7 +5,7 @@
 *.out
 *.pid
 *.seed
-*.sublime-*
+*.sublime-workspace
 *.swo
 *.swp
 *.tgz

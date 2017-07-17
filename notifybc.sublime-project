@@ -1,0 +1,44 @@
+{
+  "folders": [
+  {
+    "path": "."
+  }],
+  "build_systems": [
+  {
+    "name": "docs",
+    "cmd": ["bundle.bat", "exec", "jekyll", "s"],
+    "working_dir": "${project_path}/docs"
+  },
+  {
+    "name": "npm-run-test",
+    "cmd": ["npm.cmd", "test"],
+    "working_dir": "${project_path}",
+  },
+  {
+    "name": "node-app",
+    "cmd": ["node.exe", "server/server.js"],
+    "working_dir": "${project_path}",
+    "env":
+    {
+      "NOTIFYBC_NODE_ROLE": "master"
+    }
+  },
+  {
+    "name": "debug-app",
+    "cmd": ["node-debug.cmd", "server/server.js"],
+    "working_dir": "${project_path}",
+    "env":
+    {
+      "NOTIFYBC_NODE_ROLE": "master"
+    }
+  },
+  {
+    "name": "debug-jasmine",
+    "cmd": ["node-debug.cmd", "node_modules/jasmine/bin/jasmine.js"],
+    "working_dir": "${project_path}",
+    "env":
+    {
+      "NODE_ENV": "test"
+    }
+  }]
+}
