@@ -5,6 +5,7 @@ var parallel = require('async/parallel')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
 var request = require('request')
+var jmespath = require('jmespath')
 
 module.exports = function(Notification) {
   disableAllMethods(Notification, [
@@ -271,10 +272,22 @@ module.exports = function(Notification) {
               limit: broadcastSubscriberChunkSize
             },
             function(err, subscribers) {
-              var tasks = subscribers.map(function(e, i) {
+              var tasks = subscribers.reduce(function(a, e, i) {
                 // todo: if there is e.filter, then evaluate e.filter against data
                 // and return function if match
-                return function(cb) {
+                if (e.filter) {
+                  let match
+                  try {
+                    match = jmespath.search(
+                      [data.data],
+                      '[?' + e.filter.toString() + ']'
+                    )
+                  } catch (ex) {}
+                  if (!match || match.length == 0) {
+                    return a
+                  }
+                }
+                a.push(function(cb) {
                   var notificationMsgCB = function(err) {
                     if (err) {
                       data.errorWhenSendingToUsers =
@@ -325,8 +338,9 @@ module.exports = function(Notification) {
                         notificationMsgCB
                       )
                   }
-                }
-              })
+                })
+                return a
+              }, [])
               parallel(tasks, function(err, res) {
                 if (
                   !data.asyncBroadcastPushNotification ||
