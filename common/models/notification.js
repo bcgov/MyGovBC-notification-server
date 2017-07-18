@@ -283,7 +283,7 @@ module.exports = function(Notification) {
                       '[?' + e.filter.toString() + ']'
                     )
                   } catch (ex) {}
-                  if (!match || match.length == 0) {
+                  if (!match || match.length === 0) {
                     return a
                   }
                 }
