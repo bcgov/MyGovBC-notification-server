@@ -5,349 +5,434 @@ var parallel = require('async/parallel')
 var path = require('path')
 var fs = require('fs')
 
-describe('CRON purgeData', function () {
-  beforeEach(function (done) {
-    parallel([
-      function (cb) {
-        app.models.Notification.create({
-          "channel": "email",
-          "isBroadcast": true,
-          "message": {
-            "title": "test",
-            "body": "this is a test"
-          },
-          "serviceName": "pastService",
-          "created": "2010-01-01",
-          "state": "sent"
-        }, function (err, res) {
-          cb(err, res)
-        })
-      },
-      function (cb) {
-        app.models.Notification.create({
-          "channel": "email",
-          "isBroadcast": true,
-          "message": {
-            "title": "test",
-            "body": "this is a test"
-          },
-          "serviceName": "futureService",
-          "created": "2020-01-01",
-          "state": "sent"
-        }, function (err, res) {
-          cb(err, res)
-        })
-      },
-      function (cb) {
-        app.models.Notification.create({
-          "channel": "inApp",
-          "isBroadcast": true,
-          "message": {
-            "title": "test",
-            "body": "this is a test"
-          },
-          "serviceName": "expiredService",
-          "validTill": "2010-01-01",
-          "state": "new"
-        }, function (err, res) {
-          cb(err, res)
-        })
-      },
-      function (cb) {
-        app.models.Notification.create({
-          "channel": "inApp",
-          "isBroadcast": true,
-          "message": {
-            "title": "test",
-            "body": "this is a test"
-          },
-          "serviceName": "nonexpiredService",
-          "validTill": "3010-01-01",
-          "state": "new"
-        }, function (err, res) {
-          cb(err, res)
-        })
-      },
-      function (cb) {
-        app.models.Notification.create({
-          "channel": "inApp",
-          "userId": "foo",
-          "message": {
-            "title": "test",
-            "body": "this is a test"
-          },
-          "serviceName": "deletedService",
-          "state": "deleted"
-        }, function (err, res) {
-          cb(err, res)
-        })
-      },
-      function (cb) {
-        app.models.Subscription.create({
-          "serviceName": "unconfirmedService",
-          "channel": "email",
-          "userChannelId": "bar@foo.com",
-          "state": "unconfirmed",
-          "confirmationRequest": {
-            "confirmationCodeRegex": "\\d{5}",
-            "sendRequest": true,
-            "from": "no_reply@example.com",
-            "subject": "Subscription confirmation",
-            "textBody": "enter {confirmation_code} in email!",
-            "confirmationCode": "53007"
-          },
-          "updated": "2010-01-01",
-        }, function (err, res) {
-          cb(err, res)
-        })
+describe('CRON purgeData', function() {
+  beforeEach(function(done) {
+    parallel(
+      [
+        function(cb) {
+          app.models.Notification.create(
+            {
+              channel: 'email',
+              isBroadcast: true,
+              message: {
+                title: 'test',
+                body: 'this is a test'
+              },
+              serviceName: 'pastService',
+              created: '2010-01-01',
+              state: 'sent'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        },
+        function(cb) {
+          app.models.Notification.create(
+            {
+              channel: 'email',
+              isBroadcast: true,
+              message: {
+                title: 'test',
+                body: 'this is a test'
+              },
+              serviceName: 'futureService',
+              created: '2020-01-01',
+              state: 'sent'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        },
+        function(cb) {
+          app.models.Notification.create(
+            {
+              channel: 'inApp',
+              isBroadcast: true,
+              message: {
+                title: 'test',
+                body: 'this is a test'
+              },
+              serviceName: 'expiredService',
+              validTill: '2010-01-01',
+              state: 'new'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        },
+        function(cb) {
+          app.models.Notification.create(
+            {
+              channel: 'inApp',
+              isBroadcast: true,
+              message: {
+                title: 'test',
+                body: 'this is a test'
+              },
+              serviceName: 'nonexpiredService',
+              validTill: '3010-01-01',
+              state: 'new'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        },
+        function(cb) {
+          app.models.Notification.create(
+            {
+              channel: 'inApp',
+              userId: 'foo',
+              message: {
+                title: 'test',
+                body: 'this is a test'
+              },
+              serviceName: 'deletedService',
+              state: 'deleted'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        },
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'unconfirmedService',
+              channel: 'email',
+              userChannelId: 'bar@foo.com',
+              state: 'unconfirmed',
+              confirmationRequest: {
+                confirmationCodeRegex: '\\d{5}',
+                sendRequest: true,
+                from: 'no_reply@example.com',
+                subject: 'Subscription confirmation',
+                textBody: 'enter {confirmation_code} in email!',
+                confirmationCode: '53007'
+              },
+              updated: '2010-01-01'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        }
+      ],
+      function(err, results) {
+        expect(err).toBeNull()
+        done()
       }
-    ], function (err, results) {
+    )
+  })
+
+  it('should deleted old non-inApp notifications', function(done) {
+    cronTasks.purgeData(app, function(err, results) {
       expect(err).toBeNull()
-      done()
+      parallel(
+        [
+          function(cb) {
+            app.models.Notification.find(
+              { where: { serviceName: 'futureService', channel: 'email' } },
+              function(err, data) {
+                expect(data.length).toBe(1)
+                cb(err, data)
+              }
+            )
+          },
+          function(cb) {
+            app.models.Notification.find(
+              { where: { serviceName: 'pastService', channel: 'email' } },
+              function(err, data) {
+                expect(data.length).toBe(0)
+                cb(err, data)
+              }
+            )
+          }
+        ],
+        function(err, results) {
+          expect(err).toBeNull()
+          done()
+        }
+      )
     })
   })
 
-  it('should deleted old non-inApp notifications', function (done) {
-    cronTasks.purgeData(app, function (err, results) {
+  it('should delete all expired inApp notifications', function(done) {
+    cronTasks.purgeData(app, function(err, results) {
       expect(err).toBeNull()
-      parallel([
-        function (cb) {
-          app.models.Notification.find({where: {serviceName: "futureService", channel: 'email'}}, function (err, data) {
-            expect(data.length).toBe(1)
-            cb(err, data)
-          })
-        },
-        function (cb) {
-          app.models.Notification.find({where: {serviceName: "pastService", channel: 'email'}}, function (err, data) {
-            expect(data.length).toBe(0)
-            cb(err, data)
-          })
+      parallel(
+        [
+          function(cb) {
+            app.models.Notification.find(
+              {
+                where: {
+                  serviceName: 'nonexpiredService',
+                  channel: 'inApp'
+                }
+              },
+              function(err, data) {
+                expect(data.length).toBe(1)
+                cb(err, data)
+              }
+            )
+          },
+          function(cb) {
+            app.models.Notification.find(
+              {
+                where: {
+                  serviceName: 'expiredService',
+                  channel: 'inApp'
+                }
+              },
+              function(err, data) {
+                expect(data.length).toBe(0)
+                cb(err, data)
+              }
+            )
+          }
+        ],
+        function(err, results) {
+          expect(err).toBeNull()
+          done()
         }
-      ], function (err, results) {
-        expect(err).toBeNull()
-        done()
-      })
+      )
     })
   })
 
-  it('should delete all expired inApp notifications', function (done) {
-    cronTasks.purgeData(app, function (err, results) {
+  it('should delete all deleted inApp notifications', function(done) {
+    cronTasks.purgeData(app, function(err, results) {
       expect(err).toBeNull()
-      parallel([
-        function (cb) {
-          app.models.Notification.find({
-            where: {
-              serviceName: "nonexpiredService",
-              channel: 'inApp'
-            }
-          }, function (err, data) {
-            expect(data.length).toBe(1)
-            cb(err, data)
-          })
-        },
-        function (cb) {
-          app.models.Notification.find({
-            where: {
-              serviceName: "expiredService",
-              channel: 'inApp'
-            }
-          }, function (err, data) {
-            expect(data.length).toBe(0)
-            cb(err, data)
-          })
+      parallel(
+        [
+          function(cb) {
+            app.models.Notification.find(
+              {
+                where: {
+                  serviceName: 'deletedService',
+                  channel: 'inApp'
+                }
+              },
+              function(err, data) {
+                expect(data.length).toBe(0)
+                cb(err, data)
+              }
+            )
+          }
+        ],
+        function(err, results) {
+          expect(err).toBeNull()
+          done()
         }
-      ], function (err, results) {
-        expect(err).toBeNull()
-        done()
-      })
+      )
     })
   })
 
-  it('should delete all deleted inApp notifications', function (done) {
-    cronTasks.purgeData(app, function (err, results) {
+  xit('should delete all old non-confirmed subscriptions', function(done) {
+    cronTasks.purgeData(app, function(err, results) {
       expect(err).toBeNull()
-      parallel([
-        function (cb) {
-          app.models.Notification.find({
-            where: {
-              serviceName: "deletedService",
-              channel: 'inApp'
-            }
-          }, function (err, data) {
-            expect(data.length).toBe(0)
-            cb(err, data)
-          })
+      parallel(
+        [
+          function(cb) {
+            app.models.Subscription.find(
+              {
+                where: {
+                  serviceName: 'unconfirmedService',
+                  channel: 'email'
+                }
+              },
+              function(err, data) {
+                // todo: need to figure out how to disable 'before save' operation hook in common.js first
+                expect(data.length).toBe(0)
+                cb(err, data)
+              }
+            )
+          }
+        ],
+        function(err, results) {
+          expect(err).toBeNull()
+          done()
         }
-      ], function (err, results) {
-        expect(err).toBeNull()
-        done()
-      })
-    })
-  })
-
-  xit('should delete all old non-confirmed subscriptions', function (done) {
-    cronTasks.purgeData(app, function (err, results) {
-      expect(err).toBeNull()
-      parallel([
-        function (cb) {
-          app.models.Subscription.find({
-            where: {
-              serviceName: "unconfirmedService",
-              channel: 'email'
-            }
-          }, function (err, data) {
-            // todo: need to figure out how to disable 'before save' operation hook in common.js first
-            expect(data.length).toBe(0)
-            cb(err, data)
-          })
-        }
-      ], function (err, results) {
-        expect(err).toBeNull()
-        done()
-      })
+      )
     })
   })
 })
 
-describe('CRON dispatchLiveNotifications', function () {
-  beforeEach(function (done) {
-    parallel([
-      function (cb) {
-        app.models.Notification.create({
-          "channel": "email",
-          "message": {
-            "from": "admin@foo.com",
-            "subject": "test",
-            "textBody": "this is a test {http_host}"
-          },
-          "isBroadcast": true,
-          "serviceName": "myService",
-          "httpHost": "http://foo.com",
-          "invalidBefore": "2010-01-01",
-          "state": "new"
-        }, function (err, res) {
-          cb(err, res)
-        })
-      },
-      function (cb) {
-        app.models.Notification.create({
-          "channel": "email",
-          "message": {
-            "from": "admin@foo.com",
-            "subject": "test",
-            "textBody": "this is another test {http_host}"
-          },
-          "serviceName": "myService",
-          "httpHost": "http://foo.com",
-          "userChannelId": "bar@foo.com",
-          "invalidBefore": "3010-01-01",
-          "state": "new"
-        }, function (err, res) {
-          cb(err, res)
-        })
-      },
-      function (cb) {
-        app.models.Subscription.create({
-          "serviceName": "myService",
-          "channel": "email",
-          "userChannelId": "bar@foo.com",
-          "state": "confirmed"
-        }, function (err, res) {
-          cb(err, res)
-        })
+describe('CRON dispatchLiveNotifications', function() {
+  beforeEach(function(done) {
+    parallel(
+      [
+        function(cb) {
+          app.models.Notification.create(
+            {
+              channel: 'email',
+              message: {
+                from: 'admin@foo.com',
+                subject: 'test',
+                textBody: 'this is a test {http_host}'
+              },
+              isBroadcast: true,
+              serviceName: 'myService',
+              httpHost: 'http://foo.com',
+              invalidBefore: '2010-01-01',
+              state: 'new'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        },
+        function(cb) {
+          app.models.Notification.create(
+            {
+              channel: 'email',
+              message: {
+                from: 'admin@foo.com',
+                subject: 'test',
+                textBody: 'this is another test {http_host}'
+              },
+              serviceName: 'myService',
+              httpHost: 'http://foo.com',
+              userChannelId: 'bar@foo.com',
+              invalidBefore: '3010-01-01',
+              state: 'new'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        },
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'myService',
+              channel: 'email',
+              userChannelId: 'bar@foo.com',
+              state: 'confirmed'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        }
+      ],
+      function(err, results) {
+        expect(err).toBeNull()
+        done()
       }
-    ], function (err, results) {
-      expect(err).toBeNull()
-      done()
-    })
+    )
   })
 
-  it('should send all live push notifications', function (done) {
-    cronTasks.dispatchLiveNotifications(app, function (err, results) {
+  it('should send all live push notifications', function(done) {
+    cronTasks.dispatchLiveNotifications(app, function(err, results) {
       expect(err).toBeNull()
       expect(results.length).toBe(1)
-      expect(app.models.Notification.sendEmail).toHaveBeenCalledWith('admin@foo.com', 'bar@foo.com', 'test', 'this is a test http://foo.com', undefined, jasmine.any(Function))
+      expect(app.models.Notification.sendEmail).toHaveBeenCalledWith(
+        'admin@foo.com',
+        'bar@foo.com',
+        'test',
+        'this is a test http://foo.com',
+        undefined,
+        jasmine.any(Function)
+      )
       expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
-      parallel([
-        function (cb) {
-          app.models.Notification.find({
-            where: {
-              serviceName: "myService",
-              channel: 'email',
-              state: 'sent'
-            }
-          }, function (err, data) {
-            expect(data.length).toBe(1)
-            cb(err, data)
-          })
+      parallel(
+        [
+          function(cb) {
+            app.models.Notification.find(
+              {
+                where: {
+                  serviceName: 'myService',
+                  channel: 'email',
+                  state: 'sent'
+                }
+              },
+              function(err, data) {
+                expect(data.length).toBe(1)
+                cb(err, data)
+              }
+            )
+          }
+        ],
+        function(err, results) {
+          expect(err).toBeNull()
+          done()
         }
-      ], function (err, results) {
-        expect(err).toBeNull()
-        done()
-      })
+      )
     })
   })
 })
 
-describe('CRON checkRssConfigUpdates', function () {
-  beforeEach(function (done) {
-    spyOn(cronTasks, 'request').and.callFake(function () {
+describe('CRON checkRssConfigUpdates', function() {
+  beforeEach(function(done) {
+    spyOn(cronTasks, 'request').and.callFake(function() {
       var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
-      setTimeout(function () {
-        output.emit('response', {statusCode: 200})
+      setTimeout(function() {
+        output.emit('response', { statusCode: 200 })
       }, 0)
       return output
     })
     spyOn(cronTasks.request, 'post')
-    parallel([
-      function (cb) {
-        app.models.Configuration.create({
-          "name": "notification",
-          "serviceName": "myService",
-          "value": {
-            "rss": {
-              "url": "http://myService/rss",
-              "timeSpec": "0 0 1 0 0",
-              "outdatedItemRetentionGenerations": 1,
-              "includeUpdatedItems": false,
-              "fieldsToCheckForUpdate": [
-                "title"
-              ]
-            },
-            "messageTemplates": {
-              "email": {
-                "from": "no_reply@example.com",
-                "subject": "{title}",
-                "textBody": "{description}",
-                "htmlBody": "{description}"
+    parallel(
+      [
+        function(cb) {
+          app.models.Configuration.create(
+            {
+              name: 'notification',
+              serviceName: 'myService',
+              value: {
+                rss: {
+                  url: 'http://myService/rss',
+                  timeSpec: '0 0 1 0 0',
+                  outdatedItemRetentionGenerations: 1,
+                  includeUpdatedItems: false,
+                  fieldsToCheckForUpdate: ['title']
+                },
+                messageTemplates: {
+                  email: {
+                    from: 'no_reply@example.com',
+                    subject: '{title}',
+                    textBody: '{description}',
+                    htmlBody: '{description}'
+                  }
+                }
               }
+            },
+            function(err, res) {
+              cb(err, res)
             }
-          }
-        }, function (err, res) {
-          cb(err, res)
-        })
-      },
-      function (cb) {
-        app.models.Subscription.create({
-          "serviceName": "myService",
-          "channel": "email",
-          "userChannelId": "bar@foo.com",
-          "state": "confirmed",
-          "unsubscriptionCode": "12345"
-        }, function (err, res) {
-          cb(err, res)
-        })
+          )
+        },
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'myService',
+              channel: 'email',
+              userChannelId: 'bar@foo.com',
+              state: 'confirmed',
+              unsubscriptionCode: '12345'
+            },
+            function(err, res) {
+              cb(err, res)
+            }
+          )
+        }
+      ],
+      function(err, results) {
+        expect(err).toBeNull()
+        done()
       }
-    ], function (err, results) {
-      expect(err).toBeNull()
-      done()
-    })
+    )
   })
 
-  it('should create rss task and post notifications at initial run', function (done) {
-    cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
+  it('should create rss task and post notifications at initial run', function(
+    done
+  ) {
+    cronTasks.checkRssConfigUpdates(app, function(err, rssTasks) {
       expect(err).toBeNull()
-      expect(rssTasks["1"]).not.toBeNull()
+      expect(rssTasks['1']).not.toBeNull()
       expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
       app.models.Rss.find((err, results) => {
         expect(results[0].items[0].author).toBe('foo')
@@ -356,91 +441,99 @@ describe('CRON checkRssConfigUpdates', function () {
     })
   })
 
-  it('should avoid sending notification for unchanged items', function (done) {
-    app.models.Rss.create({
-      "serviceName": "myService",
-      "items": [
-        {
-          "title": "Item 2",
-          "description": "lorem ipsum",
-          "summary": "lorem ipsum",
-          "pubDate": "1970-01-01T00:00:00.000Z",
-          "link": "http://myservice/2",
-          "guid": "2",
-          "author": "foo",
-          "_notifyBCLastPoll": "1970-01-01T00:00:00.000Z"
+  it('should avoid sending notification for unchanged items', function(done) {
+    app.models.Rss.create(
+      {
+        serviceName: 'myService',
+        items: [
+          {
+            title: 'Item 2',
+            description: 'lorem ipsum',
+            summary: 'lorem ipsum',
+            pubDate: '1970-01-01T00:00:00.000Z',
+            link: 'http://myservice/2',
+            guid: '2',
+            author: 'foo',
+            _notifyBCLastPoll: '1970-01-01T00:00:00.000Z'
+          },
+          {
+            title: 'Item 1',
+            description: 'lorem ipsum',
+            summary: 'lorem ipsum',
+            pubDate: '1970-01-01T00:00:00.000Z',
+            link: 'http://myservice/1',
+            guid: '1',
+            author: 'foo',
+            _notifyBCLastPoll: '1970-01-01T00:00:00.000Z'
+          }
+        ],
+        lastPoll: '1970-01-01T00:00:00.000Z'
+      },
+      function(err, res) {
+        cronTasks.checkRssConfigUpdates(app, function(err, rssTasks) {
+          expect(cronTasks.request.post).not.toHaveBeenCalled()
+          app.models.Rss.find((err, results) => {
+            expect(results[0].items[0].author).toBe('foo')
+            done()
+          })
+        })
+      }
+    )
+  })
+
+  it('should send notification for updated item', function(done) {
+    parallel(
+      [
+        function(cb) {
+          app.models.Configuration.findById(1, function(err, res) {
+            let newVal = res.value
+            newVal.rss.includeUpdatedItems = true
+            newVal.rss.outdatedItemRetentionGenerations = 100
+            res.updateAttribute('value', newVal, cb)
+          })
         },
-        {
-          "title": "Item 1",
-          "description": "lorem ipsum",
-          "summary": "lorem ipsum",
-          "pubDate": "1970-01-01T00:00:00.000Z",
-          "link": "http://myservice/1",
-          "guid": "1",
-          "author": "foo",
-          "_notifyBCLastPoll": "1970-01-01T00:00:00.000Z"
+        function(cb) {
+          app.models.Rss.create(
+            {
+              serviceName: 'myService',
+              items: [
+                {
+                  title: 'Item',
+                  description: 'lorem ipsum',
+                  pubDate: '1970-01-01T00:00:00.000Z',
+                  link: 'http://myservice/1',
+                  guid: '1',
+                  author: 'foo',
+                  _notifyBCLastPoll: '1970-01-01T00:00:00.000Z'
+                }
+              ],
+              lastPoll: '1970-01-01T00:00:00.000Z'
+            },
+            cb
+          )
         }
       ],
-      "lastPoll": "1970-01-01T00:00:00.000Z"
-    }, function (err, res) {
-      cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
-        expect(cronTasks.request.post).not.toHaveBeenCalled()
-        app.models.Rss.find((err, results) => {
-          expect(results[0].items[0].author).toBe('foo')
+      function(err, results) {
+        cronTasks.checkRssConfigUpdates(app, function(err, rssTasks) {
+          expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
           done()
         })
-      })
-    })
-  })
-
-  it('should send notification for updated item', function (done) {
-    parallel([
-      function (cb) {
-        app.models.Configuration.findById(1, function (err, res) {
-          let newVal = res.value
-          newVal.rss.includeUpdatedItems = true
-          newVal.rss.outdatedItemRetentionGenerations = 100
-          res.updateAttribute('value', newVal, cb)
-        })
-      },
-      function (cb) {
-        app.models.Rss.create({
-          "serviceName": "myService",
-          "items": [
-            {
-              "title": "Item",
-              "description": "lorem ipsum",
-              "pubDate": "1970-01-01T00:00:00.000Z",
-              "link": "http://myservice/1",
-              "guid": "1",
-              "author": "foo",
-              "_notifyBCLastPoll": "1970-01-01T00:00:00.000Z"
-            }
-          ],
-          "lastPoll": "1970-01-01T00:00:00.000Z"
-        }, cb)
       }
-    ], function (err, results) {
-      cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
-        expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
-        done()
-      })
-    })
+    )
   })
 
-
-  it('should handle error', function (done) {
-    cronTasks.request = jasmine.createSpy().and.callFake(function () {
+  it('should handle error', function(done) {
+    cronTasks.request = jasmine.createSpy().and.callFake(function() {
       var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
-      setTimeout(function () {
-        output.emit('response', {statusCode: 300})
+      setTimeout(function() {
+        output.emit('response', { statusCode: 300 })
       }, 0)
       return output
     })
 
-    cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
+    cronTasks.checkRssConfigUpdates(app, function(err, rssTasks) {
       expect(err).not.toBeNull()
-      expect(rssTasks["1"]).not.toBeNull()
+      expect(rssTasks['1']).not.toBeNull()
       done()
     })
   })

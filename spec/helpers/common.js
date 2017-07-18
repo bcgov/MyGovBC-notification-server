@@ -5,7 +5,7 @@ beforeAll(() => {
   app.set('adminIps', [])
 })
 
-beforeEach(function (done) {
+beforeEach(function(done) {
   function fakeSendEmail() {
     let cb = arguments[arguments.length - 1]
     console.log('faking sendEmail')
@@ -22,7 +22,7 @@ beforeEach(function (done) {
   spyOn(app.models.Subscription, 'sendSMS').and.callFake(fakeSendSMS)
   spyOn(app.models.Notification, 'sendEmail').and.callFake(fakeSendEmail)
   spyOn(app.models.Notification, 'sendSMS').and.callFake(fakeSendSMS)
-  app.dataSources.db.automigrate(function (err) {
+  app.dataSources.db.automigrate(function(err) {
     expect(err).toBeUndefined()
     done()
   })

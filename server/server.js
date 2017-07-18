@@ -1,10 +1,10 @@
 var loopback = require('loopback')
 var boot = require('loopback-boot')
 
-var app = module.exports = loopback()
+var app = (module.exports = loopback())
 app.use(loopback.token())
 
-app.start = function () {
+app.start = function() {
   if (process.env.NOTIFYBC_NODE_ROLE !== 'slave') {
     var CronJob = require('cron').CronJob
     var cronTasks = require('./cron-tasks')
@@ -13,16 +13,17 @@ app.start = function () {
     var cronConfigPurgeData = cronConfig.purgeData || {}
     new CronJob({
       cronTime: cronConfigPurgeData.timeSpec,
-      onTick: function () {
+      onTick: function() {
         cronTasks.purgeData(app)
       },
       start: true
     })
     // start dispatchLiveNotifications cron
-    var cronConfigDispatchLiveNotifications = cronConfig.dispatchLiveNotifications || {}
+    var cronConfigDispatchLiveNotifications =
+      cronConfig.dispatchLiveNotifications || {}
     new CronJob({
       cronTime: cronConfigDispatchLiveNotifications.timeSpec,
-      onTick: function () {
+      onTick: function() {
         cronTasks.dispatchLiveNotifications(app)
       },
       start: true
@@ -31,7 +32,7 @@ app.start = function () {
     var cronConfigCheckRssConfigUpdates = cronConfig.checkRssConfigUpdates || {}
     new CronJob({
       cronTime: cronConfigCheckRssConfigUpdates.timeSpec,
-      onTick: function () {
+      onTick: function() {
         cronTasks.checkRssConfigUpdates(app)
       },
       start: true
@@ -40,7 +41,7 @@ app.start = function () {
 
   app.set('trust proxy', app.get('trustedReverseProxyIps'))
   // start the web server
-  return app.listen(function () {
+  return app.listen(function() {
     app.emit('started')
     var baseUrl = app.get('url').replace(/\/$/, '')
     console.log('Web server listening at: %s', baseUrl)
@@ -53,10 +54,9 @@ app.start = function () {
 
 // Bootstrap the application, configure models, datasources and middleware.
 // Sub-apps like REST API are mounted via boot scripts.
-boot(app, __dirname, function (err) {
+boot(app, __dirname, function(err) {
   if (err) throw err
 
   // start the server if `$ node server.js`
-  if (require.main === module)
-    app.start()
+  if (require.main === module) app.start()
 })

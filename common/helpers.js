@@ -1,4 +1,4 @@
-module.exports.disableAllMethods = function (model, methodsToExpose) {
+module.exports.disableAllMethods = function(model, methodsToExpose) {
   if (model && model.sharedClass) {
     methodsToExpose = methodsToExpose || []
 
@@ -8,24 +8,37 @@ module.exports.disableAllMethods = function (model, methodsToExpose) {
     var hiddenMethods = []
 
     try {
-      Object.keys(model.definition.settings.relations).forEach(function (relation) {
-        relationMethods.push({name: '__findById__' + relation, isStatic: false})
-        relationMethods.push({name: '__destroyById__' + relation, isStatic: false})
-        relationMethods.push({name: '__updateById__' + relation, isStatic: false})
-        relationMethods.push({name: '__exists__' + relation, isStatic: false})
-        relationMethods.push({name: '__link__' + relation, isStatic: false})
-        relationMethods.push({name: '__get__' + relation, isStatic: false})
-        relationMethods.push({name: '__create__' + relation, isStatic: false})
-        relationMethods.push({name: '__update__' + relation, isStatic: false})
-        relationMethods.push({name: '__destroy__' + relation, isStatic: false})
-        relationMethods.push({name: '__unlink__' + relation, isStatic: false})
-        relationMethods.push({name: '__count__' + relation, isStatic: false})
-        relationMethods.push({name: '__delete__' + relation, isStatic: false})
+      Object.keys(model.definition.settings.relations).forEach(function(
+        relation
+      ) {
+        relationMethods.push({
+          name: '__findById__' + relation,
+          isStatic: false
+        })
+        relationMethods.push({
+          name: '__destroyById__' + relation,
+          isStatic: false
+        })
+        relationMethods.push({
+          name: '__updateById__' + relation,
+          isStatic: false
+        })
+        relationMethods.push({ name: '__exists__' + relation, isStatic: false })
+        relationMethods.push({ name: '__link__' + relation, isStatic: false })
+        relationMethods.push({ name: '__get__' + relation, isStatic: false })
+        relationMethods.push({ name: '__create__' + relation, isStatic: false })
+        relationMethods.push({ name: '__update__' + relation, isStatic: false })
+        relationMethods.push({
+          name: '__destroy__' + relation,
+          isStatic: false
+        })
+        relationMethods.push({ name: '__unlink__' + relation, isStatic: false })
+        relationMethods.push({ name: '__count__' + relation, isStatic: false })
+        relationMethods.push({ name: '__delete__' + relation, isStatic: false })
       })
-    } catch (err) {
-    }
+    } catch (err) {}
 
-    methods.concat(relationMethods).forEach(function (method) {
+    methods.concat(relationMethods).forEach(function(method) {
       var methodName = method.name
       if (methodsToExpose.indexOf(methodName) < 0) {
         hiddenMethods.push(methodName)
@@ -33,8 +46,12 @@ module.exports.disableAllMethods = function (model, methodsToExpose) {
       }
     })
     if (hiddenMethods.length > 0) {
-      console.info('Remote methods hidden for', modelName, ':', hiddenMethods.join(', '))
+      console.info(
+        'Remote methods hidden for',
+        modelName,
+        ':',
+        hiddenMethods.join(', ')
+      )
     }
   }
 }
-

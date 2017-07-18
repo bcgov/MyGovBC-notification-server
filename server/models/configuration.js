@@ -1,9 +1,14 @@
 'use strict'
 
 var disableAllMethods = require('../../common/helpers.js').disableAllMethods
-module.exports = function (Configuration) {
-  disableAllMethods(Configuration, ['find', 'create', 'patchAttributes', 'deleteById'])
-  Configuration.beforeRemote('**', function (ctx, unused, next) {
+module.exports = function(Configuration) {
+  disableAllMethods(Configuration, [
+    'find',
+    'create',
+    'patchAttributes',
+    'deleteById'
+  ])
+  Configuration.beforeRemote('**', function(ctx, unused, next) {
     if (Configuration.isAdminReq(ctx, true)) {
       return next()
     }
@@ -12,7 +17,7 @@ module.exports = function (Configuration) {
     return next(error)
   })
 
-  Configuration.observe('before save', function () {
+  Configuration.observe('before save', function() {
     let ctx = arguments[0]
     let next = arguments[arguments.length - 1]
     try {
@@ -22,13 +27,17 @@ module.exports = function (Configuration) {
       } else if (ctx.data) {
         data = ctx.data
       }
-      if (data.name === 'notification' && data.value && data.value.rss && !data.value.httpHost) {
+      if (
+        data.name === 'notification' &&
+        data.value &&
+        data.value.rss &&
+        !data.value.httpHost
+      ) {
         let httpCtx = ctx.options.httpContext
-        data.value.httpHost = httpCtx.req.protocol + '://' + httpCtx.req.get('host')
+        data.value.httpHost =
+          httpCtx.req.protocol + '://' + httpCtx.req.get('host')
       }
-    }
-    catch (ex) {
-    }
+    } catch (ex) {}
     next()
   })
 }

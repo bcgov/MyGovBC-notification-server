@@ -20,5 +20,6 @@
   "maxlen": 0,
   "asi": true,
   "jasmine": true,
-  "expr": true
+  "expr": true,
+  "laxbreak": true
 }
