@@ -272,15 +272,20 @@ module.exports = function(Notification) {
               limit: broadcastSubscriberChunkSize
             },
             function(err, subscribers) {
+              let jmespathSearchOpts = {}
+              try {
+                jmespathSearchOpts.functionTable = Notification.app.get(
+                  'notification'
+                ).broadcastCustomFilterFunctions
+              } catch (ex) {}
               var tasks = subscribers.reduce(function(a, e, i) {
-                // todo: if there is e.filter, then evaluate e.filter against data
-                // and return function if match
                 if (e.filter) {
                   let match
                   try {
                     match = jmespath.search(
                       [data.data],
-                      '[?' + e.filter.toString() + ']'
+                      '[?' + e.filter.toString() + ']',
+                      jmespathSearchOpts
                     )
                   } catch (ex) {}
                   if (!match || match.length === 0) {
