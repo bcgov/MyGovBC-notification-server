@@ -49,6 +49,9 @@
     "userId": {
       "type": "string"
     },
+    "broadcastPushNotificationFilter": {
+      "type": "string"
+    },
     "created": {
       "type": "date",
       "default": "$now"

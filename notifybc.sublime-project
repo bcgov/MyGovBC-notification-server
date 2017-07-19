@@ -67,5 +67,8 @@
   "folders": [
   {
     "path": "."
+  },
+  {
+    "path": "../jmespath.js"
   }]
 }

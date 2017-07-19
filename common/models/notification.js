@@ -279,12 +279,12 @@ module.exports = function(Notification) {
                 ).broadcastCustomFilterFunctions
               } catch (ex) {}
               var tasks = subscribers.reduce(function(a, e, i) {
-                if (e.filter) {
+                if (e.broadcastPushNotificationFilter) {
                   let match
                   try {
                     match = jmespath.search(
                       [data.data],
-                      '[?' + e.filter.toString() + ']',
+                      '[?' + e.broadcastPushNotificationFilter + ']',
                       jmespathSearchOpts
                     )
                   } catch (ex) {}
