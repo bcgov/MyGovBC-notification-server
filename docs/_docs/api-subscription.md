@@ -189,14 +189,14 @@ The API operates on following subscription data model fields:
           <li>simple <br/> 
             <i>province == 'BC'</i>
           </li>
-          <li>compound <br/> 
-            <i>(province == 'BC' && city == 'Victoria') </i>
-          </li>
           <li>calling jmespath's <a href="http://jmespath.org/specification.html#built-in-functions">built-in functions</a> <br/> 
             <i>contains(province,'B')</i>
           </li>
           <li>calling <a href="../configuration/#broadcast-push-notification-custom-filter-functions">custom filter functions</a><br/> 
             <i>contains_ci(province,'b')</i>
+          </li>
+          <li>compound <br/> 
+            <i>(contains(province,'BC') || contains_ci(province,'b')) && city == 'Victoria' </i>
           </li>
         </ul>
         All of above filters will match data object <i>{"province": "BC", "city": "Victoria"}</i>

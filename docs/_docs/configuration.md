@@ -3,7 +3,11 @@ layout: docs
 title: Configuration
 permalink: /docs/configuration/
 ---
-There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.js*. Dynamic configs are managed using REST [configuration api](../api-config/). 
+There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. 
+
+Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](http://loopback.io/doc/en/lb3/config.json.html). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.js*. *Js* file is preferred over *json* because only *js* file supports custom functions, which are demanaded by some advanced configs below. Code snippets hereafter assumes custom config file is *js*.
+
+Dynamic configs are managed using REST [configuration api](../api-config/). 
 
 <div class="note info">
   <h5>Why Dynamic Configs?</h5>
@@ -14,9 +18,6 @@ There are two types of configurations - static and dynamic. Static configuration
   </ul>
   </p>
 </div>
-
-[//]: # (todo: add docs on recommending using js)
-
 
 ## Admin IP List
 By [design](../overview/#architecture), *NotifyBC* classifies incoming requests into four types. For a request to be classified as super-admin, the request's source ip must be in admin ip list. By default, the list contains *localhost* only as defined by *defaultAdminIps* in */server/config.json* 
@@ -353,7 +354,14 @@ When handling a sub-request, *NotifyBC* dispatches notifications to all subscrib
 If total number of subscribers is less than *broadcastSubscriberChunkSize*, then no sub-requests are spawned. Instead, the main request dispatches all notifications. 
 
 ### Broadcast Push Notification Custom Filter Functions
-To support rule-based notification event filtering, *NotifyBC* uses a [modified version](https://github.com/f-w/jmespath.js) of [jmespath](http://jmespath.org/) to implement json query. The modified version allows defining custom functions that can be used in subscription [broadcastPushNotificationFilter](../api-subscription#broadcastPushNotificationFilter) field. The functions must be implemented using JavaScript in config *notification.broadcastCustomFilterFunctions*. For example, a case-insensitive string matching function *contains_ci* can be created in file */server/config.local.js*
+<div class="note info">
+  <h5>Advanced Topic</h5>
+  <p>
+  Defining custom function requires knowledge of JavaScript and understanding how external libraries are added and referenced in NodeJS. Setting a development environment to test the custom function is also recommended.
+  </p>
+</div>
+
+To support rule-based notification event filtering, *NotifyBC* uses a [modified version](https://github.com/f-w/jmespath.js) of [jmespath](http://jmespath.org/) to implement json query. The modified version allows defining custom functions that can be used in  [broadcastPushNotificationFilter](../api-subscription#broadcastPushNotificationFilter) field of subscription API. The functions must be implemented using JavaScript in config *notification.broadcastCustomFilterFunctions*. For example, the case-insensitive string matching function *contains_ci* shown in the example of that field can be created in file */server/config.local.js*
 
 ```js
 'use strict'
@@ -383,7 +391,13 @@ module.exports = {
   }
 }
 ```
-Consult jmespath.js source code on the [functionTable syntax](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L1127) and [type constants](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L132) used by above code. Note the function can use any external libraries (*lodash* in this case) that *NotifyBC* depends on as defined in [package.json](https://github.com/bcgov/MyGovBC-notification-server/blob/master/package.json).
+Consult jmespath.js source code on the [functionTable syntax](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L1127) and [type constants](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L132) used by above code. Note the function can use any external libraries (*[lodash](https://lodash.com/)* in this case) referenced in [package.json](https://github.com/bcgov/MyGovBC-notification-server/blob/master/package.json). 
+
+<div class="note">
+  <h5>ProTips™ reference additional libraries modules</h5>
+  <p>You can add npm modules to package.json but the file maybe overwritten when upgrading <i>NotifyBC</i>. To avoid, add by running command <i><a href="https://docs.npmjs.com/cli/install">npm install &lt;your_package&gt;</a></i> during build.</p>
+</div>
+
 
 ## Database
 By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json* for local and docker deployment and MongoDB for OpenShift deployment. To use MongoDB for non-OpenShift deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
@@ -406,7 +420,7 @@ See [LoopBack MongoDB data source](https://docs.strongloop.com/display/public/LB
 In a multi-node deployment, some tasks should only be run by one node. That node is designated as *master*. The distinction is made using environment variable *NOTIFYBC_NODE_ROLE*. Setting to anything other than *slave*, including not set, will be regarded as *master*.
 
 ## Cron Jobs
-*NotifyBC* runs several cron jobs described below. These jobs are controlled by sub-properties defined in config object *cron*. To change config, create the object and properties in file */server/config.local*.
+*NotifyBC* runs several cron jobs described below. These jobs are controlled by sub-properties defined in config object *cron*. To change config, create the object and properties in file */server/config.local.js*.
 
 By default cron jobs are enabled. In a multi-node deployment, cron jobs should only run on the [master node](#node-roles) to ensure single execution.
 

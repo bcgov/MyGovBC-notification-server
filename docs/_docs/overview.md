@@ -22,13 +22,15 @@ permalink: /docs/overview/
   * deleted messages are not deleted immediately for auditing and recovery purposes
 * Support both sync and async API call for broadcast push notifications. For async API call, an optional callback url is supported
 * Broadcast push notifications can be auto-generated from RSS feeds
-* Support filtering of events that trigger the broadcast push notifications with subscriber defined rules to improve relevancy
+* Allow user to specify filter rules evaluated against broadcast push notification triggering event to improve relevancy
+* Allow application developer to create custom filter functions
 
 ### subscription and un-subscription
 * Verify the ownership of push notification subscription channel:
   * generates confirmation code based on a regex input
   * send confirmation request to unconfirmed subscription channel
   * verify confirmation code
+* Support generating random un-subscription code and sending acknowledgement message after un-subscription for anonymous subscribers as anti-spoofing measurements
 
 ### mail merge
 
