@@ -3,7 +3,7 @@ layout: docs
 title: Configuration
 permalink: /docs/configuration/
 ---
-There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.json*. Dynamic configs are managed using REST [configuration api](../api-config/). 
+There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](https://docs.strongloop.com/display/public/LB/config.json). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.js*. Dynamic configs are managed using REST [configuration api](../api-config/). 
 
 <div class="note info">
   <h5>Why Dynamic Configs?</h5>
@@ -15,21 +15,23 @@ There are two types of configurations - static and dynamic. Static configuration
   </p>
 </div>
 
+[//]: # (todo: add docs on recommending using js)
+
 
 ## Admin IP List
 By [design](../overview/#architecture), *NotifyBC* classifies incoming requests into four types. For a request to be classified as super-admin, the request's source ip must be in admin ip list. By default, the list contains *localhost* only as defined by *defaultAdminIps* in */server/config.json* 
 
-```
+```json
 {
   "defaultAdminIps": [
     "127.0.0.1"
   ]
 }
 ```
-to modify, create config object *adminIps* with updated list in file */server/config.local.json* instead. For example, to add ip range *192.168.0.0/24* to the list
+to modify, create config object *adminIps* with updated list in file */server/config.local.js* instead. For example, to add ip range *192.168.0.0/24* to the list
 
-```
-{
+```js
+module.exports = {
   "adminIps": [
     "127.0.0.1",
     "192.168.0.0/24"
@@ -63,10 +65,10 @@ By default *trustedReverseProxyIps* is empty and *siteMinderReverseProxyIps* con
 }
 ```
 
-To modify, add following objects to file /server/config.local.json
+To modify, add following objects to file /server/config.local.js
 
-```json
-{
+```js
+module.exports = {
   "siteMinderReverseProxyIps":[
     "130.32.12.0"
   ],
@@ -82,10 +84,10 @@ The rule to determine if the incoming request is authenticated by SiteMinder is
 2. if the real client ip is contained in *siteMinderReverseProxyIps*, then the request is from SiteMinder, and its SiteMinder headers are trusted; otherwise, the request is considered as directly from internet, and its SiteMinder headers are ignored.
 
 ## SMTP
-By default *NotifyBC* connects [directly](https://community.nodemailer.com/2-0-0-beta/setup-smtp/) to recipient's mailbox bypassing any SMTP relay. You can setup SMTP relay by adding following *smtp* config object to */server/config.local.json*
+By default *NotifyBC* connects [directly](https://community.nodemailer.com/2-0-0-beta/setup-smtp/) to recipient's mailbox bypassing any SMTP relay. You can setup SMTP relay by adding following *smtp* config object to */server/config.local.js*
 
-```json
-{
+```js
+module.exports = {
   "smtp": {
     "host": "smtp.foo.com",
     "port": 25,
@@ -101,20 +103,20 @@ Check out [Nodemailer](https://github.com/nodemailer/nodemailer#set-up-smtp) for
 
  * Twilio (default)
 
-Only one service provider can be chosen per installation. To change service provider, add following *smsServiceProvider* config object to file */server/config.local.json*
+Only one service provider can be chosen per installation. To change service provider, add following *smsServiceProvider* config object to file */server/config.local.js*
 
-```json
-{
+```js
+module.exports = {
   "smsServiceProvider": "twilio"
 }
 ```
 The rest configs are service provider specific. You should have an account with the chosen service provider before proceeding.
 
 ### Twilio
-Add *sms.twilio* config object to file */server/config.local.json*
+Add *sms.twilio* config object to file */server/config.local.js*
 
-```json
-{
+```js
+module.exports = {
   "sms": {
     "twilio": {
       "accountSid": "<AccountSid>",
@@ -129,10 +131,10 @@ Obtain *\<AccountSid\>*, *\<AuthToken\>* and *\<FromNumber\>* from your Twilio a
 ## Subscription/Unsubscription
 Configs in this section customize behavior of subscription and unsubscription workflow. They are all sub-properties of config object *subscription*. This object can be defined as service-agnostic static config as well as service-specific dynamic config, which overrides the static one on a service-by-service basis. Default static config is defined in file */server/config.json*. There is no default dynamic config.
 
-To customize static config, create the config object *subscription* in file */server/config.local.json*
+To customize static config, create the config object *subscription* in file */server/config.local.js*
 
-```json
-{
+```js
+module.exports = {
   "subscription": {
     ...
   }
@@ -243,12 +245,12 @@ You can customize anonymous unsubscription settings by changing the *anonymousUn
   }
 }
 ```
-The settings control whether or not unsubscription code is required, its RegEx pattern, and acknowledgement message templates, both on-screen and push notifications. Customization should be made to file */server/config.local.json*.
+The settings control whether or not unsubscription code is required, its RegEx pattern, and acknowledgement message templates, both on-screen and push notifications. Customization should be made to file */server/config.local.js*.
 
-For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app for all services, create following config in file */server/config.local.json* 
+For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app for all services, create following config in file */server/config.local.js* 
 
-```json
-{
+```js
+module.exports = {
   "subscription":{
     "anonymousUnsubscription": {
       "acknowledgements":{
@@ -280,27 +282,8 @@ You can redirect the message page by defining *anonymousUndoUnsubscription.redir
 ## Notification 
 Configs in this section customize the handling of notification request or generating notifications from RSS feeds.  They are all sub-properties of config object *notification*. Service-agnostic  configs are static and service-dependent configs are dynamic. 
 
-### Broadcast Concurrency
-When a broadcast push notification request is received, *NotifyBC* divides subscribers into chunks and generates a HTTP sub-request for each chunk.  The sub-requests are submitted in batches back to ( preferably load-balanced) server cluster to achieve horizontal scaling. Sub-requests in a batch are submitted concurrently. Batches are processed serially, i.e. a batch is held until previous batch is completed. The chunk and batch size is determined by config *broadcastSubscriberChunkSize* and *broadcastSubRequestBatchSize* respectively with default value defined in */server/config.json*
-
-```json
-{
-  "notification": {
-    "broadcastSubscriberChunkSize": 1000,
-    "broadcastSubRequestBatchSize": 10
-  }
-}
-```
-
-To customize, create the config with updated value in file */server/config.local.json*.
-
-When handling a sub-request, *NotifyBC* dispatches notifications to all subscribers in the chunk concurrently. 
-
-If total number of subscribers is less than *broadcastSubscriberChunkSize*, then no sub-requests are spawned. Instead, the main request dispatches all notifications. 
-
-
 ### RSS Feeds
-*NotifyBC* can generate notifications automatically by polling RSS feeds periodically and detect changes by comparing with an internally maintained history list. The polling frequency, RSS url, RSS item change detection criteria, and message template can be defined in dynamic configs.  
+*NotifyBC* can generate broadcast push notifications automatically by polling RSS feeds periodically and detect changes by comparing with an internally maintained history list. The polling frequency, RSS url, RSS item change detection criteria, and message template can be defined in dynamic configs.  
 
 <div class="note warning">
   <h5>Only first page is retrived for paginated RSS feeds</h5>
@@ -350,6 +333,57 @@ The config items in the *value* field are
   * fieldsToCheckForUpdate: list of fields to check for updates if *includeUpdatedItems* is *true*. By default *["pubDate"]*
 * httpHost: the http protocol, host and port used by [mail merge](../overview/#mail-merge). If missing, the value is auto-populated based on the REST request that creates this config item.
 * messageTemplates: channel-specific message template supporting dynamic token as shown. Message template fields is same as those in [notification api](../api-notification/#field-message)
+
+### Broadcast Push Notification Task Concurrency
+When a broadcast push notification request is received, *NotifyBC* divides subscribers into chunks and generates a HTTP sub-request for each chunk.  The sub-requests are submitted in batches back to ( preferably load-balanced) server cluster to achieve horizontal scaling. Sub-requests in a batch are submitted concurrently. Batches are processed serially, i.e. a batch is held until previous batch is completed. The chunk and batch size is determined by config *broadcastSubscriberChunkSize* and *broadcastSubRequestBatchSize* respectively with default value defined in */server/config.json*
+
+```json
+{
+  "notification": {
+    "broadcastSubscriberChunkSize": 1000,
+    "broadcastSubRequestBatchSize": 10
+  }
+}
+```
+
+To customize, create the config with updated value in file */server/config.local.js*.
+
+When handling a sub-request, *NotifyBC* dispatches notifications to all subscribers in the chunk concurrently. 
+
+If total number of subscribers is less than *broadcastSubscriberChunkSize*, then no sub-requests are spawned. Instead, the main request dispatches all notifications. 
+
+### Broadcast Push Notification Custom Filter Functions
+To support rule-based notification event filtering, *NotifyBC* uses a [modified version](https://github.com/f-w/jmespath.js) of [jmespath](http://jmespath.org/) to implement json query. The modified version allows defining custom functions that can be used in subscription [broadcastPushNotificationFilter](../api-subscription#broadcastPushNotificationFilter) field. The functions must be implemented using JavaScript in config *notification.broadcastCustomFilterFunctions*. For example, a case-insensitive string matching function *contains_ci* can be created in file */server/config.local.js*
+
+```js
+'use strict'
+var _ = require('lodash')
+module.exports = {
+  notification: {
+    broadcastCustomFilterFunctions: {
+      contains_ci: {
+        _func: function(resolvedArgs) {
+          if (!resolvedArgs[0] || !resolvedArgs[1]) {
+            return false
+          }
+          return (
+            _.toLower(resolvedArgs[0]).indexOf(_.toLower(resolvedArgs[1])) >= 0
+          )
+        },
+        _signature: [
+          {
+            types: [2]
+          },
+          {
+            types: [2]
+          }
+        ]
+      }
+    }
+  }
+}
+```
+Consult jmespath.js source code on the [functionTable syntax](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L1127) and [type constants](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L132) used by above code. Note the function can use any external libraries (*lodash* in this case) that *NotifyBC* depends on as defined in [package.json](https://github.com/bcgov/MyGovBC-notification-server/blob/master/package.json).
 
 ## Database
 By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json* for local and docker deployment and MongoDB for OpenShift deployment. To use MongoDB for non-OpenShift deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
@@ -401,10 +435,10 @@ The config items are
 * nonConfirmedSubscriptionRetentionDays: the retention days of non-confirmed subscriptions, i.e. all unconfirmed and deleted subscriptions
 * defaultRetentionDays: if any of the above retention day config item is omitted, default retention days is used as fall back.
 
-To change a config item, set the config item in file */server/config.local.json*. For example, to run cron jobs at 2am daily, add following object to */server/config.local.json*
+To change a config item, set the config item in file */server/config.local.js*. For example, to run cron jobs at 2am daily, add following object to */server/config.local.js*
 
-```json
- {
+```js
+module.exports = {
    "cron": {
     "purgeData":{
       "timeSpec": "0 0 2 * * *"
@@ -478,19 +512,19 @@ In a multi-node deployment, when the cluster is first started up, database is em
 </div>
 
 ## Internal Http Host
-By default, HTTP requests submitted by *NotifyBC* back to itself will be sent to the host of the incoming HTTP request that spawns such internal requests. But if config *internalHttpHost*, which has no default value, is defined, for example in file */server/config.local.json*
+By default, HTTP requests submitted by *NotifyBC* back to itself will be sent to the host of the incoming HTTP request that spawns such internal requests. But if config *internalHttpHost*, which has no default value, is defined, for example in file */server/config.local.js*
   
-```json
-{
+```js
+module.exports = {
   "internalHttpHost" : "http://notifybc:3000"
 }
 ```
-then the HTTP request will be sent to the configured host. An internal request can be generated, for example, as a [sub-request of broadcast push notification](#broadcast-concurrency) described above. *internalHttpHost* shouldn't be accessible from internet. 
+then the HTTP request will be sent to the configured host. An internal request can be generated, for example, as a [sub-request of broadcast push notification](#broadcast-push-notification-task-concurrency) described above. *internalHttpHost* shouldn't be accessible from internet. 
 
 All internal requests are supposed to be admin requests. The purpose of *internalHttpHost* is to facilitate identifying the internal server ip as admin ip.
  
 
 <div class="note">
   <h5>ProTips™ OpenShift Use Case</h5>
-  <p>The OpenShift deployment script has set <i>internalHttpHost</i> to service url <i>http://notify-bc:3000</i> in file <a href="https://github.com/bcgov/MyGovBC-notification-server/blob/master/.s2i/configs/config.production.json">config.production.json</a> so you shouldn't re-define it in <i>/server/config.local.json</i>. The source ip in such case would be in a private OpenShift ip range. You should add this private ip range to <a href="#admin-ip-list">admin ip list</a>. The private ip range varies from OpenShift installation. In BCGov's cluster, it starts with octet 172.</p>
+  <p>The OpenShift deployment script has set <i>internalHttpHost</i> to service url <i>http://notify-bc:3000</i> in file <a href="https://github.com/bcgov/MyGovBC-notification-server/blob/master/.s2i/configs/config.production.json">config.production.json</a> so you shouldn't re-define it in <i>/server/config.local.js</i>. The source ip in such case would be in a private OpenShift ip range. You should add this private ip range to <a href="#admin-ip-list">admin ip list</a>. The private ip range varies from OpenShift installation. In BCGov's cluster, it starts with octet 172.</p>
 </div>

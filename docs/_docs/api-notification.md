@@ -216,6 +216,7 @@ The API operates on following notification data model fields:
             </ul>
           </li>
         </ul>
+        <a href="../overview/#mail-merge">Mail merge</a> is performed on email and sms message templates.
       </div>
     </td>
     <td>
@@ -241,7 +242,7 @@ The API operates on following notification data model fields:
   <tr>
     <td>
       <p class="name">asyncBroadcastPushNotification</p>
-      <div class="description">this field determines if the API call to create an immediate (i.e. not future-dated) broadcast push notification is asynchronous or not. If omitted, the API call is synchronous, i.e. the API call blocks until notifications have been sent to all subscribers. If set, valid values and corresponding behaviors are
+      <div class="description">this field determines if the API call to create an immediate (i.e. not future-dated) broadcast push notification is asynchronous or not. If omitted, the API call is synchronous, i.e. the API call blocks until all subscribers have been processed. If set, valid values and corresponding behaviors are
         <ul>
           <li>true - async without callback</li>
           <li>false - sync </li>
@@ -252,6 +253,23 @@ The API operates on following notification data model fields:
     <td>
       <table>
         <tr><td>type</td><td>string or boolean</td></tr>
+        <tr><td>required</td><td>false</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <p class="name"><a name="data"/>data</p>
+      <div class="description">the event that triggers the notification, for example, a RSS feed item when the notification is genenrated automatically by RSS cron job. Field <i>data</i> serves two purposes 
+      <ul>
+        <li>to replace <a href="../overview/#dynamic-tokens">dynamic tokens</a> in <i>message</i> template fields</li>
+        <li>to match against filter defined in subscription field <a href="../api-subscription#broadcastPushNotificationFilter">broadcastPushNotificationFilter</a>, if supplied, for broadcast push notificiations to determine if the notification should be delivered to the subscriber</li>
+      </ul>
+      </div>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>object</td></tr>
         <tr><td>required</td><td>false</td></tr>
       </table>
     </td>
@@ -319,6 +337,8 @@ GET /notifications
 ```
 POST /notifications
 ```
+[//]: # (todo: add docs on rule based event filter)
+
 * inputs
   * an object containing notification data model fields. At a minimum all required fields that don't have a default value must be supplied. Id field should be omitted since it's auto-generated. The API explorer only created an empty object for field *message* but you should populate the child fields according to [model schema](#model-schema)
     * parameter name: data

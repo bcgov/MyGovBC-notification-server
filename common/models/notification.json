@@ -51,6 +51,10 @@
     "invalidBefore": {
       "type": "date"
     },
+    "data": {
+      "type": "object",
+      "required": true
+    },
     "asyncBroadcastPushNotification": {
       "type": "any"
     }
