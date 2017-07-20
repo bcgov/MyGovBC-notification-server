@@ -52,8 +52,7 @@
       "type": "date"
     },
     "data": {
-      "type": "object",
-      "required": true
+      "type": "object"
     },
     "asyncBroadcastPushNotification": {
       "type": "any"
