@@ -22,7 +22,7 @@ permalink: /docs/overview/
   * deleted messages are not deleted immediately for auditing and recovery purposes
 * Support both sync and async API call for broadcast push notifications. For async API call, an optional callback url is supported
 * Broadcast push notifications can be auto-generated from RSS feeds
-* Allow user to specify filter rules evaluated against broadcast push notification triggering event to improve relevancy
+* Allow user to specify filter rules evaluated against broadcast push notification triggering event to improve relevance
 * Allow application developer to create custom filter functions
 
 ### subscription and un-subscription
