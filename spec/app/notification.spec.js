@@ -160,6 +160,18 @@ describe('POST /notifications', function() {
             },
             cb
           )
+        },
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'myFilterableBroadcastService',
+              channel: 'email',
+              userChannelId: 'bar2@invalid',
+              state: 'confirmed',
+              broadcastPushNotificationFilter: "contains(name,'f')"
+            },
+            cb
+          )
         }
       ],
       function(err, results) {
@@ -743,8 +755,86 @@ describe('POST /notifications', function() {
         )
       })
   })
-})
 
+  it('should send broadcast email notification with matching filter', function(
+    done
+  ) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+      return true
+    })
+    request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myFilterableBroadcastService',
+        message: {
+          from: 'no_reply@bar.com',
+          subject: 'test',
+          textBody: 'test'
+        },
+        data: {
+          name: 'foo'
+        },
+        channel: 'email',
+        isBroadcast: true
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
+        app.models.Notification.find(
+          {
+            where: {
+              serviceName: 'myFilterableBroadcastService'
+            }
+          },
+          function(err, data) {
+            expect(data.length).toBe(1)
+            done()
+          }
+        )
+      })
+  })
+
+  it('should skip broadcast email notification with unmatching filter', function(
+    done
+  ) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+      return true
+    })
+    request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myFilterableBroadcastService',
+        message: {
+          from: 'no_reply@bar.com',
+          subject: 'test',
+          textBody: 'test'
+        },
+        data: {
+          name: 'Foo'
+        },
+        channel: 'email',
+        isBroadcast: true
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(0)
+        app.models.Notification.find(
+          {
+            where: {
+              serviceName: 'myFilterableBroadcastService'
+            }
+          },
+          function(err, data) {
+            expect(data.length).toBe(1)
+            expect(data[0].state).toBe('sent')
+            done()
+          }
+        )
+      })
+  })
+})
 describe('PATCH /notifications/{id}', function() {
   beforeEach(function(done) {
     app.models.Notification.create(
