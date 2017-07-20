@@ -568,6 +568,36 @@ describe('DELETE /subscriptions/{id}', function() {
               cb(err, res)
             }
           )
+        },
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'redirectAck',
+              channel: 'email',
+              userChannelId: 'bar@foo.com',
+              state: 'confirmed',
+              unsubscriptionCode: '12345'
+            },
+            cb
+          )
+        },
+        function(cb) {
+          app.models.Configuration.create(
+            {
+              name: 'subscription',
+              serviceName: 'redirectAck',
+              value: {
+                anonymousUnsubscription: {
+                  acknowledgements: {
+                    onScreen: {
+                      redirectUrl: 'http://nowhere'
+                    }
+                  }
+                }
+              }
+            },
+            cb
+          )
         }
       ],
       function(err, results) {
@@ -654,6 +684,24 @@ describe('DELETE /subscriptions/{id}', function() {
         expect(res.statusCode).toBe(404)
         app.models.Subscription.findById(data[0].id, function(err, res) {
           expect(res.state).toBe('confirmed')
+          done()
+        })
+      })
+  })
+
+  it('should redirect onscreen acknowledgements', function(done) {
+    request(app)
+      .get(
+        '/api/subscriptions/' +
+          data[3].id +
+          '/unsubscribe?unsubscriptionCode=12345'
+      )
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(302)
+        expect(res.header.location).toBe('http://nowhere')
+        app.models.Subscription.findById(data[3].id, function(err, res) {
+          expect(res.state).toBe('deleted')
           done()
         })
       })
