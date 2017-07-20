@@ -5,6 +5,7 @@ var rsa = require(rsaPath)
 var RandExp = require('randexp')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
+var jmespath = require('jmespath')
 
 module.exports = function(Subscription) {
   disableAllMethods(Subscription, [
@@ -26,6 +27,34 @@ module.exports = function(Subscription) {
     error.status = 403
     return next(error)
   })
+
+  Subscription.observe(
+    'before save',
+    function parseBroadcastPushNotificationFilter(ctx, next) {
+      let data = ctx.instance || ctx.data
+      if (!data) {
+        return next()
+      }
+      let filter = data.broadcastPushNotificationFilter
+      if (!filter) {
+        return next()
+      }
+      if (typeof filter !== 'string') {
+        let error = new Error('invalid broadcastPushNotificationFilter')
+        error.status = 400
+        return next(error)
+      }
+      filter = '[?' + filter + ']'
+      try {
+        jmespath.compile(filter)
+      } catch (ex) {
+        let error = new Error('invalid broadcastPushNotificationFilter')
+        error.status = 400
+        return next(error)
+      }
+      return next()
+    }
+  )
 
   Subscription.observe('access', function(ctx, next) {
     var u = Subscription.getCurrentUser(ctx.options.httpContext)
