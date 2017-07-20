@@ -42,6 +42,18 @@
   },
   {
     "cmd": [
+      "node.exe",
+      "node_modules/jasmine/bin/jasmine.js"
+    ],
+    "env":
+    {
+      "NODE_ENV": "test"
+    },
+    "name": "node-jasmine",
+    "working_dir": "${project_path}"
+  },
+  {
+    "cmd": [
       "node-debug.cmd",
       "server/server.js"
     ],

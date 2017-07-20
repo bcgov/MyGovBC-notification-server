@@ -269,6 +269,63 @@ describe('POST /subscriptions', function() {
         )
       })
   })
+  it('should reject subscriptions with invalid broadcastPushNotificationFilter', function(
+    done
+  ) {
+    request(app)
+      .post('/api/subscriptions')
+      .send({
+        serviceName: 'myService',
+        channel: 'sms',
+        userChannelId: '12345',
+        broadcastPushNotificationFilter: "a === 'b'"
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(400)
+        app.models.Subscription.find(
+          {
+            where: {
+              serviceName: 'myService',
+              userChannelId: '12345'
+            }
+          },
+          function(err, data) {
+            expect(data.length).toBe(0)
+            done()
+          }
+        )
+      })
+  })
+  it('should accept subscriptions with valid broadcastPushNotificationFilter', function(
+    done
+  ) {
+    request(app)
+      .post('/api/subscriptions')
+      .send({
+        serviceName: 'myService',
+        channel: 'sms',
+        userChannelId: '12345',
+        broadcastPushNotificationFilter: "a == 'b'"
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
+        app.models.Subscription.find(
+          {
+            where: {
+              serviceName: 'myService',
+              userChannelId: '12345'
+            }
+          },
+          function(err, data) {
+            expect(data[0].unsubscriptionCode).toMatch(/\d{5}/)
+            done()
+          }
+        )
+      })
+  })
 })
 
 describe('PATCH /subscriptions/{id}', function() {
