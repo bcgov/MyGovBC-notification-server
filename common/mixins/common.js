@@ -94,7 +94,7 @@ module.exports = function(Model, options) {
           error = new Error('delivery failed')
         }
       } catch (ex) {}
-      cb(error, info)
+      cb && cb(error, info)
     })
   }
 
