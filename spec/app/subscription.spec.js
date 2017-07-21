@@ -735,6 +735,38 @@ describe('DELETE /subscriptions/{id}', function() {
         })
       })
   })
+
+  it('should display onScreen acknowledgements failureMessage', function(
+    done
+  ) {
+    spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(function() {
+      let cb = arguments[arguments.length - 1]
+      process.nextTick(cb, 'error', {
+        anonymousUnsubscription: {
+          acknowledgements: {
+            onScreen: { failureMessage: 'fail' }
+          }
+        }
+      })
+    })
+
+    request(app)
+      .get(
+        '/api/subscriptions/' +
+          data[3].id +
+          '/unsubscribe?unsubscriptionCode=12345'
+      )
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(res.text).toBe('fail')
+        expect(res.type).toBe('text/plain')
+        app.models.Subscription.findById(data[3].id, function(err, res) {
+          expect(res.state).toBe('deleted')
+          done()
+        })
+      })
+  })
 })
 
 describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
