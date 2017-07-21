@@ -274,8 +274,7 @@ module.exports = function(Subscription) {
         res.serviceName,
         (configErr, mergedSubscriptionConfig) => {
           var err = writeErr || configErr
-          var anonymousUnsubscription =
-            mergedSubscriptionConfig.anonymousUnsubscription
+          var anonymousUnsubscription = mergedSubscriptionConfig && mergedSubscriptionConfig.anonymousUnsubscription
           try {
             if (!err) {
               // send acknowledgement notification

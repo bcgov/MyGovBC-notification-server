@@ -706,6 +706,35 @@ describe('DELETE /subscriptions/{id}', function() {
         })
       })
   })
+
+  it('should redirect onscreen acknowledgements with error', function(done) {
+    spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(function() {
+      let cb = arguments[arguments.length - 1]
+      process.nextTick(cb, 'error', {
+        anonymousUnsubscription: {
+          acknowledgements: {
+            onScreen: { redirectUrl: 'http://nowhere' }
+          }
+        }
+      })
+    })
+
+    request(app)
+      .get(
+        '/api/subscriptions/' +
+          data[3].id +
+          '/unsubscribe?unsubscriptionCode=12345'
+      )
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(302)
+        expect(res.header.location).toBe('http://nowhere?err=error')
+        app.models.Subscription.findById(data[3].id, function(err, res) {
+          expect(res.state).toBe('deleted')
+          done()
+        })
+      })
+  })
 })
 
 describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
