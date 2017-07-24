@@ -331,11 +331,8 @@ module.exports.checkRssConfigUpdates = function() {
                           isBroadcast: true,
                           message:
                             rssNtfctnConfigItem.value.messageTemplates[channel],
-                          data: newOrUpdatedItem
-                        }
-                        if (rssNtfctnConfigItem.value.httpHost) {
-                          notificationObject.httpHost =
-                            rssNtfctnConfigItem.value.httpHost
+                          data: newOrUpdatedItem,
+                          httpHost: rssNtfctnConfigItem.value.httpHost
                         }
                         let httpHost =
                           app.get('internalHttpHost') ||
