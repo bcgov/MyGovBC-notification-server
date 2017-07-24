@@ -1,3 +1,4 @@
 {
-  "restApiRoot": "/api"
+  "restApiRoot": "/api",
+  "internalHttpHost": ""
 }

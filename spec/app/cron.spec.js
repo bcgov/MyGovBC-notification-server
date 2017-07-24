@@ -397,7 +397,8 @@ describe('CRON checkRssConfigUpdates', function() {
                     textBody: '{description}',
                     htmlBody: '{description}'
                   }
-                }
+                },
+                httpHost: 'http://foo'
               }
             },
             function(err, res) {
@@ -434,6 +435,12 @@ describe('CRON checkRssConfigUpdates', function() {
       expect(err).toBeNull()
       expect(rssTasks['1']).not.toBeNull()
       expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
+      let joc = jasmine.objectContaining
+      expect(cronTasks.request.post).toHaveBeenCalledWith(
+        joc({
+          json: joc({ httpHost: 'http://foo' })
+        })
+      )
       app.models.Rss.find((err, results) => {
         expect(results[0].items[0].author).toBe('foo')
         done()

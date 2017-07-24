@@ -316,8 +316,6 @@ module.exports.checkRssConfigUpdates = function() {
                     )
                     // notify new or updated items
                     newOrUpdatedItems.forEach(function(newOrUpdatedItem) {
-                      newOrUpdatedItem.httpHost =
-                        rssNtfctnConfigItem.value.httpHost
                       for (var channel in rssNtfctnConfigItem.value
                         .messageTemplates) {
                         if (
