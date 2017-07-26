@@ -6,6 +6,7 @@ if (process.argv.length < 3) {
 }
 let tasks = []
 let i = 0
+/*jshint loopfunc:true */
 while (i < (process.argv[4] || 1000)) {
   let index = i
   tasks.push(function(cb) {
