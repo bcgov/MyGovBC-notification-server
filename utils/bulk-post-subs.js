@@ -16,7 +16,7 @@ while (i < (process.argv[4] || 1000)) {
         'Content-Type': 'application/json'
       },
       json: {
-        serviceName: 'load',
+        serviceName: process.argv[5] || 'load',
         channel: 'email',
         state: 'confirmed',
         index: index,
@@ -35,13 +35,13 @@ while (i < (process.argv[4] || 1000)) {
       try {
         console.log(data.body.index)
       } catch (ex) {}
-      cb(err, data)
+      cb()
     })
   })
   i++
 }
 
-parallelLimit(tasks, 50, function(error, data) {
+parallelLimit(tasks, 100, function(error, data) {
   if (error) {
     console.log(error)
   } else if (data) {
