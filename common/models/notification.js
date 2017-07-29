@@ -351,8 +351,7 @@ module.exports = function(Notification) {
                   !data.asyncBroadcastPushNotification ||
                   typeof ctx.args.start === 'number'
                 ) {
-                  _.remove(res, e => e === null)
-                  cb(err, res)
+                  cb(err, _.compact(res))
                 } else {
                   if (err) {
                     data.state = 'error'
@@ -414,6 +413,7 @@ module.exports = function(Notification) {
                       uri: uri
                     }
                     request.get(options, function(error, response, body) {
+                      // todo: need to pass error and response to handle http errors
                       cb(null, body)
                     })
                   }
