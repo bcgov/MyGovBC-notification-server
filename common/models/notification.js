@@ -413,8 +413,25 @@ module.exports = function(Notification) {
                       uri: uri
                     }
                     request.get(options, function(error, response, body) {
-                      // todo: need to pass error and response to handle http errors
-                      cb(null, body)
+                      if (!error && response.statusCode === 200) {
+                        return cb(null, body)
+                      }
+                      Notification.app.models.Subscription.find(
+                        {
+                          where: {
+                            serviceName: data.serviceName,
+                            state: 'confirmed',
+                            channel: data.channel
+                          },
+                          order: 'created ASC',
+                          skip: startIdx,
+                          limit: broadcastSubscriberChunkSize,
+                          fields: { userChannelId: true }
+                        },
+                        function(err, subs) {
+                          return cb(err, subs.map(e => e.userChannelId))
+                        }
+                      )
                     })
                   }
                   chunkRequests.push(chunkReqtask)
