@@ -66,7 +66,7 @@ objects:
             initialDelaySeconds: 100
             periodSeconds: 10
             successThreshold: 1
-            timeoutSeconds: 5
+            timeoutSeconds: 60
           name: notify-bc
           ports:
           - containerPort: 3000
@@ -79,7 +79,7 @@ objects:
             initialDelaySeconds: 100
             periodSeconds: 10
             successThreshold: 1
-            timeoutSeconds: 5
+            timeoutSeconds: 60
           resources:
             limits:
               cpu: 100m
