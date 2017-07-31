@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-time curl -X POST $1/notifications \
+time curl -X POST ${1:-http://notify-bc-notifybc.192.168.99.100.nip.io/api}/notifications \
  -H 'Content-Type: application/json' \
  -d @- << EOF
 {
-   "serviceName": "$2",
+   "serviceName": "${2:-load10}",
    "message": {
-       "from": "$3",
+       "from": "${3:-no_reply@example.com}",
        "subject": "{title}",
        "textBody": "{description}",
        "htmlBody": "{description}<p><a href='{link}'>link</a><a href='{unsubscription_url}'>nsubscription</a></p>"
