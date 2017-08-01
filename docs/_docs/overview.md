@@ -60,9 +60,9 @@ If a notification request contains field *data* of type *object*, *NotifyBC* als
 
 *NotifyBC*, designed to be a microservice, doesn't use full-blown ACL to secure API calls. Instead, it classifies incoming requests into admin and user types. Each type has two subtypes based on following criteria
 
-* super-admin, if the source ip of the request is in the admin ip list
-* admin, if the request is not super-admin but has valid access token that maps to an admin user created and logged in using the *administrator* api 
-* authenticated user, if the request is neither super-admin nor admin, but authenticated by SiteMinder, i.e. the request carries SiteMinder headers and is from trusted SiteMinder proxy
+* super-admin, if the source ip of the request is in the admin ip list and the request doesn't contain SiteMinder headers
+* admin, if the request is not super-admin but has valid access token that maps to an admin user created and logged in using the *administrator* api, and the request doesn't contain SiteMinder headers
+* authenticated user, if the request is neither super-admin nor admin, but authenticated by SiteMinder, i.e. the request contains SiteMinder headers and is from trusted SiteMinder proxy
 * anonymous user, if the request doesn't meet any of the above criteria
 
 The only extra privileges that a super-admin has over admin are that super-admin can perform CRUD operations on *configuration* and *administrator* entities through REST API. In the remaining docs, when no further distinction is necessary, an admin request refers to both super-admin and admin request; a user request refers to both authenticated and anonymous request.

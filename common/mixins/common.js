@@ -8,10 +8,19 @@ module.exports = function(Model, options) {
     return base
   }
 
-  Model.isAdminReq = function(httpCtx, ignoreAccessToken) {
+  Model.isAdminReq = function(httpCtx, ignoreAccessToken, ignoreSMSurrogate) {
     // internal requests
     if (!httpCtx || !httpCtx.req) {
       return true
+    }
+    if (!ignoreSMSurrogate) {
+      if (
+        httpCtx.req.get('SM_UNIVERSALID') ||
+        httpCtx.req.get('sm_user') ||
+        httpCtx.req.get('smgov_userdisplayname')
+      ) {
+        return false
+      }
     }
     if (!ignoreAccessToken) {
       try {
@@ -41,6 +50,9 @@ module.exports = function(Model, options) {
       httpCtx.req.get('smgov_userdisplayname')
     if (!currUser) {
       return null
+    }
+    if (Model.isAdminReq(httpCtx, undefined, true)) {
+      return currUser
     }
     var siteMinderReverseProxyIps =
       Model.app.get('siteMinderReverseProxyIps') ||
