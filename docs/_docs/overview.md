@@ -60,9 +60,15 @@ If a notification request contains field *data* of type *object*, *NotifyBC* als
 
 *NotifyBC*, designed to be a microservice, doesn't use full-blown ACL to secure API calls. Instead, it classifies incoming requests into admin and user types. Each type has two subtypes based on following criteria
 
-* super-admin, if the source ip of the request is in the admin ip list and the request doesn't contain SiteMinder headers
+* super-admin, if the source ip of the request is in the admin ip list and the request doesn't contain any of following case insensitive SiteMinder HTTP headers
+  * SM_UNIVERSALID
+  * SM_USER
+  * SMGOV_USERDISPLAYNAME
 * admin, if the request is not super-admin but has valid access token that maps to an admin user created and logged in using the *administrator* api, and the request doesn't contain SiteMinder headers
-* authenticated user, if the request is neither super-admin nor admin, but authenticated by SiteMinder, i.e. the request contains SiteMinder headers and is from trusted SiteMinder proxy
+* authenticated user, if the request 
+  * is neither super-admin nor admin, and
+  * contains SiteMinder headers, and
+  * comes from either trusted SiteMinder proxy or admin ip list
 * anonymous user, if the request doesn't meet any of the above criteria
 
 The only extra privileges that a super-admin has over admin are that super-admin can perform CRUD operations on *configuration* and *administrator* entities through REST API. In the remaining docs, when no further distinction is necessary, an admin request refers to both super-admin and admin request; a user request refers to both authenticated and anonymous request.
@@ -74,7 +80,7 @@ An admin request carries full authorization whereas user request has limited acc
 * retrieve push notifications
 * retrieve in-app notifications that is not targeted to the current user
 
-The result of an API call to the same end point may differ depending on if the request is made by admin or user. For example, the call *GET /notifications* without a filter will return all notifications to all users for an admin request, but only non-deleted, non-expired in-app notifications targeted to the current user when the request comes from user browser.
+The result of an API call to the same end point may differ depending on the request type. For example, the call *GET /notifications* without a filter will return all notifications to all users for an admin request, but only non-deleted, non-expired in-app notifications for authenticated user request, and forbidden for anonymous user request. Sometimes it is desirable for a request from admin ip list, which would normally be admin request, to be voluntarily downgraded to authenticated user request in order to take advantage of predefined filters such as the ones described above. This can be achieved by adding the SiteMinder headers to the request. This is also why admin request is not  determined by ip or access token alone.
 
 The way *NotifyBC* interacts with other components is diagrammed below.
 ![architecture diagram]({{site.baseurl}}/img/architecture.png)
