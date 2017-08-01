@@ -39,6 +39,9 @@ module.exports = function(Model, options) {
       httpCtx.req.get('SM_UNIVERSALID') ||
       httpCtx.req.get('sm_user') ||
       httpCtx.req.get('smgov_userdisplayname')
+    if (!currUser) {
+      return null
+    }
     var siteMinderReverseProxyIps =
       Model.app.get('siteMinderReverseProxyIps') ||
       Model.app.get('defaultSiteMinderReverseProxyIps')
