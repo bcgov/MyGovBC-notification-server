@@ -54,19 +54,22 @@
   },
   {
     "cmd": [
-      "node-debug.cmd",
+      "node.exe",
+      "--inspect-brk",
       "server/server.js"
     ],
     "env":
     {
-      "NOTIFYBC_NODE_ROLE": "master"
+      "NOTIFYBC_NODE_ROLE": "master",
+      //      "NODE_DEBUG": "net"
     },
     "name": "debug-app",
     "working_dir": "${project_path}"
   },
   {
     "cmd": [
-      "node-debug.cmd",
+      "node.exe",
+      "--inspect-brk",
       "node_modules/jasmine/bin/jasmine.js"
     ],
     "env":
