@@ -78,6 +78,31 @@
     },
     "name": "debug-jasmine",
     "working_dir": "${project_path}"
+  },
+  {
+    "cmd": [
+      "node-debug.cmd",
+      "server/server.js"
+    ],
+    "env":
+    {
+      "NOTIFYBC_NODE_ROLE": "master",
+      //      "NODE_DEBUG": "net"
+    },
+    "name": "v4-debug-app",
+    "working_dir": "${project_path}"
+  },
+  {
+    "cmd": [
+      "node-debug.cmd",
+      "node_modules/jasmine/bin/jasmine.js"
+    ],
+    "env":
+    {
+      "NODE_ENV": "test"
+    },
+    "name": "v4-debug-jasmine",
+    "working_dir": "${project_path}"
   }],
   "folders": [
   {
