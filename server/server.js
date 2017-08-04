@@ -42,6 +42,8 @@ app.start = function() {
   app.set('trust proxy', app.get('trustedReverseProxyIps'))
   // start the web server
   return app.listen(function() {
+    // without following line, node.js closes socket after 2min
+    this.setTimeout(0)
     app.emit('started')
     var baseUrl = app.get('url').replace(/\/$/, '')
     console.log('Web server listening at: %s', baseUrl)
