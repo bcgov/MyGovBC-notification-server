@@ -93,10 +93,12 @@ module.exports = function(Model, options) {
     }
   }
 
+  var nodemailer = require('nodemailer')
+  var transporter
   Model.sendEmail = function(from, to, subject, textBody, htmlBody, cb) {
-    var nodemailer = require('nodemailer')
-    var transporter = nodemailer.createTransport(Model.app.get('smtp'))
-    var mailOptions = {
+    transporter =
+      transporter || nodemailer.createTransport(Model.app.get('smtp'))
+    let mailOptions = {
       from: from,
       to: to,
       subject: subject,
