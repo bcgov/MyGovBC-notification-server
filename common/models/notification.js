@@ -1,6 +1,6 @@
 'use strict'
 
-var parallelLimit = require('async/parallelLimit')
+var queue = require('async/queue')
 var parallel = require('async/parallel')
 var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
@@ -391,91 +391,91 @@ module.exports = function(Notification) {
               } else {
                 // call broadcastToChunkSubscribers, coordinate output
                 let chunks = Math.ceil(count / broadcastSubscriberChunkSize)
-                let i = 0,
-                  chunkRequests = []
-                /*jshint loopfunc: true */
                 let httpHost = Notification.app.get('internalHttpHost')
                 if (!httpHost) {
                   httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
                 }
-                while (i < chunks) {
-                  let startIdx = i * broadcastSubscriberChunkSize
-                  let chunkReqtask = cb => {
-                    let uri =
-                      httpHost +
-                      Notification.app.get('restApiRoot') +
-                      '/notifications/' +
-                      data.id +
-                      '/broadcastToChunkSubscribers?start=' +
-                      startIdx
-                    let options = {
-                      json: true,
-                      uri: uri
+
+                let q = queue(function(task, cb) {
+                  let uri =
+                    httpHost +
+                    Notification.app.get('restApiRoot') +
+                    '/notifications/' +
+                    data.id +
+                    '/broadcastToChunkSubscribers?start=' +
+                    task.startIdx
+                  let options = {
+                    json: true,
+                    uri: uri
+                  }
+                  request.get(options, function(error, response, body) {
+                    if (!error && response.statusCode === 200) {
+                      return cb && cb(body)
                     }
-                    request.get(options, function(error, response, body) {
-                      if (!error && response.statusCode === 200) {
-                        return cb(null, body)
-                      }
-                      Notification.app.models.Subscription.find(
-                        {
-                          where: {
-                            serviceName: data.serviceName,
-                            state: 'confirmed',
-                            channel: data.channel
-                          },
-                          order: 'created ASC',
-                          skip: startIdx,
-                          limit: broadcastSubscriberChunkSize,
-                          fields: { userChannelId: true }
+                    Notification.app.models.Subscription.find(
+                      {
+                        where: {
+                          serviceName: data.serviceName,
+                          state: 'confirmed',
+                          channel: data.channel
                         },
-                        function(err, subs) {
-                          return cb(err, subs.map(e => e.userChannelId))
+                        order: 'created ASC',
+                        skip: startIdx,
+                        limit: broadcastSubscriberChunkSize,
+                        fields: { userChannelId: true }
+                      },
+                      function(err, subs) {
+                        return cb && cb(err || subs.map(e => e.userChannelId))
+                      }
+                    )
+                  })
+                }, broadcastSubRequestBatchSize)
+                q.drain = function() {
+                  if (!data.asyncBroadcastPushNotification) {
+                    cb()
+                  } else {
+                    if (data.state !== 'error') {
+                      data.state = 'sent'
+                    }
+                    data.save(function(errSave) {
+                      if (
+                        typeof data.asyncBroadcastPushNotification === 'string'
+                      ) {
+                        let options = {
+                          uri: data.asyncBroadcastPushNotification,
+                          headers: {
+                            'Content-Type': 'application/json'
+                          },
+                          json: data
                         }
-                      )
+                        request.post(options)
+                      }
                     })
                   }
-                  chunkRequests.push(chunkReqtask)
+                }
+                let queuedTasks = [],
+                  i = 0
+                while (i < chunks) {
+                  queuedTasks.push({
+                    startIdx: i * broadcastSubscriberChunkSize
+                  })
                   i++
                 }
-                parallelLimit(
-                  chunkRequests,
-                  broadcastSubRequestBatchSize,
-                  function(error, errorWhenSendingToUsers) {
-                    if (errorWhenSendingToUsers) {
-                      let flattened = [].concat.apply(
-                        [],
-                        errorWhenSendingToUsers
-                      )
-                      if (flattened.length > 0) {
-                        data.errorWhenSendingToUsers = flattened
-                      }
-                    }
-                    if (!data.asyncBroadcastPushNotification) {
-                      cb(error)
-                    } else {
-                      if (error) {
-                        data.state = 'error'
-                      } else {
-                        data.state = 'sent'
-                      }
-                      data.save(function(errSave) {
-                        if (
-                          typeof data.asyncBroadcastPushNotification ===
-                          'string'
-                        ) {
-                          let options = {
-                            uri: data.asyncBroadcastPushNotification,
-                            headers: {
-                              'Content-Type': 'application/json'
-                            },
-                            json: data
-                          }
-                          request.post(options)
-                        }
-                      })
-                    }
+                q.push(queuedTasks, function(errorWhenSendingToUsers) {
+                  if (!errorWhenSendingToUsers) {
+                    return
                   }
-                )
+                  if (errorWhenSendingToUsers instanceof Array) {
+                    if (errorWhenSendingToUsers.length <= 0) {
+                      return
+                    }
+                    data.errorWhenSendingToUsers = (data.errorWhenSendingToUsers ||
+                      [])
+                      .concat(errorWhenSendingToUsers)
+                  } else {
+                    data.state = 'error'
+                  }
+                })
               }
             }
           )
