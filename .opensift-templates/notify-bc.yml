@@ -82,8 +82,8 @@ objects:
             timeoutSeconds: 60
           resources:
             limits:
-              cpu: 100m
-              memory: 512Mi
+              cpu: '1'
+              memory: 1Gi
           volumeMounts:
           - mountPath: /mnt
             name: config-volume
