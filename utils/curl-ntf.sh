@@ -7,7 +7,6 @@ time curl -X POST ${1:-http://notify-bc-notifybc.192.168.99.100.nip.io/api}/noti
    "message": {
        "from": "${3:-no_reply@example.com}",
        "subject": "{title}",
-       "textBody": "{description}",
        "htmlBody": "{description}<p><a href='{link}'>link</a><a href='{unsubscription_url}'>nsubscription</a></p>"
    },
    "channel": "email",

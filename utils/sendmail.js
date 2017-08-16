@@ -8,7 +8,7 @@ let transporter = nodemailer.createTransport({
   port: 25,
   pool: true,
   direct: false,
-  maxMessages: 99999,
+  maxMessages: process.argv[6] || 99999,
   maxConnections: process.argv[5] || 5
 })
 
