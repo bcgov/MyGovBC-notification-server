@@ -14,7 +14,7 @@ When *NotifyBC* is used to deliver broadcast push notifications to a large numbe
 ## Environment
 
 ### Hardware
-Two computers, connnected by 1Gbps LAN, are used to host 
+Two computers, connected by 1Gbps LAN, are used to host 
 
 * *NotifyBC*
   * Mac Mini Late 2012 model
@@ -127,7 +127,7 @@ According to [Baseline Performance for SMTP](https://technet.microsoft.com/en-us
 
 ## Advices
 
-* Avoid using default direct mode in production. Instead use SMTP server. Direct mode doesn't support connnection pooling, resulting in port depletion quickly.
+* Avoid using default direct mode in production. Instead use SMTP server. Direct mode doesn't support connection pooling, resulting in port depletion quickly.
 * Enable pooled connection for SMTP.
 * Set smtp config *maxConnections* to a number big enough as long as SMTP server can handle. Test found for Windows SMTP server 50 is a suitable number, beyond which performance gain is insignificant.
 * Avoid setting CPU resource limit too low for *NotifyBC* app pods.
