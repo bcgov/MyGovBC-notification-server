@@ -129,7 +129,7 @@ According to [Baseline Performance for SMTP](https://technet.microsoft.com/en-us
 
 * Avoid using default direct mode in production. Instead use SMTP server. Direct mode doesn't support connnection pooling, resulting in port depletion quickly.
 * Enable pooled connection for SMTP.
-* Set smtp config *maxConnections* to a number big enough as long as SMTP server can handle. Test found for Windows SMTP server 50 is a suitable number, beyond which performance increase is insignificant.
+* Set smtp config *maxConnections* to a number big enough as long as SMTP server can handle. Test found for Windows SMTP server 50 is a suitable number, beyond which performance gain is insignificant.
 * Avoid setting CPU resource limit too low for *NotifyBC* app pods.
 * If you have control over the SMTP server,
   * use SSD for its storage
