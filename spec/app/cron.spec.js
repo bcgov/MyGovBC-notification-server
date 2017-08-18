@@ -276,6 +276,7 @@ describe('CRON dispatchLiveNotifications', function() {
               isBroadcast: true,
               serviceName: 'myService',
               httpHost: 'http://foo.com',
+              asyncBroadcastPushNotification: false,
               invalidBefore: '2010-01-01',
               state: 'new'
             },

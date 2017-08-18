@@ -128,7 +128,10 @@ module.exports.dispatchLiveNotifications = function() {
       }
     },
     function(err, livePushNotifications) {
-      if (err) {
+      if (
+        err ||
+        (livePushNotifications && livePushNotifications.length === 0)
+      ) {
         return callback && callback(err, livePushNotifications)
       }
       let notificationTasks = livePushNotifications.map(function(
@@ -136,9 +139,14 @@ module.exports.dispatchLiveNotifications = function() {
       ) {
         return function(cb) {
           livePushNotification.state = 'sending'
+          if (
+            livePushNotification.asyncBroadcastPushNotification === undefined
+          ) {
+            livePushNotification.asyncBroadcastPushNotification = true
+          }
           livePushNotification.save(function(errSave) {
             if (errSave) {
-              return cb(errSave)
+              return cb(null, errSave)
             }
             let ctx = {}
             ctx.args = {}
@@ -153,7 +161,7 @@ module.exports.dispatchLiveNotifications = function() {
                 ctx,
                 livePushNotification,
                 function(errDispatchNotification) {
-                  return cb(errDispatchNotification)
+                  return cb(null, errDispatchNotification)
                 }
               )
             })
