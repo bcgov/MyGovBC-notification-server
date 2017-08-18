@@ -50,41 +50,45 @@ The test was performed in August 2017. Unless otherwise specified, the versions 
 
 ## Procedure
 
-1. update file */server/config.local.js* through [configMap](../installation/#update-configuration-files). Add sections for SMTP server and a custom filter funtion
+1. update or create file */server/config.local.js* through [configMap](../installation/#update-configuration-files). Add sections for SMTP server and a custom filter funtion
 
    ```
-   ...
-   smtp: {
-     host: '<smtp-vm-ip-or-hostname>',
-     secure: false,
-     port: 25,
-     pool: true,
-     direct: false,
-     maxMessages: 99999,
-     maxConnections: 50
-   },
-   ...
-   notification: {
-     broadcastCustomFilterFunctions: {
-       /*jshint camelcase: false */
-       contains_ci: {
-         _func: function(resolvedArgs) {
-           if (!resolvedArgs[0] || !resolvedArgs[1]) {
-             return false
-           }
-           return (
-             _.toLower(resolvedArgs[0]).indexOf(
-              _.toLower(resolvedArgs[1])) >= 0
-           )
-         },
-         _signature: [
-           {
-             types: [2]
+   'use strict'
+   var _ = require('lodash')    
+   module.exports = {
+     ...
+     smtp: {
+       host: '<smtp-vm-ip-or-hostname>',
+       secure: false,
+       port: 25,
+       pool: true,
+       direct: false,
+       maxMessages: 99999,
+       maxConnections: 50
+     },
+     ...
+     notification: {
+       broadcastCustomFilterFunctions: {
+         /*jshint camelcase: false */
+         contains_ci: {
+           _func: function(resolvedArgs) {
+             if (!resolvedArgs[0] || !resolvedArgs[1]) {
+               return false
+             }
+             return (
+               _.toLower(resolvedArgs[0]).indexOf(
+                _.toLower(resolvedArgs[1])) >= 0
+             )
            },
-           {
-             types: [2]
-           }
-         ]
+           _signature: [
+             {
+               types: [2]
+             },
+             {
+               types: [2]
+             }
+           ]
+         }
        }
      }
    }
