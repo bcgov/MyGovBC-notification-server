@@ -9,7 +9,7 @@ if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
     mv /tmp/artifacts/* ./
 fi
 echo "---> Installing application source"
-rm -rf /tmp/src/node_modules /tmp/src/docs
+rm -rf /tmp/src/node_modules /tmp/src/docs /tmp/src/utils
 mv /tmp/src/.s2i/configs/datasources.production.js /tmp/src/server/
 mv /tmp/src/.s2i/configs/config.production.json /tmp/src/server/
 chmod -R a+rwx /tmp/src
