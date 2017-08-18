@@ -72,6 +72,22 @@ describe('GET /notifications', function() {
             },
             cb
           )
+        },
+        function(cb) {
+          app.models.Notification.create(
+            {
+              channel: 'email',
+              isBroadcast: true,
+              message: {
+                from: 'no_reply@example.com',
+                subject: 'hello',
+                htmlBody: 'hello'
+              },
+              serviceName: 'myService',
+              state: 'sent'
+            },
+            cb
+          )
         }
       ],
       function(err, results) {
