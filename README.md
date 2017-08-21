@@ -1,4 +1,6 @@
-[![Build Status](https://jenkins-gcpe-notifybc-tools.pathfinder.gov.bc.ca/buildStatus/icon?job=notify-bc-dev)](https://jenkins-gcpe-notifybc-tools.pathfinder.gov.bc.ca/job/notify-bc-dev/)
+Build Status
+* [![Build Status](https://jenkins-gcpe-notifybc-tools.pathfinder.gov.bc.ca/buildStatus/icon?job=notify-bc-dev)](https://jenkins-gcpe-notifybc-tools.pathfinder.gov.bc.ca/job/notify-bc-dev/) deploying to OpenShift 
+* [![Build Status](https://travis-ci.org/bcgov/MyGovBC-notification-server.svg?branch=master)](https://travis-ci.org/bcgov/MyGovBC-notification-server) using latest version of NodeJS 
 
 NotifyBC
 ===========
