@@ -8,17 +8,20 @@ let transporter = nodemailer.createTransport({
   port: 25,
   pool: true,
   direct: false,
-  maxMessages: process.argv[6] || 99999,
+  maxMessages: process.argv[7] || 99999,
   maxConnections: process.argv[5] || 5
 })
+
+let bodyUnit =
+  'Lorem ipsum dolor sit amet, facete debitis dolores nam eu, nemore voluptatum interesset at mel. Duo et legimus vituperata, mei adipisci prodesset conclusionemque an. Mnesarchum adversarium eam eu, ad postea labore vituperatoribus eam. Dicam convenire vis ei, id vis quod luptatum. Expetenda consequat at quo, mel inermis volumus intellegam ut, mei vocibus inciderint ea. At error viris has.'
+let body = bodyUnit.repeat(process.argv[8] || 1)
 
 let q = queue(function(task, cb) {
   let mailOptions = {
     from: 'noreply@example.com',
     to: process.argv[3] || 'test@example.com',
     subject: 'Despite unpopularity, Victoria fadsasdfasd',
-    text:
-      'Lorem ipsum dolor sit amet, facete debitis dolores nam eu, nemore voluptatum interesset at mel. Duo et legimus vituperata, mei adipisci prodesset conclusionemque an. Mnesarchum adversarium eam eu, ad postea labore vituperatoribus eam. Dicam convenire vis ei, id vis quod luptatum. Expetenda consequat at quo, mel inermis volumus intellegam ut, mei vocibus inciderint ea. At error viris has.'
+    text: body
   }
   transporter.sendMail(mailOptions, function(error, info) {
     try {
