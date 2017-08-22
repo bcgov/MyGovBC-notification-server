@@ -33,7 +33,11 @@ while (i < (process.argv[4] || 1000)) {
         err = data.statusCode
       }
       try {
-        console.log(data.body.index)
+        if (err) {
+          console.error(err)
+        } else {
+          console.log(data.body.index)
+        }
       } catch (ex) {}
       cb()
     })
