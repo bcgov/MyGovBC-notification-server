@@ -228,6 +228,15 @@ objects:
   kind: ConfigMap
   metadata:
     name: notify-bc
+  data:
+    datasources.production.js: |
+      'use strict'
+      module.exports = {
+        db: {
+          connector: "mongodb",
+          url: "mongodb://${DATABASE_SERVICE_NAME}-0.${DATABASE_SERVICE_NAME}:27017,${DATABASE_SERVICE_NAME}-1.${DATABASE_SERVICE_NAME}:27017,${DATABASE_SERVICE_NAME}-2.${DATABASE_SERVICE_NAME}:27017/${DATABASE_NAME}?replicaSet=rs0"
+        }
+      }
 - apiVersion: v1
   kind: ConfigMap
   metadata:
