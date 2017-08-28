@@ -71,7 +71,7 @@ notifyBC
 If successful, similar output is displayed as in source code installation.
 
 ## Deploy to OpenShift
-*NotifyBC* supports deployment to OpenShift Origin of minimum version 1.3, or other compatible platforms such as OpenShift Container Platform of matching version. [OpenShift instant app templates](https://github.com/bcgov/MyGovBC-notification-server/blob/master/.opensift-templates) have been created to facilitate build and deployment. This template adopts [source-to-image strategy](https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets-s2i-strategy) with [binary source](https://docs.openshift.org/latest/dev_guide/builds.html#binary-source) input and supports [incremental builds](https://docs.openshift.org/latest/dev_guide/builds.html#incremental-builds). 
+*NotifyBC* supports deployment to OpenShift Origin of minimum version 1.5, or other compatible platforms such as OpenShift Container Platform of matching version. [OpenShift instant app templates](https://github.com/bcgov/MyGovBC-notification-server/blob/master/.opensift-templates) have been created to facilitate build and deployment. This template adopts [source-to-image strategy](https://docs.openshift.org/latest/dev_guide/builds.html#using-secrets-s2i-strategy) with [binary source](https://docs.openshift.org/latest/dev_guide/builds.html#binary-source) input and supports [incremental builds](https://docs.openshift.org/latest/dev_guide/builds.html#incremental-builds). 
 
 To deploy to OpenShift, you need to have access to relevant OpenShift projects with minimum edit role. This implies you know and have access to OpenShift web console as identified by *\<openshift-console-url\>* below.
 
@@ -90,25 +90,26 @@ If using Jenkins, all the software are pre-installed on OpenShift provided Jenki
 ### Hosting Environment Setup
 
 1. Install the templates
-    ```bash
-    ~ $ git clone \
-    https://github.com/bcgov/MyGovBC-notification-server.git \
-    notifyBC
-    ~ $ cd notifyBC
-    ~ $ oc login -u <username> -p <password> <openshift-console-url>
-    ~ $ oc create -f .opensift-templates/notify-bc-build.yml -n <yourprojectname-tools>
-    ~ $ oc create -f .opensift-templates/notify-bc.yml -n <yourprojectname-<env>>
-    ```
-  After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc* in the *\<yourprojectname-\<env\>>* project.
-2. create OpenShift instant apps by clicking *notify-bc-build* and *notify-bc* template from *Add to Project* in web console of respective projects (Tip: you may need to click *See all* link in Instant Apps section to reveal the template). Adjust parameters as you see fit.
-3. (optional) create instance-specific [configuration](../configuration) files for each runtime environment and upload to OpenShift via [configMap](https://docs.openshift.org/latest/dev_guide/configmaps.html) named *notify-bc*. To do so, 
-    * create a temporary directory for each environment *\<env\>/*, say *dev/* 
-    * create **.local.json* config files such as *config.local.json* and *middleware.local.json* under *\<env\>/*
-    * run
-      ```sh
-      ~ $ oc create configmap notify-bc --from-file=<env>/ --dry-run -o yaml|oc replace -f- -n <yourprojectname-<env>>
-      ```
-    * delete temporary directory *\<env\>/*
+
+   ```bash
+   ~ $ git clone \
+   https://github.com/bcgov/MyGovBC-notification-server.git \
+   notifyBC
+   ~ $ cd notifyBC
+   ~ $ oc login -u <username> -p <password> <openshift-console-url>
+   ~ $ oc create -f .opensift-templates/notify-bc-build.yml -n <yourprojectname-tools>
+   ~ $ oc create -f .opensift-templates/notify-bc.yml -n <yourprojectname-<env>>
+   ```
+   After this step you will find an instant app template called *notify-bc-build* available in the *\<yourprojectname-tools\>* project and *notify-bc* in the *\<yourprojectname-\<env\>>* project.
+
+   The template *notify-bc.yml* creates a single instance MongoDB. If you want a 3-node MongoDB cluster, use template *notify-bc-mongodb-cluster.yml* instead, i.e. replace last command  with
+
+   ```bash
+   ~ $ oc create -f .opensift-templates/notify-bc-mongodb-cluster.yml -n <yourprojectname-<env>>
+   ```
+   MongoDB cluster created by this template uses stateful sets. As of OpenShift 1.5, stateful set is in technology preview phase so use the feature with precaution.
+2. create OpenShift apps by clicking *Add to Project* in web console of respective projects, select JavaScript in languages catalog, and click either *notify-bc-build* or *notify-bc* template. Adjust parameters as you see fit.
+3. (optional) create instance-specific [configuration](../configuration) files by modifying configMap *notify-bc*. To do so, in web console of a runtime environment project, click *Resources > Config Maps > notify-bc > Actions > Edit*. Each config file corresponds to an item in configMap with key being the file name. For example, to create config file *config.local.json*, create an item with key *config.local.json*. 
 
 <div class="note">
   <h5>ProTips™ backup config files</h5>
@@ -158,17 +159,6 @@ To promote runtime image from one environment to another, for example from *dev*
 oc tag <yourprojectname-tools>/notify-bc:latest <yourprojectname-test>/notify-bc:latest <yourprojectname-tools>/notify-bc:test
 ```
 The above command will deploy the latest (which should also be dev) runtime image to *test* env. The purpose of tagging runtime image of *test* env in both \<yourprojectname-test\>/notify-bc:latest and \<yourprojectname-tools\>/notify-bc:test is to use \<yourprojectname-tools\>/notify-bc:test as backup such that in case the image stream \<yourprojectname-test\>/notify-bc, which is used by *test* runtime pods, is deleted inadvertently, it can be recovered from \<yourprojectname-tools\>/notify-bc:test.
-
-### Update Configuration Files
-To update configurations files on a running environment
-
-```sh
-~ $ oc get configmaps notify-bc -o yaml -n <yourprojectname-<env>> > configMap.yml
-~ $ # modify configMap.yml...
-~ $ oc replace -f configMap.yml -n <yourprojectname-<env>>
-~ $ rm configMap.yml
-```
-For updated config files to take effect, manually run deployments of *notify-bc-app* and *notify-bc-cron*.
 
 ## Install Docs Website (Optional)
 If you want to contribute to *NotifyBC* docs beyond simple fix ups, you can install [Jekyll](https://jekyllrb.com/) through Ruby bundler and render this web site locally:
