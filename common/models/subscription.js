@@ -268,77 +268,93 @@ module.exports = function(Subscription) {
       error.status = 403
       return cb(error)
     }
-    let unsubscribeItems = (query, serviceNames) => {
+    let unsubscribeItems = (query, additionalServiceNames) => {
       Subscription.updateAll(query, { state: 'deleted' }, (writeErr, res) => {
-        Subscription.getMergedConfig(
-          'subscription',
-          this.serviceName,
-          (configErr, mergedSubscriptionConfig) => {
-            var err = writeErr || configErr
-            var anonymousUnsubscription =
-              mergedSubscriptionConfig &&
-              mergedSubscriptionConfig.anonymousUnsubscription
-            try {
-              if (!err) {
-                // send acknowledgement notification
-                try {
-                  switch (this.channel) {
-                    case 'email':
-                      var msg =
-                        anonymousUnsubscription.acknowledgements.notification[
-                          this.channel
-                        ]
-                      var subject = Subscription.mailMerge(
-                        msg.subject,
-                        this,
-                        options.httpContext
-                      )
-                      var textBody = Subscription.mailMerge(
-                        msg.textBody,
-                        this,
-                        options.httpContext
-                      )
-                      var htmlBody = Subscription.mailMerge(
-                        msg.htmlBody,
-                        this,
-                        options.httpContext
-                      )
-                      Subscription.sendEmail(
-                        msg.from,
-                        this.userChannelId,
-                        subject,
-                        textBody,
-                        htmlBody
-                      )
-                      break
-                  }
-                } catch (ex) {}
-              }
-              if (
-                anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
-              ) {
-                var redirectUrl =
-                  anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
-                if (err) {
-                  redirectUrl += '?err=' + encodeURIComponent(err)
+        let handleUnsubscriptionResponse = writeErr => {
+          Subscription.getMergedConfig(
+            'subscription',
+            this.serviceName,
+            (configErr, mergedSubscriptionConfig) => {
+              var err = writeErr || configErr
+              var anonymousUnsubscription =
+                mergedSubscriptionConfig &&
+                mergedSubscriptionConfig.anonymousUnsubscription
+              try {
+                if (!err) {
+                  // send acknowledgement notification
+                  try {
+                    switch (this.channel) {
+                      case 'email':
+                        var msg =
+                          anonymousUnsubscription.acknowledgements.notification[
+                            this.channel
+                          ]
+                        var subject = Subscription.mailMerge(
+                          msg.subject,
+                          this,
+                          options.httpContext
+                        )
+                        var textBody = Subscription.mailMerge(
+                          msg.textBody,
+                          this,
+                          options.httpContext
+                        )
+                        var htmlBody = Subscription.mailMerge(
+                          msg.htmlBody,
+                          this,
+                          options.httpContext
+                        )
+                        Subscription.sendEmail(
+                          msg.from,
+                          this.userChannelId,
+                          subject,
+                          textBody,
+                          htmlBody
+                        )
+                        break
+                    }
+                  } catch (ex) {}
                 }
-                return options.httpContext.res.redirect(redirectUrl)
-              } else {
-                options.httpContext.res.setHeader('Content-Type', 'text/plain')
+                if (
+                  anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
+                ) {
+                  var redirectUrl =
+                    anonymousUnsubscription.acknowledgements.onScreen
+                      .redirectUrl
+                  if (err) {
+                    redirectUrl += '?err=' + encodeURIComponent(err)
+                  }
+                  return options.httpContext.res.redirect(redirectUrl)
+                } else {
+                  options.httpContext.res.setHeader(
+                    'Content-Type',
+                    'text/plain'
+                  )
 
-                if (err) {
+                  if (err) {
+                    return options.httpContext.res.end(
+                      anonymousUnsubscription.acknowledgements.onScreen
+                        .failureMessage
+                    )
+                  }
                   return options.httpContext.res.end(
                     anonymousUnsubscription.acknowledgements.onScreen
-                      .failureMessage
+                      .successMessage
                   )
                 }
-                return options.httpContext.res.end(
-                  anonymousUnsubscription.acknowledgements.onScreen
-                    .successMessage
-                )
-              }
-            } catch (ex) {}
-            return cb(err, 1)
+              } catch (ex) {}
+              return cb(err, 1)
+            }
+          )
+        }
+        if (writeErr || !additionalServiceNames) {
+          return handleUnsubscriptionResponse(writeErr)
+        }
+        this.updateAttribute(
+          'unsubscribedAdditionalServiceNames',
+          additionalServiceNames,
+          (writeErr, res) => {
+            return handleUnsubscriptionResponse(writeErr)
           }
         )
       })
