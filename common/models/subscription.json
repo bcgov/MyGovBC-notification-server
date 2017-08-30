@@ -80,6 +80,15 @@
           "http": {
             "source": "query"
           }
+        },
+        {
+          "arg": "additionalServices",
+          "required": false,
+          "description": "additonal services to unsubscribe. Can be an array or a string. For string, if value is _all, then unsubscribe all subscribed services.",
+          "type": "any",
+          "http": {
+            "source": "query"
+          }
         }
       ],
       "returns": [

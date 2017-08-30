@@ -246,6 +246,7 @@ module.exports = function(Subscription) {
   Subscription.prototype.deleteItemById = function(
     options,
     unsubscriptionCode,
+    additionalServices,
     cb
   ) {
     if (!Subscription.isAdminReq(options.httpContext)) {
@@ -267,75 +268,84 @@ module.exports = function(Subscription) {
         return cb(error)
       }
     }
-    this.state = 'deleted'
-    Subscription.replaceById(this.id, this, function(writeErr, res) {
-      Subscription.getMergedConfig(
-        'subscription',
-        res.serviceName,
-        (configErr, mergedSubscriptionConfig) => {
-          var err = writeErr || configErr
-          var anonymousUnsubscription = mergedSubscriptionConfig && mergedSubscriptionConfig.anonymousUnsubscription
-          try {
-            if (!err) {
-              // send acknowledgement notification
-              try {
-                switch (res.channel) {
-                  case 'email':
-                    var msg =
-                      anonymousUnsubscription.acknowledgements.notification[
-                        res.channel
-                      ]
-                    var subject = Subscription.mailMerge(
-                      msg.subject,
-                      res,
-                      options.httpContext
-                    )
-                    var textBody = Subscription.mailMerge(
-                      msg.textBody,
-                      res,
-                      options.httpContext
-                    )
-                    var htmlBody = Subscription.mailMerge(
-                      msg.htmlBody,
-                      res,
-                      options.httpContext
-                    )
-                    Subscription.sendEmail(
-                      msg.from,
-                      res.userChannelId,
-                      subject,
-                      textBody,
-                      htmlBody
-                    )
-                    break
-                }
-              } catch (ex) {}
-            }
-            if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
-              var redirectUrl =
-                anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
-              if (err) {
-                redirectUrl += '?err=' + encodeURIComponent(err)
+    let unsubscribeItems = (query, serviceNames) => {
+      Subscription.updateAll(query, { state: 'deleted' }, (writeErr, res) => {
+        Subscription.getMergedConfig(
+          'subscription',
+          this.serviceName,
+          (configErr, mergedSubscriptionConfig) => {
+            var err = writeErr || configErr
+            var anonymousUnsubscription =
+              mergedSubscriptionConfig &&
+              mergedSubscriptionConfig.anonymousUnsubscription
+            try {
+              if (!err) {
+                // send acknowledgement notification
+                try {
+                  switch (this.channel) {
+                    case 'email':
+                      var msg =
+                        anonymousUnsubscription.acknowledgements.notification[
+                          this.channel
+                        ]
+                      var subject = Subscription.mailMerge(
+                        msg.subject,
+                        this,
+                        options.httpContext
+                      )
+                      var textBody = Subscription.mailMerge(
+                        msg.textBody,
+                        this,
+                        options.httpContext
+                      )
+                      var htmlBody = Subscription.mailMerge(
+                        msg.htmlBody,
+                        this,
+                        options.httpContext
+                      )
+                      Subscription.sendEmail(
+                        msg.from,
+                        this.userChannelId,
+                        subject,
+                        textBody,
+                        htmlBody
+                      )
+                      break
+                  }
+                } catch (ex) {}
               }
-              return options.httpContext.res.redirect(redirectUrl)
-            } else {
-              options.httpContext.res.setHeader('Content-Type', 'text/plain')
+              if (
+                anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
+              ) {
+                var redirectUrl =
+                  anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
+                if (err) {
+                  redirectUrl += '?err=' + encodeURIComponent(err)
+                }
+                return options.httpContext.res.redirect(redirectUrl)
+              } else {
+                options.httpContext.res.setHeader('Content-Type', 'text/plain')
 
-              if (err) {
+                if (err) {
+                  return options.httpContext.res.end(
+                    anonymousUnsubscription.acknowledgements.onScreen
+                      .failureMessage
+                  )
+                }
                 return options.httpContext.res.end(
                   anonymousUnsubscription.acknowledgements.onScreen
-                    .failureMessage
+                    .successMessage
                 )
               }
-              return options.httpContext.res.end(
-                anonymousUnsubscription.acknowledgements.onScreen.successMessage
-              )
-            }
-          } catch (ex) {}
-          return cb(err, 1)
-        }
-      )
-    })
+            } catch (ex) {}
+            return cb(err, 1)
+          }
+        )
+      })
+    }
+    if (!additionalServices) {
+      unsubscribeItems({ id: this.id }, [this.serviceName])
+    }
   }
 
   Subscription.prototype.verify = function(options, confirmationCode, cb) {
