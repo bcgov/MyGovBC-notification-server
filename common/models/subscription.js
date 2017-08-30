@@ -249,8 +249,8 @@ module.exports = function(Subscription) {
     additionalServices,
     cb
   ) {
+    let forbidden = false
     if (!Subscription.isAdminReq(options.httpContext)) {
-      var forbidden = false
       var userId = Subscription.getCurrentUser(options.httpContext)
       if (
         !userId &&
@@ -259,14 +259,14 @@ module.exports = function(Subscription) {
       ) {
         forbidden = true
       }
-      if (this.state !== 'confirmed') {
-        forbidden = true
-      }
-      if (forbidden) {
-        var error = new Error('Forbidden')
-        error.status = 403
-        return cb(error)
-      }
+    }
+    if (this.state !== 'confirmed') {
+      forbidden = true
+    }
+    if (forbidden) {
+      let error = new Error('Forbidden')
+      error.status = 403
+      return cb(error)
     }
     let unsubscribeItems = (query, serviceNames) => {
       Subscription.updateAll(query, { state: 'deleted' }, (writeErr, res) => {
@@ -344,7 +344,58 @@ module.exports = function(Subscription) {
       })
     }
     if (!additionalServices) {
-      unsubscribeItems({ id: this.id }, [this.serviceName])
+      return unsubscribeItems({ id: this.id })
+    } else if (additionalServices instanceof Array) {
+      return unsubscribeItems(
+        {
+          or: [
+            {
+              serviceName: { inq: additionalServices },
+              channel: this.channel,
+              userChannelId: this.userChannelId
+            },
+            { id: this.id }
+          ]
+        },
+        additionalServices
+      )
+    } else if (typeof additionalServices === 'string') {
+      if (additionalServices !== '_all') {
+        return unsubscribeItems(
+          {
+            or: [
+              {
+                serviceName: additionalServices,
+                channel: this.channel,
+                userChannelId: this.userChannelId
+              },
+              { id: this.id }
+            ]
+          },
+          [additionalServices]
+        )
+      }
+      // get all subscribed services
+      Subscription.find(
+        {
+          fields: 'serviceName',
+          where: {
+            userChannelId: this.userChannelId,
+            channel: this.channel,
+            state: 'confirmed'
+          }
+        },
+        (err, subscribedServices) => {
+          unsubscribeItems(
+            {
+              userChannelId: this.userChannelId,
+              channel: this.channel,
+              state: 'confirmed'
+            },
+            _.uniq(subscribedServices.map(e => e.serviceName))
+          )
+        }
+      )
     }
   }
 
