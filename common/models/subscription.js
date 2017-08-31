@@ -268,7 +268,7 @@ module.exports = function(Subscription) {
       error.status = 403
       return cb(error)
     }
-    let unsubscribeItems = (query, additionalServiceNames) => {
+    let unsubscribeItems = (query, additionalServices) => {
       Subscription.updateAll(query, { state: 'deleted' }, (writeErr, res) => {
         let handleUnsubscriptionResponse = writeErr => {
           Subscription.getMergedConfig(
@@ -347,12 +347,12 @@ module.exports = function(Subscription) {
             }
           )
         }
-        if (writeErr || !additionalServiceNames) {
+        if (writeErr || !additionalServices) {
           return handleUnsubscriptionResponse(writeErr)
         }
         this.updateAttribute(
-          'unsubscribedAdditionalServiceNames',
-          additionalServiceNames,
+          'unsubscribedAdditionalServices',
+          additionalServices,
           (writeErr, res) => {
             return handleUnsubscriptionResponse(writeErr)
           }
@@ -361,58 +361,69 @@ module.exports = function(Subscription) {
     }
     if (!additionalServices) {
       return unsubscribeItems({ id: this.id })
-    } else if (additionalServices instanceof Array) {
-      return unsubscribeItems(
-        {
-          or: [
-            {
+    }
+    let getAdditionalServiceIds = cb => {
+      if (additionalServices instanceof Array) {
+        Subscription.find(
+          {
+            fields: 'id',
+            where: {
               serviceName: { inq: additionalServices },
               channel: this.channel,
               userChannelId: this.userChannelId
-            },
-            { id: this.id }
-          ]
-        },
-        additionalServices
-      )
-    } else if (typeof additionalServices === 'string') {
-      if (additionalServices !== '_all') {
-        return unsubscribeItems(
-          {
-            or: [
-              {
+            }
+          },
+          (err, res) => {
+            cb(err, {
+              names: additionalServices,
+              ids: res.map(e => e.id)
+            })
+          }
+        )
+        return
+      }
+      if (typeof additionalServices === 'string') {
+        if (additionalServices !== '_all') {
+          Subscription.find(
+            {
+              fields: 'id',
+              where: {
                 serviceName: additionalServices,
                 channel: this.channel,
                 userChannelId: this.userChannelId
-              },
-              { id: this.id }
-            ]
-          },
-          [additionalServices]
-        )
-      }
-      // get all subscribed services
-      Subscription.find(
-        {
-          fields: 'serviceName',
-          where: {
-            userChannelId: this.userChannelId,
-            channel: this.channel,
-            state: 'confirmed'
-          }
-        },
-        (err, subscribedServices) => {
-          unsubscribeItems(
-            {
+              }
+            },
+            (err, res) => {
+              cb(err, {
+                names: [additionalServices],
+                ids: res.map(e => e.id)
+              })
+            }
+          )
+          return
+        }
+        // get all subscribed services
+        Subscription.find(
+          {
+            fields: ['serviceName', 'id'],
+            where: {
               userChannelId: this.userChannelId,
               channel: this.channel,
               state: 'confirmed'
-            },
-            _.uniq(subscribedServices.map(e => e.serviceName))
-          )
-        }
-      )
+            }
+          },
+          (err, res) => {
+            cb(err, {
+              names: res.map(e => e.serviceName),
+              ids: res.map(e => e.id)
+            })
+          }
+        )
+      }
     }
+    getAdditionalServiceIds((err, data) => {
+      unsubscribeItems({ id: { inq: data.ids.concat(this.id) } }, data)
+    })
   }
 
   Subscription.prototype.verify = function(options, confirmationCode, cb) {
@@ -524,25 +535,20 @@ module.exports = function(Subscription) {
         )
       })
     }
-    if (!this.unsubscribedAdditionalServiceNames) {
+    if (!this.unsubscribedAdditionalServices) {
       return revertItems({ id: this.id })
     }
-    let unsubscribedAdditionalServiceNames = this.unsubscribedAdditionalServiceNames.slice()
-    this.unsetAttribute('unsubscribedAdditionalServiceNames')
+    let unsubscribedAdditionalServicesIds = this.unsubscribedAdditionalServices.ids.slice()
+    this.unsetAttribute('unsubscribedAdditionalServices')
     this.save((err, res) => {
-      return revertItems(
-        {
-          or: [
-            {
-              serviceName: { inq: unsubscribedAdditionalServiceNames },
-              channel: this.channel,
-              userChannelId: this.userChannelId
-            },
-            { id: this.id }
-          ]
-        },
-        unsubscribedAdditionalServiceNames
-      )
+      return revertItems({
+        or: [
+          {
+            id: { inq: unsubscribedAdditionalServicesIds }
+          },
+          { id: this.id }
+        ]
+      })
     })
   }
 }

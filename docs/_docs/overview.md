@@ -45,6 +45,7 @@ permalink: /docs/overview/
 * {subscription_id} 
 * anonymous unsubscription related tokens
   * {unsubscription_url}
+  * {unsubscription_all_url} - url to unsubscribe all services the user has subscribed on this *NotifyBC* instance
   * {unsubscription_code}
   * {unsubscription_reversion_url}
   * {unsubscription_service_names} - includes {service_name} and additional services user has unsubscribed, prefixed with conditionally pluralized word *service*. 

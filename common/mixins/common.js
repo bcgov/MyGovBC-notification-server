@@ -132,7 +132,9 @@ module.exports = function(Model, options) {
       if (output.match(/\{unsubscription_service_names\}/i)) {
         let serviceNames = _.union(
           [data.serviceName],
-          data.unsubscribedAdditionalServiceNames
+          data.unsubscribedAdditionalServices
+            ? data.unsubscribedAdditionalServices.names
+            : []
         )
         output = output.replace(
           /\{unsubscription_service_names\}/gi,
@@ -182,6 +184,18 @@ module.exports = function(Model, options) {
           data.id +
           '/unsubscribe?unsubscriptionCode=' +
           data.unsubscriptionCode
+      )
+    } catch (ex) {}
+    try {
+      output = output.replace(
+        /\{unsubscription_all_url\}/gi,
+        httpHost +
+          Model.app.get('restApiRoot') +
+          '/subscriptions/' +
+          data.id +
+          '/unsubscribe?unsubscriptionCode=' +
+          data.unsubscriptionCode +
+          '&additionalServices=_all'
       )
     } catch (ex) {}
     try {
