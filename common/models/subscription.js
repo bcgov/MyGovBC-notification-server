@@ -491,33 +491,57 @@ module.exports = function(Subscription) {
         return cb(error)
       }
     }
-    this.state = 'confirmed'
-    Subscription.replaceById(this.id, this, function(writeErr, res) {
-      Subscription.getMergedConfig(
-        'subscription',
-        res.serviceName,
-        (configErr, mergedSubscriptionConfig) => {
-          var err = writeErr || configErr
-          var anonymousUndoUnsubscription =
-            mergedSubscriptionConfig.anonymousUndoUnsubscription
-          if (anonymousUndoUnsubscription.redirectUrl) {
-            var redirectUrl = anonymousUndoUnsubscription.redirectUrl
-            if (err) {
-              redirectUrl += '?err=' + encodeURIComponent(err)
-            }
-            return options.httpContext.res.redirect(redirectUrl)
-          } else {
-            options.httpContext.res.setHeader('Content-Type', 'text/plain')
-            if (err) {
+    let revertItems = query => {
+      Subscription.updateAll(query, { state: 'confirmed' }, function(
+        writeErr,
+        res
+      ) {
+        Subscription.getMergedConfig(
+          'subscription',
+          res.serviceName,
+          (configErr, mergedSubscriptionConfig) => {
+            var err = writeErr || configErr
+            var anonymousUndoUnsubscription =
+              mergedSubscriptionConfig.anonymousUndoUnsubscription
+            if (anonymousUndoUnsubscription.redirectUrl) {
+              var redirectUrl = anonymousUndoUnsubscription.redirectUrl
+              if (err) {
+                redirectUrl += '?err=' + encodeURIComponent(err)
+              }
+              return options.httpContext.res.redirect(redirectUrl)
+            } else {
+              options.httpContext.res.setHeader('Content-Type', 'text/plain')
+              if (err) {
+                return options.httpContext.res.end(
+                  anonymousUndoUnsubscription.failureMessage
+                )
+              }
               return options.httpContext.res.end(
-                anonymousUndoUnsubscription.failureMessage
+                anonymousUndoUnsubscription.successMessage
               )
             }
-            return options.httpContext.res.end(
-              anonymousUndoUnsubscription.successMessage
-            )
           }
-        }
+        )
+      })
+    }
+    if (!this.unsubscribedAdditionalServiceNames) {
+      return revertItems({ id: this.id })
+    }
+    let unsubscribedAdditionalServiceNames = this.unsubscribedAdditionalServiceNames.slice()
+    this.unsetAttribute('unsubscribedAdditionalServiceNames')
+    this.save((err, res) => {
+      return revertItems(
+        {
+          or: [
+            {
+              serviceName: { inq: unsubscribedAdditionalServiceNames },
+              channel: this.channel,
+              userChannelId: this.userChannelId
+            },
+            { id: this.id }
+          ]
+        },
+        unsubscribedAdditionalServiceNames
       )
     })
   }
