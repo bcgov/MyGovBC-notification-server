@@ -364,9 +364,9 @@ module.exports = function(Subscription) {
     }
     let getAdditionalServiceIds = cb => {
       if (additionalServices instanceof Array) {
-        Subscription.find(
+        return Subscription.find(
           {
-            fields: 'id',
+            fields: ['id', 'serviceName'],
             where: {
               serviceName: { inq: additionalServices },
               channel: this.channel,
@@ -375,18 +375,17 @@ module.exports = function(Subscription) {
           },
           (err, res) => {
             cb(err, {
-              names: additionalServices,
+              names: res.map(e => e.serviceName),
               ids: res.map(e => e.id)
             })
           }
         )
-        return
       }
       if (typeof additionalServices === 'string') {
         if (additionalServices !== '_all') {
-          Subscription.find(
+          return Subscription.find(
             {
-              fields: 'id',
+              fields: ['id', 'serviceName'],
               where: {
                 serviceName: additionalServices,
                 channel: this.channel,
@@ -395,17 +394,16 @@ module.exports = function(Subscription) {
             },
             (err, res) => {
               cb(err, {
-                names: [additionalServices],
+                names: res.map(e => e.serviceName),
                 ids: res.map(e => e.id)
               })
             }
           )
-          return
         }
         // get all subscribed services
         Subscription.find(
           {
-            fields: ['serviceName', 'id'],
+            fields: ['id', 'serviceName'],
             where: {
               userChannelId: this.userChannelId,
               channel: this.channel,
@@ -422,7 +420,7 @@ module.exports = function(Subscription) {
       }
     }
     getAdditionalServiceIds((err, data) => {
-      unsubscribeItems({ id: { inq: data.ids.concat(this.id) } }, data)
+      unsubscribeItems({ id: { inq: [].concat(this.id, data.ids) } }, data)
     })
   }
 
