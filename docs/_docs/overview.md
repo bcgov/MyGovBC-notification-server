@@ -39,7 +39,7 @@ permalink: /docs/overview/
  
 * {subscription_confirmation_url}
 * {subscription_confirmation_code}
-* {service_name} 
+* {service_name}
 * {http_host} - http host in the form *http(s)://\<host_name\>:\<port\>*. The value is obtained from the http request that triggers the message
 * {rest_api_root} - configured Loopback [Root URI of REST API](https://loopback.io/doc/en/lb3/config.json.html#top-level-properties)
 * {subscription_id} 
@@ -47,6 +47,7 @@ permalink: /docs/overview/
   * {unsubscription_url}
   * {unsubscription_code}
   * {unsubscription_reversion_url}
+  * {unsubscription_service_names} - includes {service_name} and additional services user has unsubscribed, prefixed with conditionally pluralized word *service*. 
 
 #### dynamic tokens
 If a notification request contains field *data* of type *object*, *NotifyBC* also substitutes dynamic tokens, which are strings enclosed in {} but don't match static tokens above, with corresponding sub-field of *data* if available. For example, if the string *{description}* appears in email body, it is replaced with field *data.description* of the notification request if populated.

@@ -2,6 +2,8 @@ module.exports = function(Model, options) {
   'use strict'
   var ipRangeCheck = require('ip-range-check')
   var _ = require('lodash')
+  var toSentence = require('underscore.string/toSentence')
+  var pluralize = require('pluralize')
   Model.createOptionsFromRemotingContext = function(ctx) {
     var base = this.base.createOptionsFromRemotingContext(ctx)
     base.httpContext = ctx
@@ -125,6 +127,20 @@ module.exports = function(Model, options) {
     } catch (ex) {}
     try {
       output = output.replace(/\{service_name\}/gi, data.serviceName)
+    } catch (ex) {}
+    try {
+      if (output.match(/\{unsubscription_service_names\}/i)) {
+        let serviceNames = _.union(
+          [data.serviceName],
+          data.unsubscribedAdditionalServiceNames
+        )
+        output = output.replace(
+          /\{unsubscription_service_names\}/gi,
+          pluralize('service', serviceNames.length) +
+            ' ' +
+            toSentence(serviceNames)
+        )
+      }
     } catch (ex) {}
     let httpHost
     try {
