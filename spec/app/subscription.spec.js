@@ -736,9 +736,7 @@ describe('DELETE /subscriptions/{id}', function() {
       })
   })
 
-  it('should display onScreen acknowledgements failureMessage', function(
-    done
-  ) {
+  it('should display onScreen acknowledgements failureMessage', function(done) {
     spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(function() {
       let cb = arguments[arguments.length - 1]
       process.nextTick(cb, 'error', {
@@ -769,6 +767,118 @@ describe('DELETE /subscriptions/{id}', function() {
   })
 })
 
+describe('GET /subscriptions/{id}/unsubscribe', function() {
+  let data
+  beforeEach(function(done) {
+    parallel(
+      [
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'myService1',
+              channel: 'email',
+              userChannelId: 'bar@foo.com',
+              state: 'confirmed',
+              unsubscriptionCode: '12345'
+            },
+            cb
+          )
+        },
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'myService2',
+              channel: 'email',
+              userChannelId: 'bar@foo.com',
+              state: 'confirmed',
+              unsubscriptionCode: '54321'
+            },
+            cb
+          )
+        },
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'myService3',
+              channel: 'email',
+              userChannelId: 'bar@foo.com',
+              state: 'confirmed',
+              unsubscriptionCode: '11111'
+            },
+            cb
+          )
+        }
+      ],
+      function(err, results) {
+        expect(err).toBeNull()
+        data = results
+        done()
+      }
+    )
+  })
+
+  it('should allow bulk unsubscribing all services', function(done) {
+    request(app)
+      .get(
+        '/api/subscriptions/' +
+          data[0].id +
+          '/unsubscribe?unsubscriptionCode=12345&additionalServices=_all'
+      )
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Subscription.find({ where: { state: 'deleted' } }, function(
+          err,
+          res
+        ) {
+          expect(res.length).toBe(3)
+          done()
+        })
+      })
+  })
+
+  it('should allow bulk unsubscribing selcted additional service', function(
+    done
+  ) {
+    request(app)
+      .get(
+        '/api/subscriptions/' +
+          data[0].id +
+          '/unsubscribe?unsubscriptionCode=12345&additionalServices=myService3'
+      )
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Subscription.find({ where: { state: 'deleted' } }, function(
+          err,
+          res
+        ) {
+          expect(res.length).toBe(2)
+          done()
+        })
+      })
+  })
+
+  it('should allow bulk unsubscribing selcted additional service as an array', function(
+    done
+  ) {
+    request(app)
+      .get(
+        '/api/subscriptions/' +
+          data[0].id +
+          '/unsubscribe?unsubscriptionCode=12345&additionalServices=["myService3"]'
+      )
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Subscription.find({ where: { state: 'deleted' } }, function(
+          err,
+          res
+        ) {
+          expect(res.length).toBe(2)
+          done()
+        })
+      })
+  })
+})
+
 describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
   let data
   beforeEach(function(done) {
@@ -781,19 +891,9 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
               channel: 'email',
               userChannelId: 'bar@foo.com',
               state: 'deleted',
-              confirmationRequest: {
-                confirmationCodeRegex: '\\d{5}',
-                sendRequest: true,
-                from: 'no_reply@example.com',
-                subject: 'Subscription confirmation',
-                textBody: 'enter {confirmation_code} in this email',
-                confirmationCode: '37689'
-              },
               unsubscriptionCode: '50032'
             },
-            function(err, res) {
-              cb(err, res)
-            }
+            cb
           )
         },
         function(cb) {
@@ -816,6 +916,22 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
             function(err, res) {
               cb(err, res)
             }
+          )
+        },
+        function(cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'myService2',
+              channel: 'email',
+              userChannelId: 'bar@foo.com',
+              state: 'deleted',
+              unsubscriptionCode: '12345',
+              unsubscribedAdditionalServices: {
+                names: ['myService'],
+                ids: [1]
+              }
+            },
+            cb
           )
         }
       ],
@@ -910,5 +1026,23 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
           })
       }
     )
+  })
+
+  it('should allow bulk undo unsubscriptions by anonymous user', function(
+    done
+  ) {
+    request(app)
+      .get(
+        '/api/subscriptions/' +
+          data[2].id +
+          '/unsubscribe/undo?unsubscriptionCode=12345'
+      )
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Subscription.findById(data[0].id, function(err, res) {
+          expect(res.state).toBe('confirmed')
+          done()
+        })
+      })
   })
 })
