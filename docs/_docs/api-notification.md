@@ -99,7 +99,7 @@ The API operates on following notification data model fields:
   <tr>
     <td>
       <p class="name">state</p>
-      <p class="description">state of notification. Valid values: new, read (inApp only), deleted (inApp only), sent (push only), error</p>
+      <p class="description">state of notification. Valid values: <i>new</i>, <i>read</i> (inApp only), <i>deleted</i> (inApp only), <i>sent</i> (push only) or <i>error</i>. For inApp broadcast notification, if the user has read or deleted the message, the value of this field retrived by admin request will still be new. The state for the user is tracked in fields <i>readBy</i> and <i>deletedBy</i> in such case. For user request, the value contains correct state.</p>
     </td>
     <td>
       <table>
@@ -282,7 +282,7 @@ The API operates on following notification data model fields:
     <td>
       <table>
         <tr><td>type</td><td>array</td></tr>
-        <tr><td>internal</td><td>true</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
   </tr>
@@ -294,7 +294,7 @@ The API operates on following notification data model fields:
     <td>
       <table>
         <tr><td>type</td><td>array</td></tr>
-        <tr><td>internal</td><td>true</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
   </tr>
@@ -306,7 +306,7 @@ The API operates on following notification data model fields:
     <td>
       <table>
         <tr><td>type</td><td>array</td></tr>
-        <tr><td>internal</td><td>true</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
   </tr>

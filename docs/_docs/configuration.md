@@ -145,14 +145,17 @@ module.exports = {
 to create a service-specific dynamic config, use REST [config api](../configuration/)
 
 ```sh
-~ $ curl -X POST --header 'Content-Type: application/json' \
---header 'Accept: application/json' -d '{ \ 
-   "name": "subscription", \ 
-   "serivceName": "myService", \ 
-   "value": { \ 
-    ...\
-    } \ 
- }' 'http://localhost:3000/api/configurations'
+~ $ curl -X POST http://localhost:3000/api/configurations \
+-H 'Content-Type: application/json' \
+-H 'Accept: application/json' -d @- << EOF 
+{ 
+  "name": "subscription", 
+  "serivceName": "myService", 
+  "value": { 
+     ...
+  } 
+}
+EOF
 ```
 Sub-properties denoted by ellipsis in the above two code blocks are documented below. A service can have at most one dynamic subscription config.
 
@@ -199,16 +202,19 @@ You can customize *NotifyBC*'s on-screen response message to confirmation code v
 In addition to customizing the message, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app for service *myService*, create a dynamic config by calling REST config api  
 
 ```sh
-~ $ curl -X POST --header 'Content-Type: application/json' \
---header 'Accept: application/json' -d '{ \ 
-  "name": "subscription", \ 
-  "serivceName": "myService", \ 
-  "value": { \ 
-    "confirmationAcknowledgements": { \
-      "redirectUrl": "https://myapp/subscription/acknowledgement" \
-    } \
-  } \ 
- }' 'http://localhost:3000/api/configurations'
+~ $ curl -X POST 'http://localhost:3000/api/configurations' \
+-H 'Content-Type: application/json' \
+-H 'Accept: application/json' -d @- << EOF
+{  
+  "name": "subscription",  
+  "serivceName": "myService", 
+  "value": { 
+    "confirmationAcknowledgements": { 
+      "redirectUrl": "https://myapp/subscription/acknowledgement" 
+    } 
+  } 
+}
+EOF
 ```
 If error happened during unsubscription, query string *?err=\<error\>* will be appended to *redirectUrl*.
 
@@ -224,6 +230,7 @@ You can customize anonymous unsubscription settings by changing the *anonymousUn
 ```json
 {
   "subscription": {
+    ...
     "anonymousUnsubscription": {
       "code": {
         "required": true,
@@ -246,7 +253,21 @@ You can customize anonymous unsubscription settings by changing the *anonymousUn
   }
 }
 ```
-The settings control whether or not unsubscription code is required, its RegEx pattern, and acknowledgement message templates, both on-screen and push notifications. Customization should be made to file */server/config.local.js*.
+The settings control whether or not unsubscription code is required, its RegEx pattern, and acknowledgement message templates for both on-screen and push notifications. Customization should be made to file */server/config.local.js* for static config or using configuration api for service-specific dynamic config.
+
+To disable acknowledgement notification, set *subscription.anonymousUnsubscription.acknowledgements.notification* or a specific channel underneath to *null*
+
+```js
+module.exports = {
+  subscription:{
+    anonymousUnsubscription: {
+      acknowledgements:{
+        notification: null
+      }
+    }
+  }
+}
+```
 
 For on-screen acknowledgement, you can define a redirect URL instead of displaying *successMessage* or *failureMessage*. For example, to redirect on-screen acknowledgement to a page in your app for all services, create following config in file */server/config.local.js* 
 

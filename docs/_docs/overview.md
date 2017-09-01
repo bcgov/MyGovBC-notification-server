@@ -31,6 +31,7 @@ permalink: /docs/overview/
   * send confirmation request to unconfirmed subscription channel
   * verify confirmation code
 * Support generating random un-subscription code and sending acknowledgement message after un-subscription for anonymous subscribers as anti-spoofing measurements
+* Support bulk unsubscription
 
 ### mail merge
 

@@ -41,7 +41,7 @@ The API operates on following subscription data model fields:
   <tr>
     <td>
       <p class="name">serviceName</p>
-      <p class="description">name of the service</p>
+      <p class="description">name of the service. Avoid prefixing the name with underscore (_), or it may conflict with internal implemenation.</p>
     </td>
     <td>
       <table>
@@ -53,7 +53,7 @@ The API operates on following subscription data model fields:
   <tr>
     <td>
       <p class="name">channel</p>
-      <p class="description">name of the delivery channel. Valid values: email, sms.</p>
+      <p class="description">name of the delivery channel. Valid values: email and sms. Notice inApp is invalid as in-app notification doesn't need subscription.</p>
     </td>
     <td>
       <table>
@@ -221,6 +221,18 @@ The API operates on following subscription data model fields:
       </table>
     </td>
   </tr>
+  <tr>
+    <td>
+      <p class="name">unsubscribedAdditionalServices</p>
+      <p class="description">generated if parameter <i>additionalServices</i> is supplied in unsubscription request. Contains 2 sub-fields: ids and names, each being a list identifing the additional unsubscribed subscriptions.</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>object</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
+      </table>
+    </td>
+  </tr>
 </table>
 
 ## Get Subscriptions
@@ -276,55 +288,56 @@ POST /subscriptions
   ```
         
      As a result, *foo@bar.com* should receive an email confirmation request, and following json object is returned to caller upon sending the email successfully for admin request:
-    ```json
-      {
-        "serviceName": "education",
-        "channel": "email",
-        "userChannelId": "foo@bar.com",
-        "state": "unconfirmed",
-        "confirmationRequest": {
-          "confirmationCodeRegex": "\\d{5}",
-          "sendRequest": true,
-          "from": "no_reply@bar.com",
-          "subject": "confirmation",
-          "textBody": "Enter {confirmation_code} on screen",
-          "confirmationCode": "45304"
-        },
-        "created": "2016-10-03T17:35:40.202Z",
-        "updated": "2016-10-03T17:35:40.202Z",
-        "id": "57f296ec7eead50554c61de7"
-      }
-    ```
 
-      For non-admin request, the field *confirmationRequest* is removed from response, and field *userId* is populated from SiteMinder header if request is authenticated:
-    ```json
-      {
-        "serviceName": "education",
-        "channel": "email",
-        "userChannelId": "foo@bar.com",
-        "state": "unconfirmed",
-        "userId": "<user_id>",
-        "created": "2016-10-03T18:17:09.778Z",
-        "updated": "2016-10-03T18:17:09.778Z",
-        "id": "57f2a0a5b1aa0e2d5009eced"
-      }
-    ```
-  2. To subscribe a user to service *education* with RSA public key encrypted confirmation code supplied, POST following request 
-  
-      ```json
-      {
-        "serviceName": "education",
-        "channel": "email",
-        "userChannelId": "foo@bar.com",
-        "confirmationRequest": {
-         "confirmationCodeEncrypted": "<encrypted-confirmation-code>",
+     ```json
+     {
+       "serviceName": "education",
+       "channel": "email",
+       "userChannelId": "foo@bar.com",
+       "state": "unconfirmed",
+       "confirmationRequest": {
+         "confirmationCodeRegex": "\\d{5}",
          "sendRequest": true,
          "from": "no_reply@bar.com",
          "subject": "confirmation",
-         "textBody": "Enter {confirmation_code} on screen"
-        }
-      }
-      ```
+         "textBody": "Enter {confirmation_code} on screen",
+         "confirmationCode": "45304"
+       },
+       "created": "2016-10-03T17:35:40.202Z",
+       "updated": "2016-10-03T17:35:40.202Z",
+       "id": "57f296ec7eead50554c61de7"
+     }
+     ```
+     For non-admin request, the field *confirmationRequest* is removed from response, and field *userId* is populated from SiteMinder header if request is authenticated:
+
+     ```json
+     {
+       "serviceName": "education",
+       "channel": "email",
+       "userChannelId": "foo@bar.com",
+       "state": "unconfirmed",
+       "userId": "<user_id>",
+       "created": "2016-10-03T18:17:09.778Z",
+       "updated": "2016-10-03T18:17:09.778Z",
+       "id": "57f2a0a5b1aa0e2d5009eced"
+     }
+     ```
+  2. To subscribe a user to service *education* with RSA public key encrypted confirmation code supplied, POST following request 
+  
+     ```json
+     {
+       "serviceName": "education",
+       "channel": "email",
+       "userChannelId": "foo@bar.com",
+       "confirmationRequest": {
+        "confirmationCodeEncrypted": "<encrypted-confirmation-code>",
+        "sendRequest": true,
+        "from": "no_reply@bar.com",
+        "subject": "confirmation",
+        "textBody": "Enter {confirmation_code} on screen"
+       }
+     }
+     ```
       
       As a result, *NotifyBC* will decrypt the confirmation code using the private RSA key, replace placeholder  *{confirmation_code}* in the email template with the confirmation code, and send confirmation request to *foo@bar.com*.
   
@@ -375,6 +388,7 @@ This API is used for changing user channel id (such as email address) and resend
 * outcome
 
   *NotifyBC* processes the request similarly as creating a subscription except during input validation it imposes following extra constraints to user request  
+  
   * only fields *userChannelId*, *state* and *confirmationRequest* can be updated     
   * when changing *userChannelId*, *confirmationRequest* must also be supplied
   * if *userChannelId* is different from the saved record, *state* is forced to *unconfirmed*.
@@ -382,9 +396,9 @@ This API is used for changing user channel id (such as email address) and resend
      
 ## Delete a Subscription (unsubscribing)
 ```
-DELETE /subscriptions/{id}
+DELETE /subscriptions/{id}?unsubscriptionCode={unsubscriptionCode}&additionalServices={additionalServices}
 or 
-GET /subscriptions/{id}/unsubscribe
+GET /subscriptions/{id}/unsubscribe?unsubscriptionCode={unsubscriptionCode}&additionalServices={additionalServices}
 ```
 * inputs
   * subscription id
@@ -397,6 +411,12 @@ GET /subscriptions/{id}/unsubscribe
     * required: false
     * parameter type: query
     * data type: string
+  * additional service names to unsubscribe
+    * parameter name: additionalServices
+    * required: false
+    * parameter type: query
+    * data type: string or array of strings. If the value is string *_all*, then all services 
+      the user subscribed on this *NotifyBC* instance are included
 * outcome
 
   *NotifyBC* performs following actions in sequence
@@ -405,22 +425,18 @@ GET /subscriptions/{id}/unsubscribe
   2. for user request, 
     * if request is authenticated, the *userId* of the subscription is checked against current request user, if not match, request is rejected
     * if request is anonymous, and server is configured to require unsubscription code, the input  unsubscription code is matched againts the *unsubscriptionCode* field. Request is rejected if not match 
-    * if the subscription state is not *confirmed*, request is rejected
-  3. the field *state* is set to *deleted*
-  4. the subscription is saved back to database
-  5. for anonymous unsubscription, an acknowledgement notification is sent to user if configured so 
-  6. returns 
+  3. if the subscription state is not *confirmed*, request is rejected
+  4. if *additionalServices* is populated, database is queried to retrive the *serviceName* and *id* fields of the additional subscriptions
+  4. the field *state* is set to *deleted* for the subscription identified by *id* as well as  additional subscriptions retrieved in previous step
+  5. if *additionalServices* is not empty, the service names and ids of the additional subscriptions are added to field *unsubscribedAdditionalServices* of the subscription identified by *id* to allow bulk undo unsubscription later on
+  6. for anonymous unsubscription, an acknowledgement notification is sent to user if configured so 
+  7. returns 
     * for anonymous request, either the message or redirect as configured in *anonymousUnsubscription.acknowledgements.onScreen*
     * for authenticated user or admin requests, number of records affected or error message if occurred.
-* <a name="unsubscription-example"></a> example 
+* <a name="unsubscription-example"></a> examples
+  1. To allow an anonymous subscriber to unsubscribe single subscription, provide url token *{unsubscription_url}* in notification messages. When sending notification,  [mail merge](../overview/#mail-merge) is performed on the token resolving to the GET API url and parameters.
+  2. To allow an anonymous subscriber to unsubscribe all subscriptions, provide url token *{unsubscription_all_url}* in notification messages.
 
-  To allow an anonymous subscriber to unsubscribe, provide following url token in notification messages
-
-  ```
-  {unsubscription_url}
-  ```    
-When sending notification,  [mail merge](../overview/#mail-merge) is performed on the token resolving to the GET API url and parameters.
-     
 ## Un-deleteing a Subscription
 ```
 GET /subscriptions/{id}/unsubscribe/undo
@@ -447,14 +463,9 @@ This API allows an anonymous subscriber to undo an unsubscription.
     * if request is anonymous, and server is configured to require unsubscription code, the input  unsubscription code is matched againts the *unsubscriptionCode* field. Request is rejected if not match 
     * if request is authenticated, request is rejected
     * if the subscription state is not *deleted*, request is rejected
-  3. the field *state* is set to *confirmed*
-  4. the subscription is saved back to database
+  3. the field *state* is set to *confirmed* for the subscription identified by *id* as well as additional subscriptions identified in field *unsubscribedAdditionalServices*, if populated
+  4. field *unsubscribedAdditionalServices* is removed if populated
   5. returns either the message or redirect as configured in *[anonymousUndoUnsubscription](../configuration/#anonymousUndoUnsubscription)*
 * example 
 
-  To allow an anonymous subscriber to undo unsubscription, provide following link token in unsubscription acknowledgement notification, which is by default set
-
-  ```
-  {unsubscription_reversion_url}
-  ```    
-When sending notification, [mail merge](../overview/#mail-merge) is performed on this token resolving to the API url and parameters.
+  To allow an anonymous subscriber to undo unsubscription, provide link token *{unsubscription_reversion_url}* in unsubscription acknowledgement notification, which is by default set. When sending notification, [mail merge](../overview/#mail-merge) is performed on this token resolving to the API url and parameters.
