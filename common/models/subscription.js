@@ -538,7 +538,7 @@ module.exports = function(Subscription) {
     }
     let unsubscribedAdditionalServicesIds = this.unsubscribedAdditionalServices.ids.slice()
     this.unsetAttribute('unsubscribedAdditionalServices')
-    this.save((err, res) => {
+    Subscription.replaceById(this.id, this, (err, res) => {
       return revertItems({
         or: [
           {

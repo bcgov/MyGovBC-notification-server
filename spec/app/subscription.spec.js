@@ -32,13 +32,15 @@ describe('GET /subscriptions', function() {
   })
 
   it('should be forbidden by anonymous user', function(done) {
-    request(app).get('/api/subscriptions').end(function(err, res) {
-      expect(res.statusCode).toBe(403)
-      done()
-    })
+    request(app)
+      .get('/api/subscriptions')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
+      })
   })
 
-  it("should return sm user's own subscript", function(done) {
+  it("should return sm user's own subscription", function(done) {
     request(app)
       .get('/api/subscriptions')
       .set('Accept', 'application/json')
@@ -69,12 +71,14 @@ describe('GET /subscriptions', function() {
     spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function() {
       return true
     })
-    request(app).get('/api/subscriptions').end(function(err, res) {
-      expect(res.statusCode).toBe(200)
-      expect(res.body.length).toBe(1)
-      expect(res.body[0].confirmationRequest).not.toBeUndefined()
-      done()
-    })
+    request(app)
+      .get('/api/subscriptions')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(res.body.length).toBe(1)
+        expect(res.body[0].confirmationRequest).not.toBeUndefined()
+        done()
+      })
   })
 })
 
@@ -831,6 +835,9 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
           res
         ) {
           expect(res.length).toBe(3)
+          expect(
+            app.models.Subscription.sendEmail.calls.argsFor(0)[3]
+          ).toContain('services myService1, myService2 and myService3')
           done()
         })
       })
@@ -1041,7 +1048,10 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
         expect(res.statusCode).toBe(200)
         app.models.Subscription.findById(data[0].id, function(err, res) {
           expect(res.state).toBe('confirmed')
-          done()
+          app.models.Subscription.findById(data[2].id, function(err, res) {
+            expect(res.unsubscribedAdditionalServices).toBeUndefined()
+            done()
+          })
         })
       })
   })
