@@ -19,6 +19,7 @@
 - title: Miscellaneous
   docs:
   - benchmarks
+  - bulk-import
   - developer-notes
 
 - title: Meta

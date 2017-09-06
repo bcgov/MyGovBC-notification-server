@@ -19,7 +19,7 @@ let getOpt = require('node-getopt')
   .bindHelp(
     'Usage: node ' +
       process.argv[1] +
-      ' [Options] <csv-file-name>\n[Options]:\n[[OPTIONS]]'
+      ' [Options] <csv-file-path>\n[Options]:\n[[OPTIONS]]'
   )
 let args = getOpt.parseSystem()
 if (args.argv.length !== 1) {
