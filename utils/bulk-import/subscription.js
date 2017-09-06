@@ -2,27 +2,38 @@
 const request = require('request')
 const csv = require('csvtojson')
 const queue = require('async/queue')
-const program = require('commander')
-const pjson = require('../../package.json')
-program
-  .version(pjson.version)
-  .description('bulk import subscriptions from csv file')
-  .usage('[options] <csv-file-name>')
-  .option(
-    '-a --api-url-prefix <api-url-prefix>',
-    'api url prefix. default to http://localhost:3000/api',
-    'http://localhost:3000/api'
+let getOpt = require('node-getopt')
+  .create([
+    [
+      'a',
+      'api-url-prefix=<string>',
+      'api url prefix. default to http://localhost:3000/api'
+    ],
+    [
+      'c',
+      'concurrency=<int>',
+      'post request concurrency. positive integer. default to 10'
+    ],
+    ['h', 'help', 'display this help']
+  ])
+  .bindHelp(
+    'Usage: node ' +
+      process.argv[1] +
+      ' [Options] <csv-file-name>\n[Options]:\n[[OPTIONS]]'
   )
-  .option(
-    '-c --concurrency <concurrency>',
-    'post request concurrency. default to 10',
-    parseInt,
-    10
-  )
-  .parse(process.argv)
-if (program.args.length !== 1) {
+let args = getOpt.parseSystem()
+if (args.argv.length !== 1) {
   console.error('invalid arguments')
-  program.outputHelp()
+  getOpt.showHelp()
+  process.exit(1)
+}
+if (
+  args.options.concurrency &&
+  (isNaN(parseInt(args.options.concurrency)) ||
+    parseInt(args.options.concurrency) <= 0)
+) {
+  console.error('invalid option concurrency')
+  getOpt.showHelp()
   process.exit(1)
 }
 
@@ -30,7 +41,9 @@ let done = false,
   successCnt = 0
 let q = queue(function(task, cb) {
   let options = {
-    uri: program.apiUrlPrefix + '/subscriptions',
+    uri:
+      (args.options['api-url-prefix'] || 'http://localhost:3000/api') +
+      '/subscriptions',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -47,7 +60,7 @@ let q = queue(function(task, cb) {
     }
     cb(err)
   })
-}, program.concurrency)
+}, parseInt(args.options.concurrency) || 10)
 q.drain = function() {
   if (done) {
     console.log('success row count = ' + successCnt)
@@ -66,7 +79,7 @@ csv({
     }
   }
 })
-  .fromFile(program.args[0])
+  .fromFile(args.argv[0])
   .on('json', (jsonObj, rowIdx) => {
     q.push({
       jsonObj: jsonObj,

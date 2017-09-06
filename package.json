@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "async": "^2.0.1",
-    "commander": "^2.11.0",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "cron": "^1.2.1",
@@ -27,6 +26,7 @@
     "loopback-component-explorer": "^4.0.0",
     "loopback-connector-mongodb": "^1.15.2",
     "morgan": "^1.7.0",
+    "node-getopt": "^0.2.3",
     "node-rsa": "^0.4.1",
     "nodemailer": "^2.5.0",
     "pluralize": "^7.0.0",
