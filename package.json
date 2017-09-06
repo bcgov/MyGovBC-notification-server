@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "async": "^2.0.1",
+    "commander": "^2.11.0",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "cron": "^1.2.1",
