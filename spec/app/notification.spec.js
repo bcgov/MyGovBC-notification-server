@@ -99,10 +99,12 @@ describe('GET /notifications', function() {
   })
 
   it('should be forbidden by anonymous user', function(done) {
-    request(app).get('/api/notifications').end(function(err, res) {
-      expect(res.statusCode).toBe(403)
-      done()
-    })
+    request(app)
+      .get('/api/notifications')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
+      })
   })
 
   it('should be allowed to sm user for current, non-expired, non-deleted inApp notifications', function(
@@ -227,84 +229,84 @@ describe('POST /notifications', function() {
         expect(res.statusCode).toBe(200)
         expect(app.models.Notification.sendEmail).toHaveBeenCalled()
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[3]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
         ).not.toContain('{confirmation_code}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[3]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
         ).not.toContain('{service_name}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[3]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
         ).not.toContain('{http_host}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[3]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
         ).not.toContain('{rest_api_root}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[3]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
         ).not.toContain('{subscription_id}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[3]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
         ).not.toContain('{unsubscription_code}')
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain(
-          '12345'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain(
-          'myService'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain(
-          'http://127.0.0.1'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain(
-          '/api'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain(
-          '1 '
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain(
-          '54321'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain(
-          'bar foo'
-        )
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
+        ).toContain('12345')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
+        ).toContain('myService')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
+        ).toContain('http://127.0.0.1')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
+        ).toContain('/api')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
+        ).toContain('1 ')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
+        ).toContain('54321')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
+        ).toContain('bar foo')
 
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[4]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
         ).not.toContain('{confirmation_code}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[4]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
         ).not.toContain('{service_name}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[4]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
         ).not.toContain('{http_host}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[4]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
         ).not.toContain('{rest_api_root}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[4]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
         ).not.toContain('{subscription_id}')
         expect(
-          app.models.Notification.sendEmail.calls.argsFor(0)[4]
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
         ).not.toContain('{unsubscription_code}')
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain(
-          '12345'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain(
-          'myService'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain(
-          'http://127.0.0.1'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain(
-          '/api'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain(
-          '1 '
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[4]).toContain(
-          '54321'
-        )
-        expect(app.models.Notification.sendEmail.calls.argsFor(0)[3]).toContain(
-          'bar foo'
-        )
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
+        ).toContain('12345')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
+        ).toContain('myService')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
+        ).toContain('http://127.0.0.1')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
+        ).toContain('/api')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
+        ).toContain('1 ')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].html
+        ).toContain('54321')
+        expect(
+          app.models.Notification.sendEmail.calls.argsFor(0)[0].text
+        ).toContain('bar foo')
 
         app.models.Notification.find(
           {
@@ -682,7 +684,9 @@ describe('POST /notifications', function() {
       })
   })
 
-  it('should send chunked async broadcast email notifications', function(done) {
+  it('should send chunked async broadcast email notifications', function(
+    done
+  ) {
     spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
       return true
     })
@@ -712,10 +716,10 @@ describe('POST /notifications', function() {
       .createSpy()
       .and.callFake(function() {
         let cb = arguments[arguments.length - 1]
-        let from = arguments[1]
+        let to = arguments[0].to
         let error = null
-        if (from.indexOf('invalid') >= 0) {
-          error = from
+        if (to.indexOf('invalid') >= 0) {
+          error = to
         }
         console.log('faking sendEmail with error for invalid recipient')
         return cb(error, null)

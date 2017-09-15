@@ -109,14 +109,14 @@ module.exports = function(Subscription) {
         var mailHtmlBody =
           data.confirmationRequest.htmlBody &&
           Subscription.mailMerge(data.confirmationRequest.htmlBody, data, ctx)
-        Subscription.sendEmail(
-          data.confirmationRequest.from,
-          data.userChannelId,
-          mailSubject,
-          textBody,
-          mailHtmlBody,
-          cb
-        )
+        let mailOptions = {
+          from: data.confirmationRequest.from,
+          to: data.userChannelId,
+          subject: mailSubject,
+          text: textBody,
+          html: mailHtmlBody
+        }
+        Subscription.sendEmail(mailOptions, cb)
     }
   }
 
@@ -304,13 +304,14 @@ module.exports = function(Subscription) {
                           this,
                           options.httpContext
                         )
-                        Subscription.sendEmail(
-                          msg.from,
-                          this.userChannelId,
-                          subject,
-                          textBody,
-                          htmlBody
-                        )
+                        let mailOptions = {
+                          from: msg.from,
+                          to: this.userChannelId,
+                          subject: subject,
+                          text: textBody,
+                          html: htmlBody
+                        }
+                        Subscription.sendEmail(mailOptions)
                         break
                     }
                   } catch (ex) {}

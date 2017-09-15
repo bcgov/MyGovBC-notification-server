@@ -243,14 +243,14 @@ module.exports = function(Notification) {
             var subject =
               data.message.subject &&
               Notification.mailMerge(data.message.subject, tokenData, ctx)
-            Notification.sendEmail(
-              data.message.from,
-              data.userChannelId,
-              subject,
-              textBody,
-              htmlBody,
-              cb
-            )
+            let mailOptions = {
+              from: data.message.from,
+              to: data.userChannelId,
+              subject: subject,
+              text: textBody,
+              html: htmlBody
+            }
+            Notification.sendEmail(mailOptions, cb)
         }
         break
       case true:
@@ -334,14 +334,14 @@ module.exports = function(Notification) {
                           tokenData,
                           ctx
                         )
-                      Notification.sendEmail(
-                        data.message.from,
-                        e.userChannelId,
-                        subject,
-                        textBody,
-                        htmlBody,
-                        notificationMsgCB
-                      )
+                      let mailOptions = {
+                        from: data.message.from,
+                        to: e.userChannelId,
+                        subject: subject,
+                        text: textBody,
+                        html: htmlBody
+                      }
+                      Notification.sendEmail(mailOptions, notificationMsgCB)
                   }
                 })
                 return a

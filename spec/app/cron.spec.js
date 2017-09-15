@@ -331,11 +331,13 @@ describe('CRON dispatchLiveNotifications', function() {
       expect(err).toBeNull()
       expect(results.length).toBe(1)
       expect(app.models.Notification.sendEmail).toHaveBeenCalledWith(
-        'admin@foo.com',
-        'bar@foo.com',
-        'test',
-        'this is a test http://foo.com',
-        undefined,
+        {
+          from: 'admin@foo.com',
+          to: 'bar@foo.com',
+          subject: 'test',
+          text: 'this is a test http://foo.com',
+          html: undefined
+        },
         jasmine.any(Function)
       )
       expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
