@@ -18,7 +18,9 @@
       "s"
     ],
     "name": "docs",
-    "working_dir": "${project_path}/docs"
+    "working_dir": "${project_path}/docs",
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
   },
   {
     "cmd": [
@@ -26,7 +28,9 @@
       "test"
     ],
     "name": "npm-run-test",
-    "working_dir": "${project_path}"
+    "working_dir": "${project_path}",
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
   },
   {
     "cmd": [
@@ -38,7 +42,9 @@
       "NOTIFYBC_NODE_ROLE": "master"
     },
     "name": "node-app",
-    "working_dir": "${project_path}"
+    "working_dir": "${project_path}",
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
   },
   {
     "cmd": [
@@ -50,7 +56,9 @@
       "NODE_ENV": "test"
     },
     "name": "node-jasmine",
-    "working_dir": "${project_path}"
+    "working_dir": "${project_path}",
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
   },
   {
     "cmd": [
@@ -64,7 +72,9 @@
       //      "NODE_DEBUG": "net"
     },
     "name": "debug-app",
-    "working_dir": "${project_path}"
+    "working_dir": "${project_path}",
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
   },
   {
     "cmd": [
@@ -77,7 +87,9 @@
       "NODE_ENV": "test"
     },
     "name": "debug-jasmine",
-    "working_dir": "${project_path}"
+    "working_dir": "${project_path}",
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
   },
   {
     "cmd": [
@@ -90,7 +102,9 @@
       //      "NODE_DEBUG": "net"
     },
     "name": "v4-debug-app",
-    "working_dir": "${project_path}"
+    "working_dir": "${project_path}",
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
   },
   {
     "cmd": [
@@ -102,7 +116,9 @@
       "NODE_ENV": "test"
     },
     "name": "v4-debug-jasmine",
-    "working_dir": "${project_path}"
+    "working_dir": "${project_path}",
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
   }],
   "folders": [
   {
