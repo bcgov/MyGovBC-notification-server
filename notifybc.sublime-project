@@ -42,9 +42,19 @@
       "NOTIFYBC_NODE_ROLE": "master"
     },
     "name": "node-app",
-    "working_dir": "${project_path}",
-    "target": "ansi_color_build",
-    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
+    "working_dir": "${project_path}"
+  },
+  {
+    "cmd": [
+      "node.exe",
+      "server/smtp.js"
+    ],
+    "env":
+    {
+      "NOTIFYBC_NODE_ROLE": "master"
+    },
+    "name": "node-smtp",
+    "working_dir": "${project_path}"
   },
   {
     "cmd": [
@@ -68,13 +78,10 @@
     ],
     "env":
     {
-      "NOTIFYBC_NODE_ROLE": "master",
-      //      "NODE_DEBUG": "net"
+      "NOTIFYBC_NODE_ROLE": "master"
     },
     "name": "debug-app",
-    "working_dir": "${project_path}",
-    "target": "ansi_color_build",
-    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
+    "working_dir": "${project_path}"
   },
   {
     "cmd": [
@@ -87,9 +94,7 @@
       "NODE_ENV": "test"
     },
     "name": "debug-jasmine",
-    "working_dir": "${project_path}",
-    "target": "ansi_color_build",
-    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
+    "working_dir": "${project_path}"
   },
   {
     "cmd": [
@@ -98,13 +103,10 @@
     ],
     "env":
     {
-      "NOTIFYBC_NODE_ROLE": "master",
-      //      "NODE_DEBUG": "net"
+      "NOTIFYBC_NODE_ROLE": "master"
     },
     "name": "v4-debug-app",
-    "working_dir": "${project_path}",
-    "target": "ansi_color_build",
-    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
+    "working_dir": "${project_path}"
   },
   {
     "cmd": [
@@ -116,9 +118,7 @@
       "NODE_ENV": "test"
     },
     "name": "v4-debug-jasmine",
-    "working_dir": "${project_path}",
-    "target": "ansi_color_build",
-    "syntax": "Packages/ANSIescape/ANSI.tmLanguage"
+    "working_dir": "${project_path}"
   }],
   "folders": [
   {
