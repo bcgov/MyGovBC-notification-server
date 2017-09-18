@@ -1,4 +1,8 @@
 {
   "restApiRoot": "/api",
-  "internalHttpHost": ""
+  "internalHttpHost": "",
+  "subscription":
+  {
+    "unsubscriptionEmailDomain": "invalid.local"
+  }
 }

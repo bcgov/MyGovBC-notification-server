@@ -226,6 +226,8 @@ module.exports = function(Notification) {
   }
 
   function sendPushNotification(ctx, data, cb) {
+    let unsubscriptionEmailDomain = Notification.app.get('subscription')
+      .unsubscriptionEmailDomain
     switch (data.isBroadcast) {
       case false:
         let tokenData = _.assignIn({}, ctx.subscription, { data: data.data })
@@ -243,12 +245,30 @@ module.exports = function(Notification) {
             var subject =
               data.message.subject &&
               Notification.mailMerge(data.message.subject, tokenData, ctx)
+            let unsubscriptUrl = Notification.mailMerge(
+              '{unsubscription_url}',
+              tokenData,
+              ctx
+            )
+            let listUnsub = unsubscriptUrl
+            if (unsubscriptionEmailDomain) {
+              let unsubEmail =
+                Notification.mailMerge(
+                  'un-{subscription_id}-{unsubscription_code}@',
+                  tokenData,
+                  ctx
+                ) + unsubscriptionEmailDomain
+              listUnsub = [[unsubEmail, unsubscriptUrl]]
+            }
             let mailOptions = {
               from: data.message.from,
               to: data.userChannelId,
               subject: subject,
               text: textBody,
-              html: htmlBody
+              html: htmlBody,
+              list: {
+                unsubscribe: listUnsub
+              }
             }
             Notification.sendEmail(mailOptions, cb)
         }
@@ -334,12 +354,30 @@ module.exports = function(Notification) {
                           tokenData,
                           ctx
                         )
+                      let unsubscriptUrl = Notification.mailMerge(
+                        '{unsubscription_url}',
+                        tokenData,
+                        ctx
+                      )
+                      let listUnsub = unsubscriptUrl
+                      if (unsubscriptionEmailDomain) {
+                        let unsubEmail =
+                          Notification.mailMerge(
+                            'un-{subscription_id}-{unsubscription_code}@',
+                            tokenData,
+                            ctx
+                          ) + unsubscriptionEmailDomain
+                        listUnsub = [[unsubEmail, unsubscriptUrl]]
+                      }
                       let mailOptions = {
                         from: data.message.from,
                         to: e.userChannelId,
                         subject: subject,
                         text: textBody,
-                        html: htmlBody
+                        html: htmlBody,
+                        list: {
+                          unsubscribe: listUnsub
+                        }
                       }
                       Notification.sendEmail(mailOptions, notificationMsgCB)
                   }

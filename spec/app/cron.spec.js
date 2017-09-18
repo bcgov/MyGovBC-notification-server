@@ -311,7 +311,8 @@ describe('CRON dispatchLiveNotifications', function() {
               serviceName: 'myService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
-              state: 'confirmed'
+              state: 'confirmed',
+              unsubscriptionCode: '12345'
             },
             function(err, res) {
               cb(err, res)
@@ -336,7 +337,15 @@ describe('CRON dispatchLiveNotifications', function() {
           to: 'bar@foo.com',
           subject: 'test',
           text: 'this is a test http://foo.com',
-          html: undefined
+          html: undefined,
+          list: {
+            unsubscribe: [
+              [
+                'un-1-12345@invalid.local',
+                'http://foo.com/api/subscriptions/1/unsubscribe?unsubscriptionCode=12345'
+              ]
+            ]
+          }
         },
         jasmine.any(Function)
       )
