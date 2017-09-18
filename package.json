@@ -49,6 +49,9 @@
     "type": "",
     "url": ""
   },
+  "engines": {
+    "node": ">=6.9.1"
+  },
   "license": "Apache-2.0",
   "description": "notification",
   "private": true

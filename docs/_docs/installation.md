@@ -17,7 +17,7 @@ For small-scale production deployment or for the purpose of evaluation, both sou
 ### System Requirements
 * Software
   * Git
-  * [Node.js](https://nodejs.org)@^4.2.0
+  * [Node.js](https://nodejs.org)@>=6.9.1
   * MongoDB (optional but recommended)
 * Network
   * Minimum firewall requirements:
