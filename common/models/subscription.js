@@ -247,17 +247,31 @@ module.exports = function(Subscription) {
     options,
     unsubscriptionCode,
     additionalServices,
+    userChannelId,
     cb
   ) {
     let forbidden = false
     if (!Subscription.isAdminReq(options.httpContext)) {
       var userId = Subscription.getCurrentUser(options.httpContext)
-      if (
-        !userId &&
-        this.unsubscriptionCode &&
-        unsubscriptionCode !== this.unsubscriptionCode
-      ) {
-        forbidden = true
+      if (userId) {
+        if (userId !== this.userId) {
+          forbidden = true
+        }
+      } else {
+        if (
+          this.unsubscriptionCode &&
+          unsubscriptionCode !== this.unsubscriptionCode
+        ) {
+          forbidden = true
+        }
+        try {
+          if (
+            userChannelId &&
+            this.userChannelId.toLowerCase() !== userChannelId.toLowerCase()
+          ) {
+            forbidden = true
+          }
+        } catch (ex) {}
       }
     }
     if (this.state !== 'confirmed') {

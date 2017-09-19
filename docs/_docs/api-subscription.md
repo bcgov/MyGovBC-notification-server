@@ -396,9 +396,9 @@ This API is used for changing user channel id (such as email address) and resend
      
 ## Delete a Subscription (unsubscribing)
 ```
-DELETE /subscriptions/{id}?unsubscriptionCode={unsubscriptionCode}&additionalServices={additionalServices}
+DELETE /subscriptions/{id}?unsubscriptionCode={unsubscriptionCode}&additionalServices={additionalServices}&userChannelId={userChannelId}
 or 
-GET /subscriptions/{id}/unsubscribe?unsubscriptionCode={unsubscriptionCode}&additionalServices={additionalServices}
+GET /subscriptions/{id}/unsubscribe?unsubscriptionCode={unsubscriptionCode}&additionalServices={additionalServices}&userChannelId={userChannelId}
 ```
 * inputs
   * subscription id
@@ -417,6 +417,11 @@ GET /subscriptions/{id}/unsubscribe?unsubscriptionCode={unsubscriptionCode}&addi
     * parameter type: query
     * data type: string or array of strings. If the value is string *_all*, then all services 
       the user subscribed on this *NotifyBC* instance are included
+  * user channel id for extended validation
+    * parameter name: userChannelId
+    * required: false
+    * parameter type: query
+    * data type: string
 * outcome
 
   *NotifyBC* performs following actions in sequence
@@ -424,7 +429,7 @@ GET /subscriptions/{id}/unsubscribe?unsubscriptionCode={unsubscriptionCode}&addi
   1. the subscription identified by *id* is retrieved
   2. for user request, 
     * if request is authenticated, the *userId* of the subscription is checked against current request user, if not match, request is rejected
-    * if request is anonymous, and server is configured to require unsubscription code, the input  unsubscription code is matched againts the *unsubscriptionCode* field. Request is rejected if not match 
+    * if request is anonymous, and server is configured to require unsubscription code, the input  unsubscription code is matched againts the *unsubscriptionCode* field. Request is rejected if not match. In addition, if input parameter *userChannelId* is populated but doesn't match, request is rejected
   3. if the subscription state is not *confirmed*, request is rejected
   4. if *additionalServices* is populated, database is queried to retrive the *serviceName* and *id* fields of the additional subscriptions
   4. the field *state* is set to *deleted* for the subscription identified by *id* as well as  additional subscriptions retrieved in previous step

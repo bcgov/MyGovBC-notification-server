@@ -66,8 +66,7 @@
   "acls": [],
   "methods": {
     "prototype.deleteItemById": {
-      "accepts": [
-        {
+      "accepts": [{
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -89,19 +88,25 @@
           "http": {
             "source": "query"
           }
-        }
-      ],
-      "returns": [
+        },
         {
-          "arg": "message",
-          "type": "any",
-          "root": true,
-          "description": "operation outcome"
+          "arg": "userChannelId",
+          "required": false,
+          "description": "optional. Used in validation along with unsubscriptionCode if populated. Custom smtp server created for unsubscription by email should populate this field.",
+          "type": "string",
+          "http": {
+            "source": "query"
+          }
         }
       ],
+      "returns": [{
+        "arg": "message",
+        "type": "any",
+        "root": true,
+        "description": "operation outcome"
+      }],
       "description": "unsubscribe by id",
-      "http": [
-        {
+      "http": [{
           "path": "/",
           "verb": "delete"
         },
@@ -112,8 +117,7 @@
       ]
     },
     "prototype.unDeleteItemById": {
-      "accepts": [
-        {
+      "accepts": [{
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -128,25 +132,20 @@
           }
         }
       ],
-      "returns": [
-        {
-          "arg": "message",
-          "type": "any",
-          "root": true,
-          "description": "operation outcome"
-        }
-      ],
+      "returns": [{
+        "arg": "message",
+        "type": "any",
+        "root": true,
+        "description": "operation outcome"
+      }],
       "description": "revert anonymous unsubscription by id",
-      "http": [
-        {
-          "path": "/unsubscribe/undo",
-          "verb": "get"
-        }
-      ]
+      "http": [{
+        "path": "/unsubscribe/undo",
+        "verb": "get"
+      }]
     },
     "prototype.verify": {
-      "accepts": [
-        {
+      "accepts": [{
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -161,21 +160,17 @@
           }
         }
       ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": "string",
-          "root": true,
-          "description": "result"
-        }
-      ],
+      "returns": [{
+        "arg": "result",
+        "type": "string",
+        "root": true,
+        "description": "result"
+      }],
       "description": "verify confirmation code",
-      "http": [
-        {
-          "path": "/verify",
-          "verb": "get"
-        }
-      ]
+      "http": [{
+        "path": "/verify",
+        "verb": "get"
+      }]
     }
   }
 }
