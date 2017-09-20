@@ -39,6 +39,7 @@ module.exports = {
   ]
 }
 ```
+It should be noted that *NotifyBC* may generate http requests sending to itself. These http requests are expected to be admin requests. If you have created an app cluster such as in OpenShift, you should add the cluster ip range to *adminIps*. In OpenShift, this ip range is a private ip range. In BCGov's OpenShift cluster, the ip range starts with octet 172.
 
 
 <div class="note warning">
@@ -573,7 +574,7 @@ module.exports = {
   "internalHttpHost" : "http://notifybc:3000"
 }
 ```
-then the HTTP request will be sent to the configured host. An internal request can be generated, for example, as a [sub-request of broadcast push notification](#broadcast-push-notification-task-concurrency) described above. *internalHttpHost* shouldn't be accessible from internet. 
+then the HTTP request will be sent to the configured host url. An internal request can be generated, for example, as a [sub-request of broadcast push notification](#broadcast-push-notification-task-concurrency) described above. *internalHttpHost* shouldn't be accessible from internet. 
 
 All internal requests are supposed to be admin requests. The purpose of *internalHttpHost* is to facilitate identifying the internal server ip as admin ip.
  
