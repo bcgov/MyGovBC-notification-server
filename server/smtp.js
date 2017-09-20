@@ -1,13 +1,41 @@
 const SMTPServer = require('smtp-server').SMTPServer
-const validEmailRegEx = /un-(.+?)-(.*)@/
+const validEmailRegEx = /un-(.+?)-(.*)@(.+)/
 const request = require('request')
+const getOpt = require('node-getopt')
+  .create([
+    [
+      'a',
+      'api-url-prefix=<string>',
+      'NotifyBC api url prefix; default to http://localhost:3000/api'
+    ],
+    [
+      'd',
+      'allowed-domains=<string>+',
+      'allowed email domains; if missing all are allowed; repeat the option to create multiple entries.'
+    ],
+    ['h', 'help', 'display this help']
+  ])
+  .bindHelp(
+    'Usage: node ' + process.argv[1] + ' [Options]\n[Options]:\n[[OPTIONS]]'
+  )
+const args = getOpt.parseSystem()
+const urlPrefix = args.options['api-url-prefix'] || 'http://localhost:3000/api'
+const allowedDomains =
+  args.options['allowed-domains'] &&
+  args.options['allowed-domains'].map(e => e.toLowerCase())
 const server = new SMTPServer({
   //  logger: true,
   authOptional: true,
   onRcptTo(address, session, callback) {
     try {
-      if (address.address.match(validEmailRegEx)) {
-        return callback()
+      let match = address.address.match(validEmailRegEx)
+      if (match) {
+        let domain = match[3]
+        if (
+          !allowedDomains ||
+          allowedDomains.indexOf(domain.toLowerCase()) >= 0
+        )
+          return callback()
       }
     } catch (ex) {}
     return callback(new Error('invalid recipient'))
@@ -20,7 +48,8 @@ const server = new SMTPServer({
         let id = match[1]
         let unsubscriptionCode = match[2]
         request.get(
-          'http://localhost:3000/api/subscriptions/' +
+          urlPrefix +
+            '/subscriptions/' +
             id +
             '/unsubscribe?unsubscriptionCode=' +
             encodeURIComponent(unsubscriptionCode) +
@@ -33,5 +62,6 @@ const server = new SMTPServer({
   }
 })
 server.listen(25, function() {
-  console.info('server started')
+  console.info(`server started with:\napi-url-prefix=${urlPrefix}`)
+  allowedDomains && console.info(`allowed-domains=${allowedDomains}`)
 })
