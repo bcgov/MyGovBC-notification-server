@@ -47,15 +47,19 @@ const server = new SMTPServer({
         let match = e.address.match(validEmailRegEx)
         let id = match[1]
         let unsubscriptionCode = match[2]
-        request.get(
-          urlPrefix +
+        request.get({
+          url:
+            urlPrefix +
             '/subscriptions/' +
             id +
             '/unsubscribe?unsubscriptionCode=' +
             encodeURIComponent(unsubscriptionCode) +
             '&userChannelId=' +
-            encodeURIComponent(session.envelope.mailFrom.address)
-        )
+            encodeURIComponent(session.envelope.mailFrom.address),
+          headers: {
+            is_anonymous: true
+          }
+        })
       })
       callback(null)
     })

@@ -10,16 +10,17 @@ module.exports = function(Model, options) {
     return base
   }
 
-  Model.isAdminReq = function(httpCtx, ignoreAccessToken, ignoreSMSurrogate) {
+  Model.isAdminReq = function(httpCtx, ignoreAccessToken, ignoreSurrogate) {
     // internal requests
     if (!httpCtx || !httpCtx.req) {
       return true
     }
-    if (!ignoreSMSurrogate) {
+    if (!ignoreSurrogate) {
       if (
         httpCtx.req.get('SM_UNIVERSALID') ||
         httpCtx.req.get('sm_user') ||
-        httpCtx.req.get('smgov_userdisplayname')
+        httpCtx.req.get('smgov_userdisplayname') ||
+        httpCtx.req.get('is_anonymous')
       ) {
         return false
       }

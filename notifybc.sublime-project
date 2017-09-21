@@ -73,7 +73,7 @@
   {
     "cmd": [
       "node.exe",
-      "--inspect-brk",
+      "--inspect",
       "server/server.js"
     ],
     "env":
