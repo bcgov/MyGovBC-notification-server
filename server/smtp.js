@@ -57,6 +57,7 @@ const server = new SMTPServer({
             '&userChannelId=' +
             encodeURIComponent(session.envelope.mailFrom.address),
           headers: {
+            /*jshint camelcase: false */
             is_anonymous: true
           }
         })
