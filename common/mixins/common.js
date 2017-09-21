@@ -147,7 +147,6 @@ module.exports = function(Model, options) {
         httpHost = httpCtx.args.data.httpHost
       } else if (
         httpCtx.instance &&
-        httpCtx.instance &&
         httpCtx.instance.httpHost
       ) {
         httpHost = httpCtx.instance.httpHost
