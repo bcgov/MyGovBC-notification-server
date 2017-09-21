@@ -9,7 +9,7 @@ A general purpose notification subscription API Server supporting multi-channel 
 
 ## License
 
-    Copyright 2016 Province of British Columbia
+    Copyright 2016-present Province of British Columbia
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
