@@ -13,6 +13,11 @@ const getOpt = require('node-getopt')
       'allowed-smtp-domains=<string>+',
       'allowed recipient email domains; if missing all are allowed; repeat the option to create multiple entries.'
     ],
+    [
+      'p',
+      'listening-smtp-port=<integer>',
+      'if missing a random free port is chosen.'
+    ],
     ['h', 'help', 'display this help']
   ])
   .bindHelp(
@@ -23,6 +28,8 @@ const urlPrefix =
   args.options['api-url-prefix'] ||
   process.env.API_URL_PREFIX ||
   'http://localhost:3000/api'
+const port =
+  args.options['listening-smtp-port'] || process.env.LISTENING_SMTP_PORT || 0
 const allowedSmtpDomains =
   (args.options['allowed-smtp-domains'] &&
     args.options['allowed-smtp-domains'].map(e => e.toLowerCase())) ||
@@ -73,7 +80,11 @@ const server = new SMTPServer({
     })
   }
 })
-server.listen(25, function() {
-  console.info(`server started with:\napi-url-prefix=${urlPrefix}`)
-  allowedSmtpDomains && console.info(`allowed-smtp-domains=${allowedSmtpDomains}`)
+server.listen(port, function() {
+  console.info(
+    `server started listening on port ${this.address()
+      .port}  with:\napi-url-prefix=${urlPrefix}`
+  )
+  allowedSmtpDomains &&
+    console.info(`allowed-smtp-domains=${allowedSmtpDomains}`)
 })
