@@ -82,7 +82,7 @@ const server = new SMTPServer({
 })
 server.listen(port, function() {
   console.info(
-    `server started listening on port ${this.address()
+    `smtp server started listening on port ${this.address()
       .port}  with:\napi-url-prefix=${urlPrefix}`
   )
   allowedSmtpDomains &&
