@@ -10,8 +10,8 @@ const getOpt = require('node-getopt')
     ],
     [
       'd',
-      'allowed-domains=<string>+',
-      'allowed email domains; if missing all are allowed; repeat the option to create multiple entries.'
+      'allowed-smtp-domains=<string>+',
+      'allowed recipient email domains; if missing all are allowed; repeat the option to create multiple entries.'
     ],
     ['h', 'help', 'display this help']
   ])
@@ -19,10 +19,17 @@ const getOpt = require('node-getopt')
     'Usage: node ' + process.argv[1] + ' [Options]\n[Options]:\n[[OPTIONS]]'
   )
 const args = getOpt.parseSystem()
-const urlPrefix = args.options['api-url-prefix'] || 'http://localhost:3000/api'
-const allowedDomains =
-  args.options['allowed-domains'] &&
-  args.options['allowed-domains'].map(e => e.toLowerCase())
+const urlPrefix =
+  args.options['api-url-prefix'] ||
+  process.env.API_URL_PREFIX ||
+  'http://localhost:3000/api'
+const allowedSmtpDomains =
+  (args.options['allowed-smtp-domains'] &&
+    args.options['allowed-smtp-domains'].map(e => e.toLowerCase())) ||
+  (process.env.ALLOWED_SMTP_DOMAINS &&
+    process.env.ALLOWED_SMTP_DOMAINS
+      .split(',')
+      .map(e => e.trim().toLowerCase()))
 const server = new SMTPServer({
   //  logger: true,
   authOptional: true,
@@ -32,8 +39,8 @@ const server = new SMTPServer({
       if (match) {
         let domain = match[3]
         if (
-          !allowedDomains ||
-          allowedDomains.indexOf(domain.toLowerCase()) >= 0
+          !allowedSmtpDomains ||
+          allowedSmtpDomains.indexOf(domain.toLowerCase()) >= 0
         )
           return callback()
       }
@@ -68,5 +75,5 @@ const server = new SMTPServer({
 })
 server.listen(25, function() {
   console.info(`server started with:\napi-url-prefix=${urlPrefix}`)
-  allowedDomains && console.info(`allowed-domains=${allowedDomains}`)
+  allowedSmtpDomains && console.info(`allowed-smtp-domains=${allowedSmtpDomains}`)
 })
