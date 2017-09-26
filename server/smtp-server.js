@@ -16,7 +16,7 @@ const getOpt = require('node-getopt')
     [
       'p',
       'listening-smtp-port=<integer>',
-      'if missing a random free port is chosen.'
+      'if missing a random free port is chosen. Proxy is required if port is not 25.'
     ],
     ['h', 'help', 'display this help']
   ])
@@ -40,6 +40,7 @@ const allowedSmtpDomains =
 const server = new SMTPServer({
   //  logger: true,
   authOptional: true,
+  disabledCommands: ['AUTH'],
   onRcptTo(address, session, callback) {
     try {
       let match = address.address.match(validEmailRegEx)
