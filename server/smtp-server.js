@@ -1,6 +1,7 @@
 const SMTPServer = require('smtp-server').SMTPServer
 const validEmailRegEx = /un-(.+?)-(.*)@(.+)/
 const request = require('request')
+const _ = require('lodash')
 const getOpt = require('node-getopt')
   .create([
     [
@@ -18,6 +19,7 @@ const getOpt = require('node-getopt')
       'listening-smtp-port=<integer>',
       'if missing a random free port is chosen. Proxy is required if port is not 25.'
     ],
+    ['o', 'smtp-server-options', 'stringified json smtp server options'],
     ['h', 'help', 'display this help']
   ])
   .bindHelp(
@@ -37,7 +39,10 @@ const allowedSmtpDomains =
     process.env.ALLOWED_SMTP_DOMAINS
       .split(',')
       .map(e => e.trim().toLowerCase()))
-const server = new SMTPServer({
+const smtpOptsString =
+  args.options['smtp-server-options'] || process.env.SMTP_SERVER_OPTIONS
+let smtpOpts = (smtpOptsString && JSON.parse(smtpOptsString)) || {}
+smtpOpts = _.assign({}, smtpOpts, {
   //  logger: true,
   authOptional: true,
   disabledCommands: ['AUTH'],
@@ -81,6 +86,7 @@ const server = new SMTPServer({
     })
   }
 })
+const server = new SMTPServer(smtpOpts)
 server.listen(port, function() {
   console.info(
     `smtp server started listening on port ${this.address()

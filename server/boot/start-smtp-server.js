@@ -8,6 +8,8 @@ module.exports = function(app, cb) {
   smtpSvr.allowedSmtpDomains &&
     (process.env.ALLOWED_SMTP_DOMAINS = smtpSvr.allowedSmtpDomains.toString())
   smtpSvr.apiUrlPrefix && (process.env.API_URL_PREFIX = smtpSvr.apiUrlPrefix)
+  smtpSvr.options &&
+    (process.env.SMTP_SERVER_OPTIONS = JSON.stringify(smtpSvr.options))
   require('../smtp-server')
   return process.nextTick(cb)
 }
