@@ -16,5 +16,7 @@ chmod -R a+rwx /tmp/src
 mv -f /tmp/src/* ./
 echo "---> Building your Node application from source"
 npm install
-#echo "---> Run unit tests"
-#npm test
+if [ -n ${RUN_TEST+x} ]; then
+  echo "---> Run automated tests"
+  npm test
+fi
