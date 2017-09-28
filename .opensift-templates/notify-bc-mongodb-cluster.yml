@@ -60,6 +60,9 @@ objects:
           name: notify-bc
           ports:
           - containerPort: 3000
+            protocol: TCP
+          - containerPort: 2525
+            protocol: TCP
           readinessProbe:
             failureThreshold: 3
             httpGet:
@@ -172,20 +175,20 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: ${DATABASE_SERVICE_NAME}
     annotations:
       service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
+    name: ${DATABASE_SERVICE_NAME}
   spec:
+    clusterIP: None
     ports:
-      - name: peer
-        protocol: TCP
-        port: 27017
-        targetPort: 27017
+    - name: peer
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
     selector:
       name: ${DATABASE_SERVICE_NAME}
-    clusterIP: None
-    type: ClusterIP
     sessionAffinity: None
+    type: ClusterIP
 - apiVersion: v1
   kind: Service
   metadata:
@@ -197,6 +200,9 @@ objects:
     - name: web
       port: 3000
       targetPort: 3000
+    - name: smtp
+      port: 2525
+      targetPort: 2525
     selector:
       name: notify-bc-app
 - apiVersion: v1
@@ -209,6 +215,21 @@ objects:
     host: ${APPLICATION_DOMAIN}
     port:
       targetPort: 3000
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: notify-bc
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: notify-bc-smtp
+  spec:
+    host: ${INBOUND_SMTP_DOMAIN}
+    port:
+      targetPort: 2525
+    tls:
+      termination: passthrough
     to:
       kind: Service
       name: notify-bc
@@ -225,30 +246,20 @@ objects:
       name: notify-bc-cron
       subresource: scale
 - apiVersion: v1
+  data:
+    datasources.production.js: "'use strict'\nmodule.exports = {\n  db: {\n    connector:\
+      \ \"mongodb\",\n    url: \"mongodb://${DATABASE_SERVICE_NAME}-0.${DATABASE_SERVICE_NAME}:27017,${DATABASE_SERVICE_NAME}-1.${DATABASE_SERVICE_NAME}:27017,${DATABASE_SERVICE_NAME}-2.${DATABASE_SERVICE_NAME}:27017/${DATABASE_NAME}?replicaSet=rs0\"\
+      \n  }\n}\n"
   kind: ConfigMap
   metadata:
     name: notify-bc
-  data:
-    datasources.production.js: |
-      'use strict'
-      module.exports = {
-        db: {
-          connector: "mongodb",
-          url: "mongodb://${DATABASE_SERVICE_NAME}-0.${DATABASE_SERVICE_NAME}:27017,${DATABASE_SERVICE_NAME}-1.${DATABASE_SERVICE_NAME}:27017,${DATABASE_SERVICE_NAME}-2.${DATABASE_SERVICE_NAME}:27017/${DATABASE_NAME}?replicaSet=rs0"
-        }
-      }
 - apiVersion: v1
+  data:
+    mongod.conf: "net:\n  port: 27017\nreplication:\n  replSetName: rs0\nstorage:\n\
+      \  dbPath: /data/db\n"
   kind: ConfigMap
   metadata:
     name: ${DATABASE_SERVICE_NAME}
-  data:
-    mongod.conf: |
-      net:
-        port: 27017
-      replication:
-        replSetName: rs0
-      storage:
-        dbPath: /data/db
 - apiVersion: apps/v1beta1
   kind: StatefulSet
   metadata:
@@ -348,6 +359,9 @@ parameters:
   name: MEMORY_MONGODB_LIMIT
   required: true
   value: 1Gi
-- description: The exposed hostname that will route to the Node.js service, if left
-    blank a value will be defaulted.
+- description: The exposed hostname of the http API server, if left blank a value
+    will be defaulted.
   name: APPLICATION_DOMAIN
+- description: The exposed hostname of the smtp server to receive unsubscription email,
+    if left blank a value will be defaulted.
+  name: INBOUND_SMTP_DOMAIN

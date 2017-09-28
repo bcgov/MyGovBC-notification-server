@@ -70,6 +70,9 @@ objects:
           name: notify-bc
           ports:
           - containerPort: 3000
+            protocol: TCP
+          - containerPort: 2525
+            protocol: TCP
           readinessProbe:
             failureThreshold: 3
             httpGet:
@@ -255,6 +258,9 @@ objects:
     - name: web
       port: 3000
       targetPort: 3000
+    - name: smtp
+      port: 2525
+      targetPort: 2525
     selector:
       name: notify-bc-app
 - apiVersion: v1
@@ -280,6 +286,21 @@ objects:
     host: ${APPLICATION_DOMAIN}
     port:
       targetPort: 3000
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: notify-bc
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: notify-bc-smtp
+  spec:
+    host: ${INBOUND_SMTP_DOMAIN}
+    port:
+      targetPort: 2525
+    tls:
+      termination: passthrough
     to:
       kind: Service
       name: notify-bc
@@ -340,6 +361,9 @@ parameters:
   name: MEMORY_MONGODB_LIMIT
   required: true
   value: 1Gi
-- description: The exposed hostname that will route to the Node.js service, if left
-    blank a value will be defaulted.
+- description: The exposed hostname of the http API server, if left blank a value
+    will be defaulted.
   name: APPLICATION_DOMAIN
+- description: The exposed hostname of the smtp server to receive unsubscription email,
+    if left blank a value will be defaulted.
+  name: INBOUND_SMTP_DOMAIN
