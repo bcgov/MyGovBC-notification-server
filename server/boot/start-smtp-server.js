@@ -1,5 +1,5 @@
 module.exports = function(app, cb) {
-  const smtpSvr = app.get('smtpServer')
+  const smtpSvr = app.get('inboundSmtpServer')
   const subscriptionCfg = app.get('subscription')
   if (!smtpSvr) {
     return process.nextTick(cb)

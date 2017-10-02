@@ -43,7 +43,6 @@ const smtpOptsString =
   args.options['smtp-server-options'] || process.env.SMTP_SERVER_OPTIONS
 let smtpOpts = (smtpOptsString && JSON.parse(smtpOptsString)) || {}
 smtpOpts = _.assign({}, smtpOpts, {
-  //  logger: true,
   authOptional: true,
   disabledCommands: ['AUTH'],
   onRcptTo(address, session, callback) {

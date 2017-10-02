@@ -4,5 +4,5 @@
   "subscription": {
     "unsubscriptionEmailDomain": "invalid.local"
   },
-  "smtpServer": null
+  "inboundSmtpServer": null
 }
