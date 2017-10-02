@@ -10,7 +10,13 @@ permalink: /docs/installation/
   2. deploying a Docker container
   3. deploying to OpenShift
 
-For small-scale production deployment or for the purpose of evaluation, both source code and docker container will do. For large-scale production deployment that requires horizontal scalability, deploying to OpenShift and running on a MongoDB cluster is recommended. To setup a development environment in order to contribute to *NotifyBC*, installing from source code is preferred.
+For small-scale production deployment or for evaluation, both source code and docker container will do. For large-scale production deployment that requires horizontal scalability, the recommendation is one of
+
+* deploying to OpenShift
+* setting up a load banalced app cluster from source code build, backed by mongodb.
+
+To setup a development environment in order to contribute to *NotifyBC*, 
+installing from source code is preferred.
 
 ## Deploy Locally from Source Code
 
@@ -18,19 +24,23 @@ For small-scale production deployment or for the purpose of evaluation, both sou
 * Software
   * Git
   * [Node.js](https://nodejs.org)@>=6.9.1
-  * MongoDB (optional but recommended)
-* Network
-  * Minimum firewall requirements:
+* Services
+  * MongoDB, optional but recommended for production
+  * A standard SMTP server to deliver outgoing email, optional but recommended for production. You can use an existing organizational shared service, cloud-based service such as Amazon SES, or setting up your own SMTP server 
+  * A tcp proxy server such as [nginx stream proxy](http://nginx.org/en/docs/stream/ngx_stream_proxy_module.html) if list-unsubscribe by email is needed and *NotifyBC* server cannot expose port 25 to internet
+  * A SMS service provider account if needs to enable SMS channel. The supported service providers are
+    * Twilio (default) 
+  * SiteMinder, if need to allow authenticated user request
+* Network and Permissions
+  * Minimum runtime firewall requirements:
     * outbound to your ISP DNS server
     * outbound to any on port 80, 443 and 22 in order to run build scripts and send SMS messages
     * outbound to any on SMTP port 25 if using direct mail; for SMTP relay, outbound to your configured SMTP server and port only
     * inbound to listening port (3000 by default)from other authorized server ips
-    * if *NotifyBC* instance will handle anonymous subscription from client browser, the listening port should be open to internet (i.e. any) either directly or indirectly through a reverse proxy; If *NotifyBC* instance will handle SiteMinder authenticated webapp requests, the listening port should NOT be open to internet. Instead, it should only open to SiteMinder web agent reverse proxy.
-  * To use in-app notification feature, both *NotifyBC* API server and client-facing front-end web app have to be protected by SiteMinder
-<div class="note warning">
-  <h5>Don't expose a NotifyBC instance to both anonymous and SiteMinder-eneabled secure webapps</h5>
-  <p>This creates a security loophole. Instead, setup separate NotifyBC instances.</p>
-</div>
+    * if *NotifyBC* instance will handle anonymous subscription from client browser, the listening port should be open to internet either directly or indirectly through a reverse proxy; If *NotifyBC* instance will only handle SiteMinder authenticated webapp requests, the listening port should NOT be open to internet. Instead, it should only open to SiteMinder web agent reverse proxy.
+  * If list-unsubscribe by email is needed, then one of the following must be met 
+    * *NotifyBC* can bind to port 25 opening to internet
+    * a tcp proxy server of which port 25 is open to internet. This proxy server can reach *NotifyBC* on a tcp port. 
 
 ### Installation
 run following commands

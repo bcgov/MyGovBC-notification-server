@@ -10,28 +10,30 @@ permalink: /docs/overview/
 *NotifyBC* facilitates both anonymous and SiteMinder authentication-enabled secure webapps implementing notification feature. A *NotifyBC* server instance supports multiple notification services.  A service is a topic of interest that user wants to receive updates. It is used as the partition of notification messages and user subscriptions. A user may subscribe to a service in multiple push delivery channels allowed. A user may subscribe to multiple services. In-app pull notification doesn't require subscription as it's not intrusive to user.
 
 ### notification
-* Support both in-app pull notifications (a.k.a. messages or alerts) and push notifications
-* Support multiple push notifications delivery channels
+* both in-app pull notifications (a.k.a. messages or alerts) and push notifications
+* multiple push notifications delivery channels
   * email
   * sms
-* Support both unicast and broadcast message types
-* Support future-dated notifications
-* For in-app pull notifications
-  * support message states - read, deleted
-  * support message expiration
+* unicast and broadcast message types
+* future-dated notifications
+* for in-app pull notifications
+  * support read and deleted message states
+  * message expiration
   * deleted messages are not deleted immediately for auditing and recovery purposes
-* Support both sync and async API call for broadcast push notifications. For async API call, an optional callback url is supported
-* Broadcast push notifications can be auto-generated from RSS feeds
-* Allow user to specify filter rules evaluated against broadcast push notification triggering event to improve relevance
-* Allow application developer to create custom filter functions
+* both sync and async API call for broadcast push notifications. For async API call, an optional callback url is supported
+* broadcast push notifications can be auto-generated from RSS feeds
+* allow user to specify filter rules evaluated against broadcast push notification triggering event to improve relevance
+* allow application developer to create custom filter functions
 
 ### subscription and un-subscription
-* Verify the ownership of push notification subscription channel:
+* verify the ownership of push notification subscription channel:
   * generates confirmation code based on a regex input
   * send confirmation request to unconfirmed subscription channel
   * verify confirmation code
-* Support generating random un-subscription code and sending acknowledgement message after un-subscription for anonymous subscribers as anti-spoofing measurements
-* Support bulk unsubscription
+* generate random un-subscription code 
+* send acknowledgement message after un-subscription for anonymous subscribers
+* bulk unsubscription
+* [list-unsubscribe](http://www.list-unsubscribe.com/) by email
 
 ### mail merge
 
@@ -87,11 +89,6 @@ The result of an API call to the same end point may differ depending on the requ
 
 The way *NotifyBC* interacts with other components is diagrammed below.
 ![architecture diagram]({{site.baseurl}}/img/architecture.png)
-
-<div class="note warning">
-  <h5>Secure RESTful API end point</h5>
-  <p>When NotifyBC is used to serve SiteMinder authenticated requests, its RESTful API URL end point should be protected against direct internet access using firewall, otherwise SiteMinder headers can be easily spoofed. Firewall can be external or <a href="../configuration/#siteminder-reverse-proxy-ip-list-and-trusted-reverse-proxy-ip-list">built-in</a></p>
-</div>
 
 ## Application Framework
 *NotifyBC* is created on Node.js [LoopBack](https://loopback.io/). Contributors to source code of *NotifyBC* should be familiar with LoopBack. [LoopBack Docs](https://docs.strongloop.com/display/public/LB/LoopBack) serves a good complement to this documentation.

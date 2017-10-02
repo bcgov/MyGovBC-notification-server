@@ -9,7 +9,7 @@ permalink: /docs/benchmarks/
   <p>A <i>NotifyBC</i> server node can deliver 1 million emails in as little as 1 hour to a SMTP server node. SMTP server node's disk I/O is the bottleneck in such case. Throughput can be improved through horizontal scaling.</p>
 </div>
 
-When *NotifyBC* is used to deliver broadcast push notifications to a large number of subscribers, probably the most important benchmark is throughput. The benchmark is especially critical if a latency cap is imposed. To facilitate capacity planning, load testing on the email channel has been conducted. The test environment, procedure, results and performance tuning advices are provided hereafter. 
+When *NotifyBC* is used to deliver broadcast push notifications to a large number of subscribers, probably the most important benchmark is throughput. The benchmark is especially critical if a latency cap is desired. To facilitate capacity planning, load testing on the email channel has been conducted. The test environment, procedure, results and performance tuning advices are provided hereafter. 
 
 ## Environment
 
