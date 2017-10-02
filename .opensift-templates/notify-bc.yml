@@ -329,6 +329,12 @@ objects:
       name: ${DATABASE_SERVICE_NAME}
       subresource: scale
 - apiVersion: v1
+  data:
+    config.local.js: "'use strict'\nmodule.exports = {\n  inboundSmtpServer: {\n \
+      \   listeningSmtpPort: 2525,\n \
+      \   options: {\n      secure: true\n    }\n  }\n}\n"
+    middleware.local.json: "{\n  \"routes:before\":{\n    \"morgan\":{\n      \"enabled\"\
+      : false\n    }\n  }\n}\n"
   kind: ConfigMap
   metadata:
     name: notify-bc

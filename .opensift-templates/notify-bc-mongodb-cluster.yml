@@ -247,9 +247,14 @@ objects:
       subresource: scale
 - apiVersion: v1
   data:
+    config.local.js: "'use strict'\nmodule.exports = {\n  inboundSmtpServer: {\n \
+      \   listeningSmtpPort: 2525,\n \
+      \   options: {\n      secure: true\n    }\n  }\n}\n"
     datasources.production.js: "'use strict'\nmodule.exports = {\n  db: {\n    connector:\
       \ \"mongodb\",\n    url: \"mongodb://${DATABASE_SERVICE_NAME}-0.${DATABASE_SERVICE_NAME}:27017,${DATABASE_SERVICE_NAME}-1.${DATABASE_SERVICE_NAME}:27017,${DATABASE_SERVICE_NAME}-2.${DATABASE_SERVICE_NAME}:27017/${DATABASE_NAME}?replicaSet=rs0\"\
       \n  }\n}\n"
+    middleware.local.json: "{\n  \"routes:before\":{\n    \"morgan\":{\n      \"enabled\"\
+      : false\n    }\n  }\n}\n"
   kind: ConfigMap
   metadata:
     name: notify-bc
