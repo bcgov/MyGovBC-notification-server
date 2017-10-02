@@ -12,7 +12,7 @@ let options = {
   json: {
     serviceName: process.argv[3] || 'load10',
     message: {
-      from: process.argv[4] || 'no_reply@example.com',
+      from: process.argv[4] || 'no_reply@invlid.local',
       subject: '{title}',
       textBody: '{description}',
       htmlBody:

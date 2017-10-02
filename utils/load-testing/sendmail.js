@@ -18,8 +18,8 @@ let body = bodyUnit.repeat(process.argv[8] || 1)
 
 let q = queue(function(task, cb) {
   let mailOptions = {
-    from: 'noreply@example.com',
-    to: process.argv[3] || 'test@example.com',
+    from: 'noreply@invlid.local',
+    to: process.argv[3] || 'test@invlid.local',
     subject: 'Despite unpopularity, Victoria fadsasdfasd',
     text: body
   }

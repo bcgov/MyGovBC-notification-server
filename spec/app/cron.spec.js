@@ -108,7 +108,7 @@ describe('CRON purgeData', function() {
               confirmationRequest: {
                 confirmationCodeRegex: '\\d{5}',
                 sendRequest: true,
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'Subscription confirmation',
                 textBody: 'enter {confirmation_code} in email!',
                 confirmationCode: '53007'
@@ -404,7 +404,7 @@ describe('CRON checkRssConfigUpdates', function() {
                 },
                 messageTemplates: {
                   email: {
-                    from: 'no_reply@example.com',
+                    from: 'no_reply@invlid.local',
                     subject: '{title}',
                     textBody: '{description}',
                     htmlBody: '{description}'

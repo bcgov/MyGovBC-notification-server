@@ -178,7 +178,7 @@ The following default subscription sub-property *confirmationRequest* defines co
       "email": {
         "confirmationCodeRegex": "\\d{5}",
         "sendRequest": true,
-        "from": "no_reply@example.com",
+        "from": "no_reply@invlid.local",
         "subject": "Subscription confirmation",
         "textBody": "Enter {confirmation_code} on screen",
         "htmlBody": "Enter {confirmation_code} on screen"
@@ -245,7 +245,7 @@ You can customize anonymous unsubscription settings by changing the *anonymousUn
         },
         "notification":{
           "email": {
-            "from": "no_reply@example.com",
+            "from": "no_reply@invlid.local",
             "subject": "Un-subscription acknowledgement",
             "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for {unsubscription_service_names}. If you did not authorize this change or if you changed your mind, click {unsubscription_reversion_url} to revert."
           }
@@ -337,7 +337,7 @@ For example, to notify subscribers of *myService* on updates to feed *http://my-
     "httpHost": "http://localhost:3000",
     "messageTemplates": {
       "email": {
-        "from": "no_reply@example.com",
+        "from": "no_reply@invlid.local",
         "subject": "{title}",
         "textBody": "{description}",
         "htmlBody": "{description}"
@@ -578,7 +578,7 @@ module.exports = {
   ...
   subscription: {
     ...
-    unsubscriptionEmailDomain: 'example.com'
+    unsubscriptionEmailDomain: 'invlid.local'
   }
 }
 ```

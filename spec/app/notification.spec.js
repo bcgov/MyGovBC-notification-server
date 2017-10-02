@@ -79,7 +79,7 @@ describe('GET /notifications', function() {
               channel: 'email',
               isBroadcast: true,
               message: {
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'hello',
                 htmlBody: 'hello'
               },
@@ -136,7 +136,7 @@ describe('POST /notifications', function() {
               confirmationRequest: {
                 confirmationCodeRegex: '\\d{5}',
                 sendRequest: true,
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'Subscription confirmation',
                 textBody: 'enter {confirmation_code} in this email',
                 confirmationCode: '12345'

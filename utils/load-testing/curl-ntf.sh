@@ -5,7 +5,7 @@ time curl -X POST ${1:-http://notify-bc-notifybc.192.168.99.100.nip.io/api}/noti
 {
    "serviceName": "${2:-load10}",
    "message": {
-       "from": "${3:-no_reply@example.com}",
+       "from": "${3:-no_reply@invlid.local}",
        "subject": "{title}",
        "htmlBody": "{description}<p><a href='{link}'>link</a><a href='{unsubscription_url}'>nsubscription</a></p>"
    },

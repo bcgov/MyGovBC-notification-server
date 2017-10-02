@@ -16,7 +16,7 @@ describe('GET /subscriptions', function() {
         confirmationRequest: {
           confirmationCodeRegex: '\\d{5}',
           sendRequest: true,
-          from: 'no_reply@example.com',
+          from: 'no_reply@invlid.local',
           subject: 'Subscription confirmation',
           textBody: 'enter {confirmation_code} in this email',
           confirmationCode: '37688'
@@ -346,7 +346,7 @@ describe('PATCH /subscriptions/{id}', function() {
         confirmationRequest: {
           confirmationCodeRegex: '\\d{5}',
           sendRequest: true,
-          from: 'no_reply@example.com',
+          from: 'no_reply@invlid.local',
           subject: 'Subscription confirmation',
           textBody: 'enter {confirmation_code} in this email',
           confirmationCode: '37688'
@@ -418,7 +418,7 @@ describe('GET /subscriptions/{id}/verify', function() {
               confirmationRequest: {
                 confirmationCodeRegex: '\\d{5}',
                 sendRequest: true,
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'Subscription confirmation',
                 textBody: 'enter {confirmation_code} in this email',
                 confirmationCode: '37688'
@@ -439,7 +439,7 @@ describe('GET /subscriptions/{id}/verify', function() {
               confirmationRequest: {
                 confirmationCodeRegex: '\\d{5}',
                 sendRequest: true,
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'Subscription confirmation',
                 textBody: 'enter {confirmation_code} in this email',
                 confirmationCode: '37689'
@@ -521,7 +521,7 @@ describe('DELETE /subscriptions/{id}', function() {
               confirmationRequest: {
                 confirmationCodeRegex: '\\d{5}',
                 sendRequest: true,
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'Subscription confirmation',
                 textBody: 'enter {confirmation_code} in this email',
                 confirmationCode: '37688'
@@ -542,7 +542,7 @@ describe('DELETE /subscriptions/{id}', function() {
               confirmationRequest: {
                 confirmationCodeRegex: '\\d{5}',
                 sendRequest: true,
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'Subscription confirmation',
                 textBody: 'enter {confirmation_code} in this email',
                 confirmationCode: '37689'
@@ -564,7 +564,7 @@ describe('DELETE /subscriptions/{id}', function() {
               confirmationRequest: {
                 confirmationCodeRegex: '\\d{5}',
                 sendRequest: true,
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'Subscription confirmation',
                 textBody: 'enter {confirmation_code} in this email',
                 confirmationCode: '37689'
@@ -915,7 +915,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
               confirmationRequest: {
                 confirmationCodeRegex: '\\d{5}',
                 sendRequest: true,
-                from: 'no_reply@example.com',
+                from: 'no_reply@invlid.local',
                 subject: 'Subscription confirmation',
                 textBody: 'enter {confirmation_code} in this email',
                 confirmationCode: '37689'
