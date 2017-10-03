@@ -307,6 +307,12 @@ describe('POST /notifications', function() {
         expect(
           app.models.Notification.sendEmail.calls.argsFor(0)[0].text
         ).toContain('bar foo')
+        // test list-unsubscribe header
+        expect(
+          app.models.Notification.sendEmail.calls
+            .argsFor(0)[0]
+            .list.unsubscribe[0].indexOf('un-1-54321@invalid.local')
+        ).toBe(0)
 
         app.models.Notification.find(
           {
@@ -684,9 +690,7 @@ describe('POST /notifications', function() {
       })
   })
 
-  it('should send chunked async broadcast email notifications', function(
-    done
-  ) {
+  it('should send chunked async broadcast email notifications', function(done) {
     spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
       return true
     })
