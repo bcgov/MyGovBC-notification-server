@@ -1,6 +1,7 @@
 const SMTPServer = require('smtp-server').SMTPServer
 const validEmailRegEx = /un-(.+?)-(.*)@(.+)/
 const request = require('request')
+exports.request = request
 const _ = require('lodash')
 const getOpt = require('node-getopt')
   .create([
@@ -66,7 +67,7 @@ smtpOpts = _.assign({}, smtpOpts, {
         let match = e.address.match(validEmailRegEx)
         let id = match[1]
         let unsubscriptionCode = match[2]
-        request.get({
+        exports.request.get({
           url:
             urlPrefix +
             '/subscriptions/' +
@@ -94,3 +95,5 @@ server.listen(port, function() {
   allowedSmtpDomains &&
     console.info(`allowed-smtp-domains=${allowedSmtpDomains}`)
 })
+
+exports.server = server
