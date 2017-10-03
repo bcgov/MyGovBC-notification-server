@@ -4,5 +4,9 @@
   "subscription": {
     "unsubscriptionEmailDomain": "invalid.local"
   },
-  "inboundSmtpServer": null
+  "inboundSmtpServer": {
+    "listeningSmtpPort": 0,
+    "apiUrlPrefix": null,
+    "options": null
+  }
 }
