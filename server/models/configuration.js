@@ -1,5 +1,3 @@
-'use strict'
-
 var disableAllMethods = require('../../common/helpers.js').disableAllMethods
 module.exports = function(Configuration) {
   disableAllMethods(Configuration, [

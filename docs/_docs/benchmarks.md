@@ -53,7 +53,6 @@ The test was performed in August 2017. Unless otherwise specified, the versions 
 1. update or create file */server/config.local.js* through [configMap](../installation/#update-configuration-files). Add sections for SMTP server and a custom filter funtion
 
    ```
-   'use strict'
    var _ = require('lodash')    
    module.exports = {
      ...

@@ -1,5 +1,4 @@
 module.exports = function(Model, options) {
-  'use strict'
   var ipRangeCheck = require('ip-range-check')
   var _ = require('lodash')
   var toSentence = require('underscore.string/toSentence')

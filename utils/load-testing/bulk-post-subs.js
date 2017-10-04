@@ -1,4 +1,3 @@
-'use strict'
 let request = require('request')
 var parallelLimit = require('async/parallelLimit')
 if (process.argv.length < 3) {

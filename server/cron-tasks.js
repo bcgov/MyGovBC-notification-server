@@ -1,4 +1,3 @@
-'use strict'
 var parallel = require('async/parallel')
 var FeedParser = require('feedparser')
 var request = require('request')

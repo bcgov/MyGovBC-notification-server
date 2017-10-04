@@ -1,4 +1,3 @@
-'use strict'
 const request = require('request')
 const csv = require('csvtojson')
 const queue = require('async/queue')

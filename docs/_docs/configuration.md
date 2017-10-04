@@ -387,7 +387,6 @@ If total number of subscribers is less than *broadcastSubscriberChunkSize*, then
 To support rule-based notification event filtering, *NotifyBC* uses a [modified version](https://github.com/f-w/jmespath.js) of [jmespath](http://jmespath.org/) to implement json query. The modified version allows defining custom functions that can be used in  [broadcastPushNotificationFilter](../api-subscription#broadcastPushNotificationFilter) field of subscription API. The functions must be implemented using JavaScript in config *notification.broadcastCustomFilterFunctions*. For example, the case-insensitive string matching function *contains_ci* shown in the example of that field can be created in file */server/config.local.js*
 
 ```js
-'use strict'
 var _ = require('lodash')
 module.exports = {
   notification: {

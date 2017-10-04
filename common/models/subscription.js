@@ -1,4 +1,3 @@
-'use strict'
 const path = require('path')
 var rsaPath = path.resolve(__dirname, '../../server/boot/rsa.js')
 var rsa = require(rsaPath)

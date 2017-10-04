@@ -1,5 +1,3 @@
-'use strict'
-
 module.exports = function(Administrator) {
   Administrator.beforeRemote('**', function(ctx, unused, next) {
     if (Administrator.isAdminReq(ctx, true)) {

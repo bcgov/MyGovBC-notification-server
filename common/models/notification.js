@@ -1,5 +1,3 @@
-'use strict'
-
 var queue = require('async/queue')
 var parallel = require('async/parallel')
 var disableAllMethods = require('../helpers.js').disableAllMethods

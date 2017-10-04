@@ -1,4 +1,3 @@
-'use strict'
 var queue = require('async/queue')
 var nodemailer = require('nodemailer')
 var successCnt = 0

@@ -1,4 +1,3 @@
-'use strict'
 let request = require('request')
 if (process.argv.length < 2) {
   process.exit(1)
