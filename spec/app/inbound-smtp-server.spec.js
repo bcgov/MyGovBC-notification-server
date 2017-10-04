@@ -83,7 +83,7 @@ describe('list-unsubscribe by email', function() {
     })
   })
 
-  fit('should reject invalid email', function(done) {
+  it('should reject invalid email', function(done) {
     spyOn(smtpSvr, 'onRcptTo').and.callThrough()
     spyOn(smtpSvr, 'onData').and.callThrough()
     connection.connect(() => {
