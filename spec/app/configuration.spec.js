@@ -1,6 +1,11 @@
-'use strict'
+let app
 var request = require('supertest')
-var app = require('../../server/server.js')
+beforeAll(done => {
+  require('../../server/server.js')(function(err, data) {
+    app = data
+    done()
+  })
+})
 
 describe('GET /configuration', function() {
   beforeEach(function(done) {
@@ -30,18 +35,22 @@ describe('GET /configuration', function() {
     )
   })
   it('should be forbidden by anonymous user', function(done) {
-    request(app).get('/api/configurations').end(function(err, res) {
-      expect(res.statusCode).toBe(403)
-      done()
-    })
+    request(app)
+      .get('/api/configurations')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
+      })
   })
   it('should be allowed by admin user', function(done) {
     spyOn(app.models.Configuration, 'isAdminReq').and.callFake(function() {
       return true
     })
-    request(app).get('/api/configurations').end(function(err, res) {
-      expect(res.statusCode).toBe(200)
-      done()
-    })
+    request(app)
+      .get('/api/configurations')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        done()
+      })
   })
 })

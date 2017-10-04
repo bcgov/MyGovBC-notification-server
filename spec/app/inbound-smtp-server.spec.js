@@ -1,24 +1,24 @@
-const app = require('../../server/server.js')
+let app
 const parallel = require('async/parallel')
 const request = require('supertest')
 const SMTPConnection = require('smtp-connection')
 let smtpSvrImport
 let smtpSvr
 let origRequest
+let port
+beforeAll(done => {
+  require('../../server/server.js')(function(err, data) {
+    app = data
+    smtpSvrImport = require('../../server/smtp-server')
+    smtpSvr = smtpSvrImport.server
+    origRequest = smtpSvrImport.request
+    port = smtpSvr.server.address().port
+    done()
+  })
+})
 
 describe('list-unsubscribe by email', function() {
   let connection
-  let port
-  beforeAll(function(done) {
-    require('../../server/boot/start-smtp-server')(app, function(err) {
-      if (err) throw err
-      smtpSvrImport = require('../../server/smtp-server')
-      smtpSvr = smtpSvrImport.server
-      origRequest = smtpSvrImport.request
-      port = smtpSvr.server.address().port
-      done()
-    })
-  })
   beforeEach(function(done) {
     spyOn(smtpSvr, 'onRcptTo').and.callThrough()
     spyOn(smtpSvr, 'onData').and.callThrough()

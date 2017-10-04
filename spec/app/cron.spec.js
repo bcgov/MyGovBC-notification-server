@@ -1,9 +1,14 @@
-'use strict'
-var app = require('../../server/server.js')
+let app
 var cronTasks = require('../../server/cron-tasks')
 var parallel = require('async/parallel')
 var path = require('path')
 var fs = require('fs')
+beforeAll(done => {
+  require('../../server/server.js')(function(err, data) {
+    app = data
+    done()
+  })
+})
 
 describe('CRON purgeData', function() {
   beforeEach(function(done) {

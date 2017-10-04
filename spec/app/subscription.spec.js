@@ -1,7 +1,12 @@
-'use strict'
+let app
 var request = require('supertest')
-var app = require('../../server/server.js')
 var parallel = require('async/parallel')
+beforeAll(done => {
+  require('../../server/server.js')(function(err, data) {
+    app = data
+    done()
+  })
+})
 
 describe('GET /subscriptions', function() {
   var data

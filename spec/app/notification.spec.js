@@ -1,8 +1,13 @@
-'use strict'
+let app
 var request = require('supertest')
-var app = require('../../server/server.js')
 var parallel = require('async/parallel')
 var nodeReq = require('request')
+beforeAll(done => {
+  require('../../server/server.js')(function(err, data) {
+    app = data
+    done()
+  })
+})
 
 describe('GET /notifications', function() {
   var data

@@ -1,8 +1,11 @@
-'use strict'
-var app = require('../../server/server.js')
-beforeAll(() => {
+let app
+beforeAll(done => {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
-  app.set('adminIps', [])
+  require('../../server/server.js')(function(err, data) {
+    app = data
+    app.set('adminIps', [])
+    done()
+  })
 })
 
 beforeEach(function(done) {

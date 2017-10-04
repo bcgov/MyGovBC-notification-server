@@ -1,6 +1,11 @@
-'use strict'
+let app
 var request = require('supertest')
-var app = require('../../server/server.js')
+beforeAll(done => {
+  require('../../server/server.js')(function(err, data) {
+    app = data
+    done()
+  })
+})
 
 describe('administrator', function() {
   it(
