@@ -7,7 +7,16 @@ let request = require('supertest')
 const SMTPConnection = require('smtp-connection')
 
 describe('list-unsubscribe by email', function() {
+  let connection
+  let port = smtpSvr.server.address().port
   beforeEach(function(done) {
+    connection = new SMTPConnection({
+      port: port,
+      tls: {
+        rejectUnauthorized: false
+      }
+    })
+
     parallel(
       [
         function(cb) {
@@ -31,6 +40,7 @@ describe('list-unsubscribe by email', function() {
       }
     )
   })
+
   it('should accept valid email', function(done) {
     spyOn(smtpSvr, 'onRcptTo').and.callThrough()
     spyOn(smtpSvr, 'onData').and.callThrough()
@@ -51,14 +61,7 @@ describe('list-unsubscribe by email', function() {
         })
       })
     })
-    let port = smtpSvr.server.address().port
     expect(port).toBeGreaterThan(0)
-    let connection = new SMTPConnection({
-      port: port,
-      tls: {
-        rejectUnauthorized: false
-      }
-    })
     connection.connect(() => {
       connection.send(
         { from: 'bar@foo.com', to: 'un-1-12345@local.invalid' },
@@ -75,6 +78,23 @@ describe('list-unsubscribe by email', function() {
               is_anonymous: true
             }
           })
+        }
+      )
+    })
+  })
+
+  fit('should reject invalid email', function(done) {
+    spyOn(smtpSvr, 'onRcptTo').and.callThrough()
+    spyOn(smtpSvr, 'onData').and.callThrough()
+    connection.connect(() => {
+      connection.send(
+        { from: 'bar@foo.com', to: 'undo-1-12345@local.invalid' },
+        'unsubscribe',
+        (err, info) => {
+          expect(err.rejected.length).toBe(1)
+          expect(smtpSvr.onRcptTo).toHaveBeenCalled()
+          expect(smtpSvr.onData).not.toHaveBeenCalled()
+          done()
         }
       )
     })
