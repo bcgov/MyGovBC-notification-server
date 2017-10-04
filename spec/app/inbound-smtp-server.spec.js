@@ -1,17 +1,30 @@
 const app = require('../../server/server.js')
 const parallel = require('async/parallel')
-const smtpSvrImport = require('../../server/smtp-server')
-const smtpSvr = smtpSvrImport.server
-const origRequest = smtpSvrImport.request
-let request = require('supertest')
+const request = require('supertest')
 const SMTPConnection = require('smtp-connection')
+let smtpSvrImport
+let smtpSvr
+let origRequest
 
 describe('list-unsubscribe by email', function() {
   let connection
-  let port = smtpSvr.server.address().port
+  let port
+  beforeAll(function(done) {
+    require('../../server/boot/start-smtp-server')(app, function(err) {
+      if (err) throw err
+      smtpSvrImport = require('../../server/smtp-server')
+      smtpSvr = smtpSvrImport.server
+      origRequest = smtpSvrImport.request
+      port = smtpSvr.server.address().port
+      done()
+    })
+  })
   beforeEach(function(done) {
+    spyOn(smtpSvr, 'onRcptTo').and.callThrough()
+    spyOn(smtpSvr, 'onData').and.callThrough()
     connection = new SMTPConnection({
       port: port,
+      secure: true,
       tls: {
         rejectUnauthorized: false
       }
@@ -42,8 +55,6 @@ describe('list-unsubscribe by email', function() {
   })
 
   it('should accept valid email', function(done) {
-    spyOn(smtpSvr, 'onRcptTo').and.callThrough()
-    spyOn(smtpSvr, 'onData').and.callThrough()
     spyOn(origRequest, 'get').and.callFake(function() {
       let getReq = request(app).get(
         arguments[0].url.substring(arguments[0].url.indexOf('/api'))
@@ -64,9 +75,10 @@ describe('list-unsubscribe by email', function() {
     expect(port).toBeGreaterThan(0)
     connection.connect(() => {
       connection.send(
-        { from: 'bar@foo.com', to: 'un-1-12345@local.invalid' },
+        { from: 'bar@foo.com', to: 'un-1-12345@invalid.local' },
         'unsubscribe',
         (err, info) => {
+          expect(err).toBeNull()
           expect(info.accepted.length).toBe(1)
           expect(smtpSvr.onRcptTo).toHaveBeenCalled()
           expect(smtpSvr.onData).toHaveBeenCalled()
@@ -83,12 +95,25 @@ describe('list-unsubscribe by email', function() {
     })
   })
 
-  it('should reject invalid email', function(done) {
-    spyOn(smtpSvr, 'onRcptTo').and.callThrough()
-    spyOn(smtpSvr, 'onData').and.callThrough()
+  it('should reject email of invalid local-part pattern', function(done) {
     connection.connect(() => {
       connection.send(
-        { from: 'bar@foo.com', to: 'undo-1-12345@local.invalid' },
+        { from: 'bar@foo.com', to: 'undo-1-12345@invalid.local' },
+        'unsubscribe',
+        (err, info) => {
+          expect(err.rejected.length).toBe(1)
+          expect(smtpSvr.onRcptTo).toHaveBeenCalled()
+          expect(smtpSvr.onData).not.toHaveBeenCalled()
+          done()
+        }
+      )
+    })
+  })
+
+  it('should reject email of invalid domain', function(done) {
+    connection.connect(() => {
+      connection.send(
+        { from: 'bar@foo.com', to: 'un-1-12345@valid.local' },
         'unsubscribe',
         (err, info) => {
           expect(err.rejected.length).toBe(1)

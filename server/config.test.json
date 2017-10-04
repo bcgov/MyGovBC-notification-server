@@ -7,6 +7,8 @@
   "inboundSmtpServer": {
     "listeningSmtpPort": 0,
     "apiUrlPrefix": null,
-    "options": null
+    "options": {
+      "secure": true
+    }
   }
 }
