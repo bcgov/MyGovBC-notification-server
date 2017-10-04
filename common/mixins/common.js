@@ -70,6 +70,8 @@ module.exports = function(Model, options) {
     return isFromSM ? currUser : null
   }
 
+  let smsClient
+  const Twillio = require('twilio')
   Model.sendSMS = function(to, textBody, cb) {
     var smsServiceProvider = Model.app.get('smsServiceProvider')
     switch (smsServiceProvider) {
@@ -80,9 +82,9 @@ module.exports = function(Model, options) {
         var authToken = smsConfig.authToken
 
         //require the Twilio module and create a REST client
-        var client = require('twilio')(accountSid, authToken)
+        smsClient = smsClient || new Twillio(accountSid, authToken)
 
-        client.messages.create(
+        smsClient.messages.create(
           {
             to: to,
             from: smsConfig.fromNumber,
@@ -144,10 +146,7 @@ module.exports = function(Model, options) {
       }
       if (httpCtx.args && httpCtx.args.data && httpCtx.args.data.httpHost) {
         httpHost = httpCtx.args.data.httpHost
-      } else if (
-        httpCtx.instance &&
-        httpCtx.instance.httpHost
-      ) {
+      } else if (httpCtx.instance && httpCtx.instance.httpHost) {
         httpHost = httpCtx.instance.httpHost
       }
       output = output.replace(/\{http_host\}/gi, httpHost)

@@ -36,7 +36,7 @@
     "serve-favicon": "^2.0.1",
     "smtp-server": "^3.1.0",
     "strong-error-handler": "^1.0.1",
-    "twilio": "^2.11.1",
+    "twilio": "^3.7.0",
     "underscore.string": "^3.3.4"
   },
   "devDependencies": {
