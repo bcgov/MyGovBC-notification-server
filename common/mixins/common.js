@@ -97,11 +97,18 @@ module.exports = function(Model, options) {
     }
   }
 
-  var nodemailer = require('nodemailer')
-  var transporter
+  let nodemailer = require('nodemailer')
+  const directTransport = require('nodemailer-direct-transport')
+  let transporter
   Model.sendEmail = function(mailOptions, cb) {
-    transporter =
-      transporter || nodemailer.createTransport(Model.app.get('smtp'))
+    if (!transporter) {
+      let smtpCfg = Model.app.get('smtp') || Model.app.get('defaultSmtp')
+      if (smtpCfg.direct) {
+        transporter = nodemailer.createTransport(directTransport(smtpCfg))
+      } else {
+        transporter = nodemailer.createTransport(smtpCfg)
+      }
+    }
     transporter.sendMail(mailOptions, function(error, info) {
       try {
         if (!error && info.accepted.length < 1) {

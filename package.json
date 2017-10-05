@@ -1,6 +1,6 @@
 {
   "name": "notification",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "dbSchemaVersion": "0.4.0",
   "main": "server/server.js",
   "scripts": {
@@ -28,7 +28,8 @@
     "morgan": "^1.7.0",
     "node-getopt": "^0.2.3",
     "node-rsa": "^0.4.1",
-    "nodemailer": "^2.5.0",
+    "nodemailer": "^4.1.2",
+    "nodemailer-direct-transport": "^3.3.2",
     "pluralize": "^7.0.0",
     "randexp": "^0.4.3",
     "request": "^2.81.0",

@@ -86,20 +86,22 @@ The rule to determine if the incoming request is authenticated by SiteMinder is
 2. if the real client ip is contained in *siteMinderReverseProxyIps*, then the request is from SiteMinder, and its SiteMinder headers are trusted; otherwise, the request is considered as directly from internet, and its SiteMinder headers are ignored.
 
 ## SMTP
-By default *NotifyBC* acts as the SMTP server itself and connects directly to recipient's SMTP server. You can setup a SMTP relay by adding following *smtp* config object to */server/config.local.js*
+By default *NotifyBC* acts as the SMTP server itself and connects directly to recipient's SMTP server. To setup SMTP relay to a host, say *smtp.foo.com*, add following *smtp* config object to */server/config.local.js*
 
 ```js
 module.exports = {
-  "smtp": {
-    "host": "smtp.foo.com",
-    "port": 25,
-    "ignoreTLS": true,
-    "secure": false,
-    "pool": true
-  }
+  ...
+  smtp: {
+    host: 'smtp.foo.com',
+    port: 25,
+    pool: true,
+    tls: {
+      rejectUnauthorized: false
+    }
+  },
 }
 ```
-Check out [Nodemailer](https://community.nodemailer.com/2-0-0-beta/setup-smtp/) for other config options that you can define in *smtp* object. Using SMTP relay and fine-tuning some options are critical for performance. See [benchmark advices](../benchmarks/#advices). There are also options allowing you to throttle down throughput if needed.
+Check out [Nodemailer](https://nodemailer.com/smtp/) for other config options that you can define in *smtp* object. Using SMTP relay and fine-tuning some options are critical for performance. See [benchmark advices](../benchmarks/#advices). There are also options allowing you to throttle down throughput if needed.
 
 ## SMS
 *NotifyBC* depends on underlying SMS service providers to deliver SMS messages. The supported service providers are
