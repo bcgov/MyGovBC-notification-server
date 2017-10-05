@@ -1,9 +1,7 @@
 let app
 module.exports = function(cb) {
   if (app) {
-    return process.nextTick(() => {
-      cb(null, app)
-    })
+    return cb && process.nextTick(cb.bind(null, null, app))
   }
   var loopback = require('loopback')
   var boot = require('loopback-boot')
