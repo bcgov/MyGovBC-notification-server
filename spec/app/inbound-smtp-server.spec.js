@@ -9,11 +9,13 @@ let port
 beforeAll(done => {
   require('../../server/server.js')(function(err, data) {
     app = data
-    smtpSvrImport = require('../../server/smtp-server')
-    smtpSvr = smtpSvrImport.server
-    origRequest = smtpSvrImport.request
-    port = smtpSvr.server.address().port
-    done()
+    let smtpSvrImport = require('../../server/smtp-server')
+    smtpSvrImport.app((err, data) => {
+      smtpSvr = data
+      origRequest = smtpSvrImport.request
+      port = smtpSvr.server.address().port
+      done()
+    })
   })
 })
 

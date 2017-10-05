@@ -12,6 +12,5 @@ module.exports = function(app, cb) {
   smtpSvr.apiUrlPrefix && (process.env.API_URL_PREFIX = smtpSvr.apiUrlPrefix)
   smtpSvr.options &&
     (process.env.SMTP_SERVER_OPTIONS = JSON.stringify(smtpSvr.options))
-  require('../smtp-server')
-  return process.nextTick(cb)
+  return require('../smtp-server').app(cb)
 }
