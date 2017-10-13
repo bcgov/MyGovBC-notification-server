@@ -1,6 +1,6 @@
-# notification-editor
+# notification-manager
 
-> NotifyBC notification editorNotification Editor
+> NotifyBC notification manager
 
 ## Build Setup
 
