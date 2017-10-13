@@ -4,10 +4,13 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
-Vue.config.productionTip = false
+import VueMaterial from 'vue-material'
+import Vuetify from 'vuetify'
+import 'vuetify/src/stylus/main.styl'
 
-let VueMaterial = require('vue-material')
+Vue.config.productionTip = false
 Vue.use(VueMaterial)
+Vue.use(Vuetify)
 
 /* eslint-disable no-new */
 new Vue({
