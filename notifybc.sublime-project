@@ -46,6 +46,15 @@
   },
   {
     "cmd": [
+      "npm.cmd",
+      "run",
+      "dev"
+    ],
+    "name": "node-client-dev",
+    "working_dir": "${project_path}/client"
+  },
+  {
+    "cmd": [
       "node.exe",
       "server/smtp.js"
     ],
