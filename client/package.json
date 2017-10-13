@@ -1,7 +1,7 @@
 {
   "name": "notification-editor",
   "version": "1.0.0",
-  "description": "NotifyBC notification editorNotification Editor",
+  "description": "NotifyBC notification editor",
   "author": "f-w <fred.wen@gov.bc.ca>",
   "private": true,
   "scripts": {
@@ -57,6 +57,8 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "0.0.31",
     "karma-webpack": "^2.0.2",
+    "less": "^2.7.2",
+    "less-loader": "^4.0.5",
     "mocha": "^3.2.0",
     "nightwatch": "^0.9.12",
     "opn": "^5.1.0",

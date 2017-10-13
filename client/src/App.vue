@@ -32,7 +32,7 @@
       </v-content>
     </main>
     <v-footer color="indigo" app>
-      <span class="white--text">&copy; 2017</span>
+      <span class="white--text">&copy; 2017-present under the terms of <a href='https://github.com/bcgov/MyGovBC-notification-server/blob/master/LICENSE' target='_'>Apache License, Version 2.0</a></span>
     </v-footer>
   </v-app>
 </template>
@@ -48,3 +48,9 @@ export default {
   }
 }
 </script>
+
+<style scoped lang='less'>
+.white--text a {
+  color: white !important
+}
+</style>
