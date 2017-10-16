@@ -1,11 +1,29 @@
 <template>
   <div>
     <h6>Notifications</h6>
+    <div id='nb-notification-editor'></div>
   </div>
 </template>
 
 <script>
-export default {}
+import 'script-loader!json-editor'
+export default {
+  mounted: function() {
+    let element = document.getElementById('nb-notification-editor')
+    new window.JSONEditor(element, {
+      theme: 'bootstrap2',
+      iconlib: "fontawesome4",
+      schema: {
+        type: "object",
+        properties: {
+          name: {
+            "type": "string"
+          }
+        }
+      }
+    })
+  }
+}
 </script>
 
 <style scoped>
