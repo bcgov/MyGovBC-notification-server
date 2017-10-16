@@ -1,7 +1,7 @@
 {
-  "name": "notification-manager",
+  "name": "notifybc-manager",
   "version": "1.0.0",
-  "description": "NotifyBC notification manager",
+  "description": "NotifyBC manager",
   "author": "f-w <fred.wen@gov.bc.ca>",
   "private": true,
   "scripts": {
