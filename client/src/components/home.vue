@@ -1,14 +1,16 @@
 <template>
   <div>
-    <h6>Welcome,</h6>
-    <ul>
-      <li><a href="/subscriptions">Subscription</a></li>
-      <li><a href="/notifications">Notifications</a></li>
-      <li><a href="/configurations">Configurations</a></li>
-      <li><a href="/administrators">Administrators</a></li>
-      <br>
-      <li><a href="/api-explorer">API Explorer</a></li>
-    </ul>
+    <h6>Welcome</h6>
+    <p>If you are a NotifyBC administrator, you can access the web console of following items
+      <ul>
+        <li><a href="/subscriptions">Subscriptions</a></li>
+        <li><a href="/notifications">Notifications</a></li>
+        <li><a href="/configurations">Configurations</a></li>
+        <li><a href="/administrators">Administrators</a></li>
+      </ul>
+    </p>
+    <p>
+      Alternatively, use <a href="/api-explorer">API Explorer</a> to manipulate raw JSON object through REST API for maximum flexibility.</p>
   </div>
 </template>
 
