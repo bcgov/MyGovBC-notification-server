@@ -1,15 +1,46 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
+import Home from '@/components/home'
+import Subscriptions from '@/components/subscriptions'
+import Notifications from '@/components/notifications'
+import Configurations from '@/components/configurations'
+import Administrators from '@/components/administrators'
+import ApiExplorer from '@/components/api-explorer'
 
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
-      name: 'Hello',
-      component: HelloWorld
+      name: 'Home',
+      component: Home
+    },
+    {
+      path: '/subscriptions',
+      name: 'Subscriptions',
+      component: Subscriptions
+    },
+    {
+      path: '/notifications',
+      name: 'Notifications',
+      component: Notifications
+    },
+    {
+      path: '/configurations',
+      name: 'Configurations',
+      component: Configurations
+    },
+    {
+      path: '/administrators',
+      name: 'Administrators',
+      component: Administrators
+    },
+    {
+      path: '/api-explorer',
+      name: 'API Explorer',
+      component: ApiExplorer
     }
   ]
 })
