@@ -7,7 +7,8 @@ import store from './store'
 import VueMaterial from 'vue-material'
 import Vuetify from 'vuetify'
 import 'vuetify/src/stylus/main.styl'
-require("font-awesome-webpack")
+require('font-awesome-webpack')
+require('bootstrap-webpack')
 
 Vue.config.productionTip = false
 Vue.use(VueMaterial)
