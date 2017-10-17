@@ -12,12 +12,40 @@ export default {
     let element = document.getElementById('nb-notification-editor')
     new window.JSONEditor(element, {
       theme: 'bootstrap3',
-      iconlib: "fontawesome4",
+      iconlib: 'fontawesome4',
       schema: {
-        type: "object",
+        type: 'object',
         properties: {
-          name: {
-            "type": "string"
+          serviceName: {
+            type: 'string'
+          },
+          channel: {
+            enum: ['email', 'sms', 'in-app'],
+            type: 'string'
+          },
+          userChannelId: {
+            type: 'string'
+          },
+          userId: {
+            type: 'string'
+          },
+          isBroadcast: {
+            type: 'boolean'
+          },
+          skipSubscriptionConfirmationCheck: {
+            type: 'boolean'
+          },
+          validTill: {
+            type: 'string',
+            format: 'datetime-local'
+          },
+          invalidBefore: {
+            type: 'string',
+            format: 'datetime-local'
+          },
+          message: {
+            type: 'object',
+            description: 'sub-fields depend on channel'
           }
         }
       }
