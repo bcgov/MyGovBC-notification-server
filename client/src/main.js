@@ -8,7 +8,8 @@ import VueMaterial from 'vue-material'
 import Vuetify from 'vuetify'
 import 'vuetify/src/stylus/main.styl'
 require('font-awesome-webpack')
-require('bootstrap-webpack')
+require('bootstrap-webpack!@/../config/bootstrap.config.js')
+// require('bootstrap')
 
 Vue.config.productionTip = false
 Vue.use(VueMaterial)

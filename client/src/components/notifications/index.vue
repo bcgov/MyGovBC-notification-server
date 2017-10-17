@@ -11,7 +11,7 @@ export default {
   mounted: function() {
     let element = document.getElementById('nb-notification-editor')
     new window.JSONEditor(element, {
-      theme: 'bootstrap2',
+      theme: 'bootstrap3',
       iconlib: "fontawesome4",
       schema: {
         type: "object",
@@ -26,5 +26,8 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang='less'>
+#nb-notification-editor {
+  @import '../../../node_modules/bootstrap/less/bootstrap.less';
+}
 </style>
