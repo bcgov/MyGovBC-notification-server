@@ -6,18 +6,24 @@
 </template>
 
 <script>
-import 'script-loader!json-editor'
+import 'json-editor'
+import 'sceditor/src/jquery.sceditor.js'
 export default {
   mounted: function() {
     let element = document.getElementById('nb-notification-editor')
-    new window.JSONEditor(element, {
+    window.JSONEditor.plugins.sceditor.style = ''
+    let jsonEditor = new window.JSONEditor(element, {
       theme: 'bootstrap3',
       iconlib: 'fontawesome4',
       schema: {
         type: 'object',
         properties: {
           serviceName: {
-            type: 'string'
+            type: 'string',
+            format: 'html',
+            options: {
+              wysiwyg: true
+            }
           },
           channel: {
             enum: ['email', 'sms', 'in-app'],
@@ -57,5 +63,10 @@ export default {
 <style lang='less'>
 #nb-notification-editor {
   @import '../../../node_modules/bootstrap/less/bootstrap.less';
+  .sceditor-container
+ {
+    @import '../../../node_modules/sceditor/minified/jquery.sceditor.default.min.css';
+    @import '../../../node_modules/sceditor/minified/themes/default.min.css';
+  }
 }
 </style>
