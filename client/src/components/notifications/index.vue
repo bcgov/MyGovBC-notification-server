@@ -65,6 +65,9 @@ export default {
   @import '~bootstrap/less/bootstrap.less';
   .sceditor-container
  {
+    * {
+      box-sizing: content-box;
+    }
     @import '~sceditor/minified/jquery.sceditor.default.min.css';
     @import '~sceditor/minified/themes/default.min.css';
   }
