@@ -15,15 +15,12 @@ export default {
     let jsonEditor = new window.JSONEditor(element, {
       theme: 'bootstrap3',
       iconlib: 'fontawesome4',
+      keep_oneof_values: false,
       schema: {
         type: 'object',
         properties: {
           serviceName: {
-            type: 'string',
-            format: 'html',
-            options: {
-              wysiwyg: true
-            }
+            type: 'string'
           },
           channel: {
             enum: ['email', 'sms', 'in-app'],
@@ -50,8 +47,42 @@ export default {
             format: 'datetime-local'
           },
           message: {
-            type: 'object',
-            description: 'sub-fields depend on channel'
+            description: 'sub-fields depend on channel',
+            oneOf: [{
+              title: 'email',
+              type: 'object',
+              properties: {
+                from: {
+                  type: 'string'
+                },
+                subject: {
+                  type: 'string'
+                },
+                textBody: {
+                  type: 'string',
+                  format: 'html'
+                },
+                htmlBody: {
+                  type: 'string',
+                  format: 'html',
+                  options: {
+                    wysiwyg: true
+                  }
+                }
+              }
+            }, {
+              title: 'sms',
+              type: 'object',
+              properties: {
+                textBody: {
+                  type: 'string',
+                  format: 'html'
+                }
+              }
+            }, {
+              title: 'in-app',
+              type: 'object'
+            }]
           }
         },
         required: ['serviceName', 'channel', 'message']
@@ -64,6 +95,9 @@ export default {
 <style lang='less'>
 #nb-notification-editor {
   @import '~bootstrap/less/bootstrap.less';
+  select {
+    -webkit-appearance: menulist-button;
+  }
   .sceditor-container {
     * {
       box-sizing: content-box;
