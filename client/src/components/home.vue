@@ -3,14 +3,14 @@
     <h6>Welcome</h6>
     <p>If you are a NotifyBC administrator, you can manage following items
       <ul>
-        <li><a href="/subscriptions">Subscriptions</a></li>
-        <li><a href="/notifications">Notifications</a></li>
-        <li><a href="/configurations">Configurations</a></li>
-        <li><a href="/administrators">Administrators</a></li>
+        <li><router-link to="/subscriptions">Subscriptions</router-link></li>
+        <li><router-link to="/notifications">Notifications</router-link></li>
+        <li><router-link to="/configurations">Configurations</router-link></li>
+        <li><router-link to="/administrators">Administrators</router-link></li>
       </ul>
     </p>
     <p>
-      Alternatively, use <a href="/api-explorer">API Explorer</a> to manipulate raw JSON object through REST API for maximum flexibility.</p>
+      Alternatively, use <router-link to="/api-explorer">API Explorer</router-link> to manipulate raw JSON object through REST API for maximum flexibility.</p>
   </div>
 </template>
 

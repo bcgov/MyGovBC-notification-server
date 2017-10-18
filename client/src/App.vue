@@ -2,7 +2,7 @@
   <v-app id="inspire">
     <v-navigation-drawer persistent v-model="drawer" enable-resize-watcher app>
       <v-list dense>
-        <v-list-tile href="/">
+        <v-list-tile to="/">
           <v-list-tile-action>
             <v-icon>home</v-icon>
           </v-list-tile-action>
@@ -10,7 +10,7 @@
             <v-list-tile-title>Home</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile href="/subscriptions/">
+        <v-list-tile to="/subscriptions/">
           <v-list-tile-action>
             <v-icon>list</v-icon>
           </v-list-tile-action>
@@ -18,7 +18,7 @@
             <v-list-tile-title>Subscriptions</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile href="/notifications/">
+        <v-list-tile to="/notifications/">
           <v-list-tile-action>
             <v-icon>email</v-icon>
           </v-list-tile-action>
@@ -26,7 +26,7 @@
             <v-list-tile-title>Notifications</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile href="/configurations/">
+        <v-list-tile to="/configurations/">
           <v-list-tile-action>
             <v-icon>settings_applications</v-icon>
           </v-list-tile-action>
@@ -34,7 +34,7 @@
             <v-list-tile-title>Configurations</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile href="/administrators/">
+        <v-list-tile to="/administrators/">
           <v-list-tile-action>
             <v-icon>security</v-icon>
           </v-list-tile-action>
@@ -42,7 +42,7 @@
             <v-list-tile-title>Administrators</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile href="/api-explorer/">
+        <v-list-tile to="/api-explorer/">
           <v-list-tile-action>
             <v-icon>code</v-icon>
           </v-list-tile-action>

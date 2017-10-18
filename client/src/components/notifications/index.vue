@@ -53,7 +53,8 @@ export default {
             type: 'object',
             description: 'sub-fields depend on channel'
           }
-        }
+        },
+        required: ['serviceName', 'channel', 'message']
       }
     })
   }
@@ -63,8 +64,7 @@ export default {
 <style lang='less'>
 #nb-notification-editor {
   @import '~bootstrap/less/bootstrap.less';
-  .sceditor-container
- {
+  .sceditor-container {
     * {
       box-sizing: content-box;
     }
