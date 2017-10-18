@@ -52,7 +52,7 @@
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
-    <v-toolbar color="indigo" dark fixed app>
+    <v-toolbar color="indigo" dark app>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>NotifyBC Manager - {{ this.$router.currentRoute.name }}</v-toolbar-title>
     </v-toolbar>
