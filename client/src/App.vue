@@ -54,7 +54,7 @@
     </v-navigation-drawer>
     <v-toolbar color="indigo" dark app>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>NotifyBC Manager - {{ this.$router.currentRoute.name }}</v-toolbar-title>
+      <v-toolbar-title>NotifyBC Web Console - {{ this.$router.currentRoute.name }}</v-toolbar-title>
     </v-toolbar>
     <main>
       <v-content>

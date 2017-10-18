@@ -1,6 +1,6 @@
-# NotifyBC-manager
+# NotifyBC-web-console
 
-> NotifyBC manager
+> NotifyBC web console
 
 ## Build Setup
 

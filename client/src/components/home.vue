@@ -1,7 +1,7 @@
 <template>
   <div>
     <h6>Welcome</h6>
-    <p>If you are a NotifyBC administrator, you can access the web console of following items
+    <p>If you are a NotifyBC administrator, you can manage following items
       <ul>
         <li><a href="/subscriptions">Subscriptions</a></li>
         <li><a href="/notifications">Notifications</a></li>

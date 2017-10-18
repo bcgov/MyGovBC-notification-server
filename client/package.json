@@ -1,7 +1,7 @@
 {
-  "name": "notifybc-manager",
+  "name": "notifybc-web-console",
   "version": "1.0.0",
-  "description": "NotifyBC manager",
+  "description": "NotifyBC web console",
   "author": "f-w <fred.wen@gov.bc.ca>",
   "private": true,
   "scripts": {
