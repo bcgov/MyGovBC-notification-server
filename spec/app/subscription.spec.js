@@ -284,8 +284,46 @@ describe('POST /subscriptions', function() {
       })
   })
 
-  it('todo: should ignore message supplied by non-admin user when creating subscription', function(done){
-    done()
+  it('should ignore message supplied by non-admin user when creating a subscription', function(
+    done
+  ) {
+    request(app)
+      .post('/api/subscriptions')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        userChannelId: 'nobody@local.invalid',
+        confirmationRequest: {
+          confirmationCodeRegex: '\\d{5}',
+          sendRequest: true,
+          from: 'nobody@local.invalid',
+          subject: 'spoofed subject',
+          textBody: 'spoofed body',
+          confirmationCode: '41488'
+        }
+      })
+      .set('Accept', 'application/json')
+      .end(function(err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(app.models.Subscription.sendEmail).toHaveBeenCalledTimes(1)
+        app.models.Subscription.find(
+          {
+            where: {
+              serviceName: 'myService',
+              userChannelId: 'nobody@local.invalid'
+            }
+          },
+          function(err, data) {
+            expect(data[0].confirmationRequest.textBody).not.toContain(
+              'spoofed'
+            )
+            expect(
+              app.models.Subscription.sendEmail.calls.argsFor(0)[0].subject
+            ).not.toContain('spoofed')
+            done()
+          }
+        )
+      })
   })
 
   it('should reject subscriptions with invalid broadcastPushNotificationFilter', function(
