@@ -12,10 +12,11 @@ module.exports = function(Subscription) {
     'create',
     'patchAttributes',
     'deleteItemById',
-    'verify'
+    'verify',
+    'count'
   ])
 
-  Subscription.beforeRemote('find', function() {
+  function accessCheckForGetRequest() {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     var userId = Subscription.getCurrentUser(ctx)
@@ -25,7 +26,10 @@ module.exports = function(Subscription) {
     var error = new Error('Forbidden')
     error.status = 403
     return next(error)
-  })
+  }
+
+  Subscription.beforeRemote('find', accessCheckForGetRequest)
+  Subscription.beforeRemote('count', accessCheckForGetRequest)
 
   Subscription.observe(
     'before save',

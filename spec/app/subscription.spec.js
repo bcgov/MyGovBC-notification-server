@@ -123,6 +123,7 @@ describe('POST /subscriptions', function() {
         )
       })
   })
+
   it('should allow admin users create subscriptions and send confirmation request with proper mail merge', function(
     done
   ) {
@@ -223,6 +224,7 @@ describe('POST /subscriptions', function() {
         )
       })
   })
+
   it('should generate unsubscription code for subscriptions created by admin user', function(
     done
   ) {
@@ -254,6 +256,7 @@ describe('POST /subscriptions', function() {
         )
       })
   })
+
   it('should allow non-admin user create subscriptions', function(done) {
     request(app)
       .post('/api/subscriptions')
@@ -280,6 +283,11 @@ describe('POST /subscriptions', function() {
         )
       })
   })
+
+  it('todo: should ignore message supplied by non-admin user when creating subscription', function(done){
+    done()
+  })
+
   it('should reject subscriptions with invalid broadcastPushNotificationFilter', function(
     done
   ) {
@@ -308,6 +316,7 @@ describe('POST /subscriptions', function() {
         )
       })
   })
+
   it('should accept subscriptions with valid broadcastPushNotificationFilter', function(
     done
   ) {

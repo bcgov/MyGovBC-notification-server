@@ -236,11 +236,12 @@ The API operates on following subscription data model fields:
 </table>
 
 ## Get Subscriptions
+
 ```
 GET /subscriptions
 ```
 * inputs 
-  * a filter defining fields, where, include, order, offset, and limit
+  * a filter defining fields, where, include, order, offset, and limit. See [Loopback Querying Data](https://loopback.io/doc/en/lb3/Querying-data.html) for valid syntax and examples
     * parameter name: filter
     * required: false
     * parameter type: query
@@ -252,6 +253,27 @@ GET /subscriptions
     * only subscriptions created by the user 
     * the *confirmationRequest* field is removed. 
   * forbidden for anonymous user requests 
+
+## Get Subscription Count
+
+```
+GET /subscriptions/count
+```
+* inputs 
+  * a [where filter](https://loopback.io/doc/en/lb3/Where-filter.html)
+    * parameter name: filter
+    * required: false
+    * parameter type: query
+    * data type: object
+* outcome
+
+  Validations rules are the same as *GET /subscriptions*. If passed, the output is a count of subscriptions matching the query
+
+  ```json
+  {
+    "count": <number>
+  }
+  ```
 
 ## Create a Subscription
 ```
