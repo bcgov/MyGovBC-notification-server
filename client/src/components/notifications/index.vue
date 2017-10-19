@@ -22,7 +22,9 @@ export default {
   computed: mapState(['currentlyEditedNotification']),
   methods: {
     setCurrentlyEditedNotification: function() {
-      this.$store.dispatch('setCurrentlyEditedNotification', this.jsonEditor.getValue())
+      this.$store.dispatch('setCurrentlyEditedNotification', this.jsonEditor.getValue()).catch((reason) => {
+        this.createJsonEditor()
+      })
     },
     resetEditor: function() {
       this.createJsonEditor()
