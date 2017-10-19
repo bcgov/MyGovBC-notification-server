@@ -5,8 +5,20 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    notifications: []
+    currentlyEditedNotification: undefined
   },
-  mutations: {},
+  mutations: {
+    setCurrentlyEditedNotification(state, item) {
+      state.currentlyEditedNotification = item
+    }
+  },
+  actions: {
+    setCurrentlyEditedNotification({ commit }, item) {
+      return new Promise((resolve, reject) => {
+        commit('setCurrentlyEditedNotification', item)
+        resolve()
+      })
+    }
+  },
   strict: process.env.NODE_ENV !== 'production'
 })
