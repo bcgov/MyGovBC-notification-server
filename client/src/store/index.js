@@ -14,18 +14,10 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    setCurrentlyEditedNotification({ commit }, item) {
-      return new Promise((resolve, reject) => {
-        axios
-          .get('https://www.google.ca')
-          .then(function(response) {
-            commit('setCurrentlyEditedNotification', item)
-            resolve()
-          })
-          .catch(function(error) {
-            reject(error)
-          })
-      })
+    async setCurrentlyEditedNotification({ commit }, item) {
+      await axios.get('https://www.google.ca')
+      commit('setCurrentlyEditedNotification', item)
+      return
     }
   },
   strict: process.env.NODE_ENV !== 'production'
