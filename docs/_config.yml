@@ -9,6 +9,7 @@ collections:
     output: true
 
 name: NotifyBC
+title: NotifyBC
 description: A versatile notification API server
 baseurl: "/MyGovBC-notification-server"
 url: "https://bcgov.github.io"
