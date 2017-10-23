@@ -40,6 +40,8 @@ export default {
         iconlib: 'fontawesome4',
         keep_oneof_values: false,
         required_by_default: true,
+        // required: ['serviceName', 'channel', 'message'],
+        remove_empty_properties: true,
         disable_collapse: true,
         startval: this.$store.state.currentlyEditedNotification,
         schema: {

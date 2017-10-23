@@ -4,6 +4,7 @@ import axios from 'axios'
 
 Vue.use(Vuex)
 
+const ApiUrlPrefix = 'http://localhost:3000/api'
 export default new Vuex.Store({
   state: {
     currentlyEditedNotification: undefined
@@ -15,7 +16,7 @@ export default new Vuex.Store({
   },
   actions: {
     async setCurrentlyEditedNotification({ commit }, item) {
-      await axios.get('https://www.google.ca')
+      await axios.post(ApiUrlPrefix + '/notifications', item)
       commit('setCurrentlyEditedNotification', item)
       return
     }
