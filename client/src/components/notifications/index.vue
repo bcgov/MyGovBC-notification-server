@@ -1,140 +1,106 @@
 <template>
   <div>
     <h6>Notifications</h6>
-    <div id='nb-notification-editor'></div>
-    <v-btn color="primary" @click="setCurrentlyEditedNotification">save</v-btn>
-    <v-btn color="error" @click="resetEditor">cancel</v-btn>
+    <v-data-table :headers="headers" :items="notifications" hide-actions class="elevation-1">
+      <template slot="items" slot-scope="props">
+        <td>{{ props.item.serviceName }}</td>
+        <td>{{ props.item.channel }}</td>
+        <td>{{ props.item.state }}</td>
+        <td>{{ props.item.isBroadcast }}</td>
+        <td class='text-xs-right'>{{ props.item.updated }}</td>
+        <td>
+          <v-btn @click="editItem(props)" flat icon color="indigo">
+            <v-icon>create</v-icon>
+          </v-btn>
+        </td>
+      </template>
+      <template slot="expand" slot-scope="props">
+        <notification-editor class='ma-2' @submit="closeEditPanel(props)" @cancel="closeEditPanel(props)" :item='props.item' />
+      </template>
+      <template slot="footer">
+        <td colspan="100%">
+          <v-expansion-panel>
+            <v-expansion-panel-content hide-actions v-model='newPanelExpanded'>
+              <div slot="header" class='text-xs-center' color="indigo">
+                <v-btn flat icon>
+                  <v-icon large color="indigo">{{this.newPanelExpanded?'keyboard_arrow_up':'add'}}</v-icon>
+                </v-btn>
+              </div>
+              <v-card>
+                <v-card-text class="grey lighten-3">
+                  <notification-editor class='ma-2' @submit="closeNewPanel" @cancel="closeNewPanel" />
+                </v-card-text>
+              </v-card>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </td>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
 <script>
-import 'json-editor'
-import 'sceditor/src/jquery.sceditor.js'
 import {
-  mapState
+  mapState,
+  mapActions
 } from 'vuex'
+import NotificationEditor from './editor'
 export default {
+  components: {
+    'notification-editor': NotificationEditor
+  },
+  computed: mapState(['notifications']),
+  created: function() {
+    this.fetchNotifications()
+  },
+  methods: {
+    ...mapActions(['fetchNotifications']),
+    editItem: function(props) {
+      props.expanded = !props.expanded
+    },
+    closeEditPanel: function(props) {
+      props.expanded = false
+    },
+    closeNewPanel: function() {
+      this.newPanelExpanded = false
+    }
+  },
   data: function() {
     return {
-      jsonEditor: null
+      newItemIcon: 'add',
+      newPanelExpanded: false,
+      headers: [{
+        text: 'Service Name',
+        align: 'left',
+        value: 'serviceName'
+      }, {
+        text: 'Channel',
+        align: 'left',
+        value: 'channel'
+      }, {
+        text: 'State',
+        align: 'left',
+        value: 'state'
+      }, {
+        text: 'Is Broadcast',
+        align: 'left',
+        value: 'isBroadcast'
+      }, {
+        text: 'updated',
+        align: 'right',
+        value: 'updated'
+      }, {
+        text: 'Actions',
+        align: 'left',
+        sortable: false
+      }]
     }
-  },
-  computed: mapState(['currentlyEditedNotification']),
-  methods: {
-    setCurrentlyEditedNotification: function() {
-      this.$store.dispatch('setCurrentlyEditedNotification', this.jsonEditor.getValue()).catch((reason) => {
-        this.createJsonEditor()
-      })
-    },
-    resetEditor: function() {
-      this.createJsonEditor()
-    },
-    createJsonEditor: function() {
-      let element = $('#nb-notification-editor', this.$el).get(0)
-      window.JSONEditor.plugins.sceditor.style = ''
-      if (this.jsonEditor) {
-        this.jsonEditor.destroy()
-      }
-      this.jsonEditor = new window.JSONEditor(element, {
-        theme: 'bootstrap3',
-        iconlib: 'fontawesome4',
-        keep_oneof_values: false,
-        required_by_default: true,
-        // required: ['serviceName', 'channel', 'message'],
-        remove_empty_properties: true,
-        disable_collapse: true,
-        startval: this.$store.state.currentlyEditedNotification,
-        schema: {
-          type: 'object',
-          properties: {
-            serviceName: {
-              type: 'string'
-            },
-            channel: {
-              enum: ['email', 'sms', 'in-app'],
-              type: 'string'
-            },
-            userChannelId: {
-              type: 'string'
-            },
-            userId: {
-              type: 'string'
-            },
-            isBroadcast: {
-              type: 'boolean'
-            },
-            skipSubscriptionConfirmationCheck: {
-              type: 'boolean'
-            },
-            validTill: {
-              type: 'string',
-              format: 'datetime-local'
-            },
-            invalidBefore: {
-              type: 'string',
-              format: 'datetime-local'
-            },
-            message: {
-              description: 'sub-fields depend on channel',
-              oneOf: [{
-                title: 'email',
-                type: 'object',
-                properties: {
-                  from: {
-                    type: 'string'
-                  },
-                  subject: {
-                    type: 'string'
-                  },
-                  textBody: {
-                    type: 'string',
-                    format: 'html'
-                  },
-                  htmlBody: {
-                    type: 'string',
-                    format: 'html',
-                    options: {
-                      wysiwyg: true
-                    }
-                  }
-                }
-              }, {
-                title: 'sms',
-                type: 'object',
-                properties: {
-                  textBody: {
-                    type: 'string',
-                    format: 'html'
-                  }
-                }
-              }, {
-                title: 'in-app',
-                type: 'object'
-              }]
-            }
-          }
-        }
-      })
-    }
-  },
-  mounted: function() {
-    this.createJsonEditor()
   }
 }
 </script>
-
-<style lang='less'>
-#nb-notification-editor {
-  @import '~bootstrap/less/bootstrap.less';
-  select {
-    -webkit-appearance: menulist-button;
-  }
-  .sceditor-container {
-    * {
-      box-sizing: content-box;
-    }
-    @import '~sceditor/minified/jquery.sceditor.default.min.css';
-    @import '~sceditor/minified/themes/default.min.css';
-  }
+<style lang='less' scoped>
+.table__overflow {
+  overflow-x: visible;
+  overflow-y: visible;
 }
 </style>
