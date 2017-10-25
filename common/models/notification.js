@@ -10,7 +10,8 @@ module.exports = function(Notification) {
     'find',
     'create',
     'patchAttributes',
-    'deleteItemById'
+    'deleteItemById',
+    'count'
   ])
 
   Notification.observe('access', function(ctx, next) {

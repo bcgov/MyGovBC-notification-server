@@ -4,7 +4,8 @@ module.exports = function(Configuration) {
     'find',
     'create',
     'patchAttributes',
-    'deleteById'
+    'deleteById',
+    'count'
   ])
   Configuration.beforeRemote('**', function(ctx, unused, next) {
     if (Configuration.isAdminReq(ctx, true)) {
