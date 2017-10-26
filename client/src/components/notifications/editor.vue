@@ -82,7 +82,14 @@ export default {
             skipSubscriptionConfirmationCheck: {
               type: 'string',
               enum: [true, false],
+              default: 'false',
               propertyOrder: 500
+            },
+            asyncBroadcastPushNotification: {
+              type: 'string',
+              enum: [true, false],
+              propertyOrder: 550,
+              description: 'set to true to avoid long processing time when sending broadcast notification to many subscribers'
             },
             validTill: {
               type: 'string',
