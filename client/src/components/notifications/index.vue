@@ -1,7 +1,7 @@
 <template>
   <div>
     <h6>Notifications</h6>
-    <v-data-table :headers="headers" :items="notifications" hide-actions class="elevation-1">
+    <v-data-table :headers="headers" :items="notifications.items" class="elevation-1" :pagination.sync="pagination" :total-items="notifications.totalCount" :loading="loading">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.serviceName }}</td>
         <td>{{ props.item.channel }}</td>
@@ -18,7 +18,7 @@
         <notification-editor class='ma-2' @submit="closeEditPanel(props)" @cancel="closeEditPanel(props)" :item='props.item' />
       </template>
       <template slot="footer">
-        <td colspan="100%">
+        <td colspan="100%" class='pa-0'>
           <v-expansion-panel>
             <v-expansion-panel-content hide-actions v-model='newPanelExpanded'>
               <div slot="header" class='text-xs-center' color="indigo">
@@ -49,12 +49,15 @@ export default {
   components: {
     'notification-editor': NotificationEditor
   },
-  computed: mapState(['notifications']),
-  created: function() {
-    this.fetchNotifications()
+  computed: {...mapState(['notifications']),
+  },
+  created: async function() {
+    await this.fetchNotifications()
+    await this.fetchNotificationCount()
+    this.loading = false
   },
   methods: {
-    ...mapActions(['fetchNotifications']),
+    ...mapActions(['fetchNotifications', 'fetchNotificationCount']),
     editItem: function(props) {
       props.expanded = !props.expanded
     },
@@ -65,10 +68,31 @@ export default {
       this.newPanelExpanded = false
     }
   },
+  watch: {
+    pagination: {
+      async handler() {
+        this.loading = true
+        let filter = {}
+        if (this.pagination.rowsPerPage > 0) {
+          filter.limit = this.pagination.rowsPerPage
+          filter.skip = this.pagination.rowsPerPage * (this.pagination.page - 1)
+        }
+        if (this.pagination.sortBy) {
+          filter.order = this.pagination.sortBy + ' ' + (this.pagination.descending ? 'DESC' : 'ASC')
+        }
+        await this.fetchNotifications(filter)
+        await this.fetchNotificationCount()
+        this.loading = false
+        return
+      },
+      deep: true
+    }
+  },
   data: function() {
     return {
-      newItemIcon: 'add',
       newPanelExpanded: false,
+      pagination: {},
+      loading: true,
       headers: [{
         text: 'Service Name',
         align: 'left',
