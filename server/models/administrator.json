@@ -2,6 +2,13 @@
   "name": "administrator",
   "base": "User",
   "idInjection": true,
+  "indexes": {
+    "$**_text": {
+      "keys": {
+        "$**": "text"
+      }
+    }
+  },
   "options": {
     "validateUpsert": true
   },

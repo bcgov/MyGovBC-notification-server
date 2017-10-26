@@ -11,6 +11,11 @@
       "options": {
         "unique": true
       }
+    },
+    "$**_text": {
+      "keys": {
+        "$**": "text"
+      }
     }
   },
   "options": {

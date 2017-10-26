@@ -2,6 +2,13 @@
   "name": "notification",
   "base": "PersistedModel",
   "idInjection": true,
+  "indexes": {
+    "$**_text": {
+      "keys": {
+        "$**": "text"
+      }
+    }
+  },
   "options": {
     "validateUpsert": true,
     "replaceOnPUT": true
@@ -45,7 +52,7 @@
       "type": "boolean",
       "default": false
     },
-    "skipSubscriptionConfirmationCheck":{
+    "skipSubscriptionConfirmationCheck": {
       "type": "boolean",
       "default": false
     },
@@ -67,8 +74,7 @@
   "acls": [],
   "methods": {
     "prototype.broadcastToChunkSubscribers": {
-      "accepts": [
-        {
+      "accepts": [{
           "arg": "options",
           "type": "object",
           "http": "optionsFromRequest"
@@ -83,40 +89,32 @@
           }
         }
       ],
-      "returns": [
-        {
-          "arg": "failedDeliveries",
-          "type": "array",
-          "root": true,
-          "description": "failed deliveries"
-        }
-      ],
+      "returns": [{
+        "arg": "failedDeliveries",
+        "type": "array",
+        "root": true,
+        "description": "failed deliveries"
+      }],
       "description": "dispatch broadcast notifications to a chunk of subscribers",
-      "http": [
-        {
-          "path": "/broadcastToChunkSubscribers",
-          "verb": "get"
-        }
-      ]
+      "http": [{
+        "path": "/broadcastToChunkSubscribers",
+        "verb": "get"
+      }]
     },
     "prototype.deleteItemById": {
-      "accepts": [
-        {
-          "arg": "options",
-          "type": "object",
-          "required": false,
-          "http": "optionsFromRequest",
-          "description": ""
-        }
-      ],
+      "accepts": [{
+        "arg": "options",
+        "type": "object",
+        "required": false,
+        "http": "optionsFromRequest",
+        "description": ""
+      }],
       "returns": [],
       "description": "delete a notification by Id",
-      "http": [
-        {
-          "path": "/",
-          "verb": "delete"
-        }
-      ]
+      "http": [{
+        "path": "/",
+        "verb": "delete"
+      }]
     }
   }
 }
