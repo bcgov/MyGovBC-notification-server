@@ -318,20 +318,42 @@ The API operates on following notification data model fields:
 GET /notifications
 ```
 * inputs 
-  * a filter defining fields, where, include, order, offset, and limit
+  * a filter defining fields, where, include, order, offset, and limit. See [Loopback Querying Data](https://loopback.io/doc/en/lb3/Querying-data.html) for valid syntax and examples
     * parameter name: filter
     * required: false
     * parameter type: query
     * data type: object
 * outcome
   * for admin requests, returns unabridged array of notification data matching the filter
-  * for user requests, in addition to filter, following constraints are imposed on the returned array 
+  * for authenticated user requests, in addition to filter, following constraints are imposed on the returned array 
     * only inApp notifications 
     * only non-deleted notifications. For broadcast notification, non-deleted means not marked by current user as deleted
     * only non-expired notifications
     * for unicast notifications, only the ones targeted to current user
     * if current user is in *readBy*, then the *state* is changed to *read*
     * the internal field *readBy* and *deletedBy* are removed
+  * forbidden to anonymous user requests
+
+## Get Notification Count
+
+```
+GET /notifications/count
+```
+* inputs
+  * a [where filter](https://loopback.io/doc/en/lb3/Where-filter.html)
+    * parameter name: filter
+    * required: false
+    * parameter type: query
+    * data type: object
+* outcome
+
+  Validations rules are the same as *GET /notifications*. If passed, the output is a count of notifications matching the query
+
+  ```json
+  {
+    "count": <number>
+  }
+  ```
 
 ## Send Notifications
 ```
