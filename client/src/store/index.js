@@ -10,7 +10,8 @@ export default new Vuex.Store({
     notifications: {
       items: [],
       filter: undefined,
-      totalCount: undefined
+      totalCount: undefined,
+      search: undefined
     }
   },
   mutations: {
@@ -20,8 +21,11 @@ export default new Vuex.Store({
     setTotalNotificationCount(state, cnt) {
       state.notifications.totalCount = cnt
     },
-    setNotificationsFilter(state, filter){
+    setNotificationsFilter(state, filter) {
       state.notifications.filter = filter
+    },
+    setNotificationsSearch(state, value) {
+      state.notifications.search = value
     }
   },
   actions: {
@@ -41,9 +45,11 @@ export default new Vuex.Store({
         data: item
       })
       await dispatch('fetchNotifications')
-      await dispatch('fetchNotificationCount')
     },
-    async fetchNotifications({ commit }, filter) {
+    async fetchNotifications({ commit, state }, filter) {
+      if (filter) {
+        filter = Object.assign({}, state.notifications.filter, filter)
+      }
       commit('setNotificationsFilter', filter)
       let url = ApiUrlPrefix + '/notifications'
       if (filter) {
@@ -51,16 +57,12 @@ export default new Vuex.Store({
       }
       let items = await axios.get(url)
       commit('setLocalNotifications', items.data)
-      return items.data
-    },
-    async fetchNotificationCount({ commit , state}) {
-      let url = ApiUrlPrefix + '/notifications/count'
-      if (state.notifications.filter && state.notifications.filter.where) {
-        url += '?where=' + encodeURIComponent(JSON.stringify(state.notifications.filter.where))
+      url = ApiUrlPrefix + '/notifications/count'
+      if (filter && filter.where) {
+        url += '?where=' + encodeURIComponent(JSON.stringify(filter.where))
       }
       let response = await axios.get(url)
       commit('setTotalNotificationCount', response.data.count)
-      return response.data.count
     }
   },
   strict: process.env.NODE_ENV !== 'production'

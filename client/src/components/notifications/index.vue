@@ -1,6 +1,8 @@
 <template>
   <div>
     <h6>Notifications</h6>
+    <v-spacer></v-spacer>
+    <v-text-field append-icon="search" label="Search" single-line hide-details v-model="search"></v-text-field>
     <v-data-table :headers="headers" :items="notifications.items" class="elevation-1" :pagination.sync="pagination" :total-items="notifications.totalCount" :loading="loading">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.serviceName }}</td>
@@ -50,14 +52,37 @@ export default {
     'notification-editor': NotificationEditor
   },
   computed: {...mapState(['notifications']),
+    search: {
+      get() {
+        return this.notifications.search
+      },
+      set(value) {
+        this.$store.commit('setNotificationsSearch', value)
+        let filter = {
+          where: undefined
+        }
+        if (value !== '') {
+          filter.where = {
+            '$text': {
+              search: value
+            }
+          }
+          filter.skip = 0
+          this.pagination.page = 1
+        }
+        this.fetchNotifications(filter)
+      }
+    }
   },
   created: async function() {
     await this.fetchNotifications()
-    await this.fetchNotificationCount()
-    this.loading = false
   },
   methods: {
-    ...mapActions(['fetchNotifications', 'fetchNotificationCount']),
+    fetchNotifications: async function(filter) {
+      this.loading = true
+      await this.$store.dispatch('fetchNotifications', filter)
+      this.loading = false
+    },
     editItem: function(props) {
       props.expanded = !props.expanded
     },
@@ -71,18 +96,17 @@ export default {
   watch: {
     pagination: {
       async handler() {
-        this.loading = true
-        let filter = {}
+        let filter
         if (this.pagination.rowsPerPage > 0) {
+          filter = filter || {}
           filter.limit = this.pagination.rowsPerPage
           filter.skip = this.pagination.rowsPerPage * (this.pagination.page - 1)
         }
         if (this.pagination.sortBy) {
+          filter = filter || {}
           filter.order = this.pagination.sortBy + ' ' + (this.pagination.descending ? 'DESC' : 'ASC')
         }
         await this.fetchNotifications(filter)
-        await this.fetchNotificationCount()
-        this.loading = false
         return
       },
       deep: true
