@@ -2,7 +2,7 @@
   <div>
     <h6>Notifications</h6>
     <v-spacer></v-spacer>
-    <v-text-field append-icon="search" label="Search" single-line hide-details v-model="search"></v-text-field>
+    <v-text-field append-icon="search" hint='enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
     <v-data-table :headers="headers" :items="notifications.items" class="elevation-1" :pagination.sync="pagination" :total-items="notifications.totalCount" :loading="loading">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.serviceName }}</td>
@@ -72,6 +72,12 @@ export default {
               search: value
             }
           }
+          try {
+            let searchJson = JSON.parse(value)
+            if (searchJson instanceof Object) {
+              filter.where = searchJson
+            }
+          } catch (ex) {}
           filter.skip = 0
           this.pagination.page = 1
         }
@@ -129,19 +135,19 @@ export default {
       pagination: {},
       loading: true,
       headers: [{
-        text: 'Service Name',
+        text: 'serviceName',
         align: 'left',
         value: 'serviceName'
       }, {
-        text: 'Channel',
+        text: 'channel',
         align: 'left',
         value: 'channel'
       }, {
-        text: 'State',
+        text: 'state',
         align: 'left',
         value: 'state'
       }, {
-        text: 'Is Broadcast',
+        text: 'isBroadcast',
         align: 'left',
         value: 'isBroadcast'
       }, {
@@ -149,7 +155,7 @@ export default {
         align: 'right',
         value: 'updated'
       }, {
-        text: 'Actions',
+        text: 'actions',
         align: 'left',
         sortable: false
       }]

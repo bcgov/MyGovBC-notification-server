@@ -50,6 +50,9 @@ export default new Vuex.Store({
       if (filter) {
         filter = Object.assign({}, state.notifications.filter, filter)
       }
+      else{
+        commit('setNotificationsSearch', undefined)
+      }
       commit('setNotificationsFilter', filter)
       let url = ApiUrlPrefix + '/notifications'
       if (filter) {
