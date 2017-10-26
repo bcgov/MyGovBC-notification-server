@@ -11,13 +11,16 @@
         <td>{{ props.item.isBroadcast }}</td>
         <td class='text-xs-right'>{{ props.item.updated }}</td>
         <td>
-          <v-btn @click="editItem(props)" flat icon color="indigo">
+          <v-btn @click="editItem(props)" v-if="props.item.state === 'new'" flat icon>
             <v-icon>create</v-icon>
+          </v-btn>
+          <v-btn @click="viewItem(props)" flat icon>
+            <v-icon>info</v-icon>
           </v-btn>
         </td>
       </template>
       <template slot="expand" slot-scope="props">
-        <notification-editor class='ma-2' @submit="closeEditPanel(props)" @cancel="closeEditPanel(props)" :item='props.item' />
+        <component :is='currentExpanderView' class='ma-2' @submit="closeEditPanel(props)" @cancel="closeEditPanel(props)" :item='props.item' />
       </template>
       <template slot="footer">
         <td colspan="100%" class='pa-0'>
@@ -47,9 +50,11 @@ import {
   mapActions
 } from 'vuex'
 import NotificationEditor from './editor'
+import NotificationViewer from './viewer'
 export default {
   components: {
-    'notification-editor': NotificationEditor
+    notificationEditor: NotificationEditor,
+    notificationViewer: NotificationViewer
   },
   computed: {...mapState(['notifications']),
     search: {
@@ -84,7 +89,12 @@ export default {
       this.loading = false
     },
     editItem: function(props) {
-      props.expanded = !props.expanded
+      props.expanded = (this.currentExpanderView === 'notificationEditor') ? !props.expanded : true
+      this.currentExpanderView = 'notificationEditor'
+    },
+    viewItem: function(props) {
+      props.expanded = (this.currentExpanderView === 'notificationViewer') ? !props.expanded : true
+      this.currentExpanderView = 'notificationViewer'
     },
     closeEditPanel: function(props) {
       props.expanded = false
@@ -115,6 +125,7 @@ export default {
   data: function() {
     return {
       newPanelExpanded: false,
+      currentExpanderView: 'notificationEditor',
       pagination: {},
       loading: true,
       headers: [{
