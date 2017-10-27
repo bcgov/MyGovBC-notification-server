@@ -34,8 +34,9 @@ export default {
     },
     createJsonEditor: function() {
       let element = $('#nb-notification-editor', this.$el).get(0)
-      window.JSONEditor.plugins.sceditor.style = ''
-      window.JSONEditor.plugins.sceditor.width = '99%'
+      window.JSONEditor.plugins.sceditor.style = '/sceditor/minified/jquery.sceditor.default.min.css'
+      window.JSONEditor.plugins.sceditor.width = '98%'
+
       if (this.jsonEditor) {
         this.jsonEditor.destroy()
       }
@@ -146,9 +147,10 @@ export default {
                   htmlBody: {
                     type: 'string',
                     format: 'html',
-                    options: {
-                      wysiwyg: true
-                    }
+                    // todo: fix https://github.com/jdorn/json-editor/issues/651
+                    // options: {
+                    //   wysiwyg: true
+                    // }
                   }
                 }
               }, {
@@ -191,7 +193,6 @@ export default {
     * {
       box-sizing: content-box;
     }
-    @import (less) '~sceditor/minified/jquery.sceditor.default.min.css';
   }
 }
 </style>
