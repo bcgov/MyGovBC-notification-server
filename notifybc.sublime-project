@@ -126,5 +126,8 @@
   },
   {
     "path": "../jmespath.js"
+  },
+  {
+    "path": "../loopback-component-explorer"
   }]
 }
