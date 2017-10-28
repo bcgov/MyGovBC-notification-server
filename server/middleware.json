@@ -50,7 +50,17 @@
       ]
     }
   },
-  "files": {},
+  "files": {
+    "loopback#static": {
+      "params": "$!../client/dist"
+    }
+  },
+  "files:after": {
+    "loopback#static": {
+      "paths": ["/*"],
+      "params": "$!../client/dist"
+    }
+  },
   "final": {
     "loopback#urlNotFound": {}
   },

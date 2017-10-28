@@ -5,6 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
+    "postinstall": "pushd client && npm i && npm run build && popd",
     "test": "cross-env NODE_ENV=test istanbul cover node_modules/jasmine/bin/jasmine.js",
     "pretest": "jshint .",
     "posttest": "nsp check"
