@@ -34,8 +34,9 @@
   },
   {
     "cmd": [
-      "node.exe",
-      "server/server.js"
+      "npm.cmd",
+      "run",
+      "start:dev"
     ],
     "env":
     {
@@ -87,7 +88,8 @@
     ],
     "env":
     {
-      "NOTIFYBC_NODE_ROLE": "master"
+      "NOTIFYBC_NODE_ROLE": "master",
+      "NODE_ENV": "dev"
     },
     "name": "debug-app",
     "working_dir": "${project_path}"

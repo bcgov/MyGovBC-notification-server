@@ -5,7 +5,8 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
-    "postinstall": "pushd client && npm i && npm run build && popd",
+    "start:dev": "cross-env NODE_ENV=dev node .",
+    "postinstall": "cd client && npm i && npm run build && cd ..",
     "test": "cross-env NODE_ENV=test istanbul cover node_modules/jasmine/bin/jasmine.js",
     "pretest": "jshint .",
     "posttest": "nsp check"
@@ -17,6 +18,7 @@
     "cron": "^1.2.1",
     "cross-env": "^5.0.0",
     "csvtojson": "^1.1.7",
+    "ejs": "^2.5.7",
     "feedparser": "^2.2.0",
     "helmet": "^3.8.0",
     "ip-range-check": "0.0.2",
@@ -42,12 +44,16 @@
     "underscore.string": "^3.3.4"
   },
   "devDependencies": {
+    "connect-history-api-fallback": "^1.4.0",
     "istanbul": "^0.4.5",
     "jasmine": "^2.6.0",
     "jshint": "^2.5.6",
     "nsp": "^2.1.0",
     "smtp-connection": "^4.0.2",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "webpack": "^3.8.1",
+    "webpack-dev-middleware": "^1.12.0",
+    "webpack-hot-middleware": "^2.20.0"
   },
   "repository": {
     "type": "",

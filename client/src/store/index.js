@@ -4,7 +4,7 @@ import axios from 'axios'
 
 Vue.use(Vuex)
 
-const ApiUrlPrefix = 'http://localhost:3000/api'
+const ApiUrlPrefix = window.ApiUrlPrefix || '/api'
 export default new Vuex.Store({
   state: {
     notifications: {

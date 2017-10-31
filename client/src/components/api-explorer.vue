@@ -1,12 +1,17 @@
 <template>
   <div>
-    <iframe id='api-explorer' src='http://localhost:3000/explorer/' />
+    <iframe id='api-explorer' :src='ApiExplorerUrlPrefix' />
   </div>
 </template>
 
 <script>
 import iFrameResize from 'iframe-resizer'
 export default {
+  data: function() {
+    return {
+      ApiExplorerUrlPrefix: window.ApiExplorerUrlPrefix || '/explorer'
+    }
+  },
   mounted: async function() {
     $('#api-explorer').iFrameResize({
       log: false

@@ -52,13 +52,13 @@
   },
   "files": {
     "loopback#static": {
-      "params": "$!../client/dist"
+      "params": "$!../client/dist/"
     }
   },
   "files:after": {
     "loopback#static": {
       "paths": ["/*"],
-      "params": "$!../client/dist"
+      "params": "$!../client/dist/"
     }
   },
   "final": {
