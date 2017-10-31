@@ -18,7 +18,7 @@
         </td>
       </template>
       <template slot="expand" slot-scope="props">
-        <component :is='currentExpanderView' class='ma-2' @submit="closeEditPanel(props)" @cancel="closeEditPanel(props)" :item='props.item' :schema='schema' storeActionName='setNotification' />
+        <component :is='currentExpanderView' class='ma-2' @submit="submitEditPanel(props)" @cancel="cancelEditPanel(props)" :item='props.item' :schema='schema' storeActionName='setNotification' />
       </template>
       <template slot="footer">
         <td colspan="100%" class='pa-0'>
@@ -31,7 +31,7 @@
               </div>
               <v-card>
                 <v-card-text class="grey lighten-3">
-                  <notification-editor class='ma-2' @submit="closeNewPanel" @cancel="closeNewPanel" :schema='schema' storeActionName='setNotification' />
+                  <notification-editor class='ma-2' @submit="submitNewPanel" @cancel="cancelNewPanel" :schema='schema' storeActionName='setNotification' />
                 </v-card-text>
               </v-card>
             </v-expansion-panel-content>
@@ -100,10 +100,18 @@ export default {
       props.expanded = (this.currentExpanderView === 'notificationViewer') ? !props.expanded : true
       this.currentExpanderView = 'notificationViewer'
     },
-    closeEditPanel: function(props) {
+    submitEditPanel: function(props) {
+      props.expanded = false
+      this.$store.dispatch('fetchNotifications', {})
+    },
+    cancelEditPanel: function(props) {
       props.expanded = false
     },
-    closeNewPanel: function() {
+    submitNewPanel: function() {
+      this.newPanelExpanded = false
+      this.$store.dispatch('fetchNotifications', {})
+    },
+    cancelNewPanel: function() {
       this.newPanelExpanded = false
     }
   },

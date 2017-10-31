@@ -44,13 +44,11 @@ export default new Vuex.Store({
         url: ApiUrlPrefix + '/notifications' + (id ? '/' + id : ''),
         data: item
       })
-      await dispatch('fetchNotifications')
     },
     async fetchNotifications({ commit, state }, filter) {
       if (filter) {
         filter = Object.assign({}, state.notifications.filter, filter)
-      }
-      else{
+      } else {
         commit('setNotificationsSearch', undefined)
       }
       commit('setNotificationsFilter', filter)
