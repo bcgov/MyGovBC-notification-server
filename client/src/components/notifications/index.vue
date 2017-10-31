@@ -1,8 +1,6 @@
 <template>
   <div>
-    <h6>Notifications</h6>
-    <v-spacer></v-spacer>
-    <v-text-field append-icon="search" hint='enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
+    <v-text-field append-icon="search" hint='Enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search, for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
     <v-data-table :headers="headers" :items="notifications.items" class="elevation-1" :pagination.sync="pagination" :total-items="notifications.totalCount" :loading="loading">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.serviceName }}</td>
@@ -113,10 +111,15 @@ export default {
     pagination: {
       async handler() {
         let filter
-        if (this.pagination.rowsPerPage > 0) {
+        if (this.pagination.rowsPerPage >= -1) {
           filter = filter || {}
-          filter.limit = this.pagination.rowsPerPage
-          filter.skip = this.pagination.rowsPerPage * (this.pagination.page - 1)
+          if (this.pagination.rowsPerPage > 0) {
+            filter.limit = this.pagination.rowsPerPage
+            filter.skip = this.pagination.rowsPerPage * (this.pagination.page - 1)
+          } else {
+            filter.limit = undefined
+            filter.skip = 0
+          }
         }
         if (this.pagination.sortBy) {
           filter = filter || {}
