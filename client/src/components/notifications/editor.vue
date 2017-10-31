@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div id='nb-notification-editor'></div>
-    <v-btn color="primary" @click="setCurrentlyEditedNotification">save</v-btn>
+    <div id='nb-item-editor'></div>
+    <v-btn color="primary" @click="setCurrentlyEditedItem">save</v-btn>
     <v-btn color="error" @click="resetEditor">cancel</v-btn>
   </div>
 </template>
@@ -13,16 +13,16 @@ export default {
   data: function() {
     return {
       jsonEditor: null,
-      currentlyEditedNotification: undefined
+      currentlyEditedItem: undefined
     }
   },
-  props: ['item'],
+  props: ['item','schema','storeActionName'],
   methods: {
-    setCurrentlyEditedNotification: async function() {
+    setCurrentlyEditedItem: async function() {
       try {
         let item = this.jsonEditor.getValue()
-        await this.$store.dispatch('setNotification', item)
-        this.currentlyEditedNotification = item
+        await this.$store.dispatch(this.storeActionName, item)
+        this.currentlyEditedItem = item
         this.$emit('submit')
       } catch (ex) {
         this.createJsonEditor()
@@ -33,7 +33,7 @@ export default {
       this.$emit('cancel')
     },
     createJsonEditor: function() {
-      let element = $('#nb-notification-editor', this.$el).get(0)
+      let element = $('#nb-item-editor', this.$el).get(0)
       window.JSONEditor.plugins.sceditor.style = '/sceditor/minified/jquery.sceditor.default.min.css'
       window.JSONEditor.plugins.sceditor.width = '98%'
 
@@ -49,126 +49,7 @@ export default {
         remove_empty_properties: true,
         disable_collapse: true,
         startval: this.item,
-        schema: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              options: {
-                hidden: true
-              }
-            },
-            serviceName: {
-              type: 'string',
-              propertyOrder: 100
-            },
-            channel: {
-              enum: ['email', 'sms', 'in-app'],
-              type: 'string',
-              propertyOrder: 200
-            },
-            userId: {
-              type: 'string',
-              propertyOrder: 250
-            },
-            userChannelId: {
-              type: 'string',
-              propertyOrder: 300
-            },
-            isBroadcast: {
-              type: 'string',
-              enum: [true, false],
-              propertyOrder: 400
-            },
-            skipSubscriptionConfirmationCheck: {
-              type: 'string',
-              enum: [true, false],
-              default: 'false',
-              propertyOrder: 500
-            },
-            asyncBroadcastPushNotification: {
-              type: 'string',
-              enum: [true, false],
-              propertyOrder: 550,
-              description: 'set to true to avoid long processing time when sending broadcast notification to many subscribers'
-            },
-            validTill: {
-              type: 'string',
-              format: 'datetime',
-              description: 'use format yyyy-mm-ddThh:mm:ss.fffZ, ok to truncate minor parts. Examples 2017-10-23T17:53:44.502Z or 2017-10-23',
-              propertyOrder: 600
-            },
-            invalidBefore: {
-              type: 'string',
-              format: 'datetime',
-              description: 'use format yyyy-mm-ddThh:mm:ss.fffZ, ok to truncate minor parts. Examples 2017-10-23T17:53:44.502Z or 2017-10-23',
-              propertyOrder: 700
-            },
-            state: {
-              type: 'string',
-              enum: ['new', 'sending', 'sent', 'read', 'error', 'deleted'],
-              propertyOrder: 800
-            },
-            created: {
-              type: 'string',
-              options: {
-                hidden: true
-              }
-            },
-            updated: {
-              type: 'string',
-              options: {
-                hidden: true
-              }
-            },
-            httpHost: {
-              type: 'string',
-              options: {
-                hidden: true
-              }
-            },
-            message: {
-              description: 'sub-fields depend on channel',
-              propertyOrder: 900,
-              oneOf: [{
-                title: 'email',
-                type: 'object',
-                properties: {
-                  from: {
-                    type: 'string'
-                  },
-                  subject: {
-                    type: 'string'
-                  },
-                  textBody: {
-                    type: 'string',
-                    format: 'html'
-                  },
-                  htmlBody: {
-                    type: 'string',
-                    format: 'html',
-                    // todo: fix https://github.com/jdorn/json-editor/issues/651
-                    // options: {
-                    //   wysiwyg: true
-                    // }
-                  }
-                }
-              }, {
-                title: 'sms',
-                type: 'object',
-                properties: {
-                  textBody: {
-                    type: 'string',
-                    format: 'html'
-                  }
-                }
-              }, {
-                title: 'in-app',
-                type: 'object'
-              }]
-            }
-          }
-        }
+        schema: this.schema
       })
     }
   },
@@ -184,7 +65,7 @@ export default {
   height: auto!important;
 }
 
-#nb-notification-editor {
+#nb-item-editor {
   @import '~bootstrap/less/bootstrap.less';
   select {
     -webkit-appearance: menulist-button;

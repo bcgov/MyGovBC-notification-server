@@ -18,7 +18,7 @@
         </td>
       </template>
       <template slot="expand" slot-scope="props">
-        <component :is='currentExpanderView' class='ma-2' @submit="closeEditPanel(props)" @cancel="closeEditPanel(props)" :item='props.item' />
+        <component :is='currentExpanderView' class='ma-2' @submit="closeEditPanel(props)" @cancel="closeEditPanel(props)" :item='props.item' :schema='schema' storeActionName='setNotification' />
       </template>
       <template slot="footer">
         <td colspan="100%" class='pa-0'>
@@ -31,7 +31,7 @@
               </div>
               <v-card>
                 <v-card-text class="grey lighten-3">
-                  <notification-editor class='ma-2' @submit="closeNewPanel" @cancel="closeNewPanel" />
+                  <notification-editor class='ma-2' @submit="closeNewPanel" @cancel="closeNewPanel" :schema='schema' storeActionName='setNotification' />
                 </v-card-text>
               </v-card>
             </v-expansion-panel-content>
@@ -161,7 +161,127 @@ export default {
         text: 'actions',
         align: 'left',
         sortable: false
-      }]
+      }],
+      schema: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            options: {
+              hidden: true
+            }
+          },
+          serviceName: {
+            type: 'string',
+            propertyOrder: 100
+          },
+          channel: {
+            enum: ['email', 'sms', 'in-app'],
+            type: 'string',
+            propertyOrder: 200
+          },
+          userId: {
+            type: 'string',
+            propertyOrder: 250
+          },
+          userChannelId: {
+            type: 'string',
+            propertyOrder: 300
+          },
+          isBroadcast: {
+            type: 'string',
+            enum: [true, false],
+            propertyOrder: 400
+          },
+          skipSubscriptionConfirmationCheck: {
+            type: 'string',
+            enum: [true, false],
+            default: 'false',
+            propertyOrder: 500
+          },
+          asyncBroadcastPushNotification: {
+            type: 'string',
+            enum: [true, false],
+            propertyOrder: 550,
+            description: 'set to true to avoid long processing time when sending broadcast notification to many subscribers'
+          },
+          validTill: {
+            type: 'string',
+            format: 'datetime',
+            description: 'use format yyyy-mm-ddThh:mm:ss.fffZ, ok to truncate minor parts. Examples 2017-10-23T17:53:44.502Z or 2017-10-23',
+            propertyOrder: 600
+          },
+          invalidBefore: {
+            type: 'string',
+            format: 'datetime',
+            description: 'use format yyyy-mm-ddThh:mm:ss.fffZ, ok to truncate minor parts. Examples 2017-10-23T17:53:44.502Z or 2017-10-23',
+            propertyOrder: 700
+          },
+          state: {
+            type: 'string',
+            enum: ['new', 'sending', 'sent', 'read', 'error', 'deleted'],
+            propertyOrder: 800
+          },
+          created: {
+            type: 'string',
+            options: {
+              hidden: true
+            }
+          },
+          updated: {
+            type: 'string',
+            options: {
+              hidden: true
+            }
+          },
+          httpHost: {
+            type: 'string',
+            options: {
+              hidden: true
+            }
+          },
+          message: {
+            description: 'sub-fields depend on channel',
+            propertyOrder: 900,
+            oneOf: [{
+              title: 'email',
+              type: 'object',
+              properties: {
+                from: {
+                  type: 'string'
+                },
+                subject: {
+                  type: 'string'
+                },
+                textBody: {
+                  type: 'string',
+                  format: 'html'
+                },
+                htmlBody: {
+                  type: 'string',
+                  format: 'html',
+                  // todo: fix https://github.com/jdorn/json-editor/issues/651
+                  // options: {
+                  //   wysiwyg: true
+                  // }
+                }
+              }
+            }, {
+              title: 'sms',
+              type: 'object',
+              properties: {
+                textBody: {
+                  type: 'string',
+                  format: 'html'
+                }
+              }
+            }, {
+              title: 'in-app',
+              type: 'object'
+            }]
+          }
+        }
+      }
     }
   }
 }
