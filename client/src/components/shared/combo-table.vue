@@ -1,0 +1,151 @@
+<template>
+  <div>
+    <v-text-field append-icon="search" hint='Enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search, for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
+    <v-data-table :headers="headers" :items="$store.state[this.storeState].items" class="elevation-1" :pagination.sync="pagination" :total-items="$store.state[this.storeState].totalCount" :loading="loading">
+      <template slot="items" slot-scope="props">
+        <td>{{ props.item.serviceName }}</td>
+        <td>{{ props.item.channel }}</td>
+        <td>{{ props.item.state }}</td>
+        <td>{{ props.item.isBroadcast }}</td>
+        <td class='text-xs-right'>{{ props.item.updated }}</td>
+        <td>
+          <v-btn @click="editItem(props)" v-if="props.item.state === 'new'" flat icon>
+            <v-icon>create</v-icon>
+          </v-btn>
+          <v-btn @click="viewItem(props)" flat icon>
+            <v-icon>info</v-icon>
+          </v-btn>
+        </td>
+      </template>
+      <template slot="expand" slot-scope="props">
+        <component :is='currentExpanderView' class='ma-2' @submit="submitEditPanel(props)" @cancel="cancelEditPanel(props)" :item='props.item' :schema='schema' :storeActionName='storeActionName' />
+      </template>
+      <template slot="footer">
+        <td colspan="100%" class='pa-0'>
+          <v-expansion-panel>
+            <v-expansion-panel-content hide-actions v-model='newPanelExpanded'>
+              <div slot="header" class='text-xs-center' color="indigo">
+                <v-btn flat icon>
+                  <v-icon large color="indigo">{{this.newPanelExpanded?'keyboard_arrow_up':'add'}}</v-icon>
+                </v-btn>
+              </div>
+              <v-card>
+                <v-card-text class="grey lighten-3">
+                  <model-editor class='ma-2' @submit="submitNewPanel" @cancel="cancelNewPanel" :schema='schema' :storeActionName='storeActionName' />
+                </v-card-text>
+              </v-card>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </td>
+      </template>
+    </v-data-table>
+  </div>
+</template>
+
+<script>
+import ModelEditor from './editor'
+import ModelViewer from './viewer'
+export default {
+  components: {
+    ModelEditor,
+    ModelViewer
+  },
+  props: ['storeState', 'headers', 'schema', 'storeActionName', 'storeSearchMutationName', 'storeFetchItemsActionName'],
+  computed: {
+    search: {
+      get() {
+        return this.$store.state[this.storeState].search
+      },
+      set(value) {
+        this.$store.commit(this.storeSearchMutationName, value)
+        let filter = {
+          where: undefined
+        }
+        if (value !== '') {
+          filter.where = {
+            '$text': {
+              search: value
+            }
+          }
+          try {
+            let searchJson = JSON.parse(value)
+            if (searchJson instanceof Object) {
+              filter.where = searchJson
+            }
+          } catch (ex) {}
+          filter.skip = 0
+          this.pagination.page = 1
+        }
+        this.fetchItems(filter)
+      }
+    }
+  },
+  methods: {
+    fetchItems: async function(filter) {
+      this.loading = true
+      await this.$store.dispatch(this.storeFetchItemsActionName, filter)
+      this.loading = false
+    },
+    editItem: function(props) {
+      props.expanded = (this.currentExpanderView === 'modelEditor') ? !props.expanded : true
+      this.currentExpanderView = 'modelEditor'
+    },
+    viewItem: function(props) {
+      props.expanded = (this.currentExpanderView === 'modelViewer') ? !props.expanded : true
+      this.currentExpanderView = 'modelViewer'
+    },
+    submitEditPanel: function(props) {
+      props.expanded = false
+      this.$store.dispatch(this.storeFetchItemsActionName, {})
+    },
+    cancelEditPanel: function(props) {
+      props.expanded = false
+    },
+    submitNewPanel: function() {
+      this.newPanelExpanded = false
+      this.$store.dispatch(this.storeFetchItemsActionName, {})
+    },
+    cancelNewPanel: function() {
+      this.newPanelExpanded = false
+    }
+  },
+  watch: {
+    pagination: {
+      async handler() {
+        let filter
+        if (this.pagination.rowsPerPage >= -1) {
+          filter = filter || {}
+          if (this.pagination.rowsPerPage > 0) {
+            filter.limit = this.pagination.rowsPerPage
+            filter.skip = this.pagination.rowsPerPage * (this.pagination.page - 1)
+          } else {
+            filter.limit = undefined
+            filter.skip = 0
+          }
+        }
+        if (this.pagination.sortBy) {
+          filter = filter || {}
+          filter.order = this.pagination.sortBy + ' ' + (this.pagination.descending ? 'DESC' : 'ASC')
+        }
+        await this.fetchItems(filter)
+        return
+      },
+      deep: true
+    }
+  },
+  data: function() {
+    return {
+      newPanelExpanded: false,
+      currentExpanderView: 'modelEditor',
+      pagination: {},
+      loading: true
+    }
+  }
+}
+</script>
+<style lang='less' scoped>
+.table__overflow {
+  overflow-x: visible;
+  overflow-y: visible;
+}
+</style>
