@@ -18,6 +18,18 @@ export default new Vuex.Store({
       filter: undefined,
       totalCount: undefined,
       search: undefined
+    },
+    configurations: {
+      items: [],
+      filter: undefined,
+      totalCount: undefined,
+      search: undefined
+    },
+    administrators: {
+      items: [],
+      filter: undefined,
+      totalCount: undefined,
+      search: undefined
     }
   },
   mutations: {
