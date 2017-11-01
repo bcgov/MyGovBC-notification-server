@@ -6,7 +6,7 @@ module.exports = function(server) {
   server.set('view engine', 'html')
   let extraIncludes = ''
   let viewRelDir = '../../client/dist'
-  server.use(require('connect-history-api-fallback')())
+  server.middleware('files:before', require('connect-history-api-fallback')())
   if (process.env.NODE_ENV === 'dev') {
     viewRelDir = '../../client'
     extraIncludes = '<script type="text/javascript" src="/app.js"></script>'
@@ -18,8 +18,9 @@ module.exports = function(server) {
       log: false,
       heartbeat: 2000
     })
-    server.use(hotMiddleware)
-    server.use(
+    server.middleware('files:before', hotMiddleware)
+    server.middleware(
+      'files:before',
       webpackDevMiddleware(compiler, {
         publicPath: config.output.publicPath,
         hot: true
@@ -27,7 +28,7 @@ module.exports = function(server) {
     )
   }
   server.set('views', require('path').join(__dirname, viewRelDir))
-  server.get(/^\/(index\.html)?$/, (req, res) => {
+  server.middleware('files:before', /^\/(index\.html)?$/, (req, res) => {
     res.render('index.html', {
       ApiUrlPrefix: req.app.get('restApiRoot'),
       ExtraIncludes: extraIncludes,
