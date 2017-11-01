@@ -47,8 +47,8 @@ import {
   mapState,
   mapActions
 } from 'vuex'
-import NotificationEditor from './editor'
-import NotificationViewer from './viewer'
+import NotificationEditor from './shared/editor'
+import NotificationViewer from './shared/viewer'
 export default {
   components: {
     notificationEditor: NotificationEditor,
