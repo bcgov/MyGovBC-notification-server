@@ -1,12 +1,16 @@
 <template>
-  <combo-table :headers='headers' :schema='schema' model='notifications' />
+  <combo-table :headers='headers' :schema='schema' model='notifications' editableStates='new'>
+    <template slot-scope='props'>
+      <td>{{ props.props.item.serviceName }}</td>
+      <td>{{ props.props.item.channel }}</td>
+      <td>{{ props.props.item.state }}</td>
+      <td>{{ props.props.item.isBroadcast }}</td>
+      <td class='text-xs-right'>{{ props.props.item.updated }}</td>
+    </template>
+  </combo-table>
 </template>
 
 <script>
-import {
-  mapState,
-  mapActions
-} from 'vuex'
 import ComboTable from './shared/combo-table'
 export default {
   components: {

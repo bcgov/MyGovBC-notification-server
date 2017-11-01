@@ -3,13 +3,9 @@
     <v-text-field append-icon="search" hint='Enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search, for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
     <v-data-table :headers="headers" :items="$store.state[this.model].items" class="elevation-1" :pagination.sync="pagination" :total-items="$store.state[this.model].totalCount" :loading="loading">
       <template slot="items" slot-scope="props">
-        <td>{{ props.item.serviceName }}</td>
-        <td>{{ props.item.channel }}</td>
-        <td>{{ props.item.state }}</td>
-        <td>{{ props.item.isBroadcast }}</td>
-        <td class='text-xs-right'>{{ props.item.updated }}</td>
+        <slot :props='props' />
         <td>
-          <v-btn @click="editItem(props)" v-if="props.item.state === 'new'" flat icon>
+          <v-btn @click="editItem(props)" v-if="!editableStates || editableStates.indexOf(props.item.state) >= 0" flat icon>
             <v-icon>create</v-icon>
           </v-btn>
           <v-btn @click="viewItem(props)" flat icon>
@@ -50,7 +46,7 @@ export default {
     ModelEditor,
     ModelViewer
   },
-  props: ['model', 'headers', 'schema'],
+  props: ['model', 'headers', 'schema', 'editableStates'],
   computed: {
     search: {
       get() {
