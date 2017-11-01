@@ -1,5 +1,5 @@
 <template>
-  <combo-table store-state='notifications' :headers='headers' :schema='schema' storeActionName='setNotification' storeSearchMutationName='setNotificationsSearch' storeFetchItemsActionName='fetchNotifications' />
+  <combo-table :headers='headers' :schema='schema' model='notifications' />
 </template>
 
 <script>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-text-field append-icon="search" hint='Enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search, for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
-    <v-data-table :headers="headers" :items="$store.state[this.storeState].items" class="elevation-1" :pagination.sync="pagination" :total-items="$store.state[this.storeState].totalCount" :loading="loading">
+    <v-data-table :headers="headers" :items="$store.state[this.model].items" class="elevation-1" :pagination.sync="pagination" :total-items="$store.state[this.model].totalCount" :loading="loading">
       <template slot="items" slot-scope="props">
         <td>{{ props.item.serviceName }}</td>
         <td>{{ props.item.channel }}</td>
@@ -18,7 +18,7 @@
         </td>
       </template>
       <template slot="expand" slot-scope="props">
-        <component :is='currentExpanderView' class='ma-2' @submit="submitEditPanel(props)" @cancel="cancelEditPanel(props)" :item='props.item' :schema='schema' :storeActionName='storeActionName' />
+        <component :is='currentExpanderView' class='ma-2' @submit="submitEditPanel(props)" @cancel="cancelEditPanel(props)" :item='props.item' :schema='schema' :model='model' />
       </template>
       <template slot="footer">
         <td colspan="100%" class='pa-0'>
@@ -31,7 +31,7 @@
               </div>
               <v-card>
                 <v-card-text class="grey lighten-3">
-                  <model-editor class='ma-2' @submit="submitNewPanel" @cancel="cancelNewPanel" :schema='schema' :storeActionName='storeActionName' />
+                  <model-editor class='ma-2' @submit="submitNewPanel" @cancel="cancelNewPanel" :schema='schema' :model='model' />
                 </v-card-text>
               </v-card>
             </v-expansion-panel-content>
@@ -50,14 +50,17 @@ export default {
     ModelEditor,
     ModelViewer
   },
-  props: ['storeState', 'headers', 'schema', 'storeActionName', 'storeSearchMutationName', 'storeFetchItemsActionName'],
+  props: ['model', 'headers', 'schema'],
   computed: {
     search: {
       get() {
-        return this.$store.state[this.storeState].search
+        return this.$store.state[this.model].search
       },
       set(value) {
-        this.$store.commit(this.storeSearchMutationName, value)
+        this.$store.commit('setItemSearch', {
+          model: this.model,
+          value: value
+        })
         let filter = {
           where: undefined
         }
@@ -83,7 +86,10 @@ export default {
   methods: {
     fetchItems: async function(filter) {
       this.loading = true
-      await this.$store.dispatch(this.storeFetchItemsActionName, filter)
+      await this.$store.dispatch('fetchItems', {
+        model: this.model,
+        filter: filter
+      })
       this.loading = false
     },
     editItem: function(props) {
@@ -96,14 +102,20 @@ export default {
     },
     submitEditPanel: function(props) {
       props.expanded = false
-      this.$store.dispatch(this.storeFetchItemsActionName, {})
+      this.$store.dispatch('fetchItems', {
+        model: this.model,
+        filter: {}
+      })
     },
     cancelEditPanel: function(props) {
       props.expanded = false
     },
     submitNewPanel: function() {
       this.newPanelExpanded = false
-      this.$store.dispatch(this.storeFetchItemsActionName, {})
+      this.$store.dispatch('fetchItems', {
+        model: this.model,
+        filter: {}
+      })
     },
     cancelNewPanel: function() {
       this.newPanelExpanded = false

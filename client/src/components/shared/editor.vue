@@ -16,12 +16,15 @@ export default {
       currentlyEditedItem: undefined
     }
   },
-  props: ['item','schema','storeActionName'],
+  props: ['item', 'schema', 'model'],
   methods: {
     setCurrentlyEditedItem: async function() {
       try {
         let item = this.jsonEditor.getValue()
-        await this.$store.dispatch(this.storeActionName, item)
+        await this.$store.dispatch('setItem', {
+          model: this.model,
+          item: item
+        })
         this.currentlyEditedItem = item
         this.$emit('submit')
       } catch (ex) {
@@ -36,7 +39,6 @@ export default {
       let element = $('#nb-item-editor', this.$el).get(0)
       window.JSONEditor.plugins.sceditor.style = '/sceditor/minified/jquery.sceditor.default.min.css'
       window.JSONEditor.plugins.sceditor.width = '98%'
-
       if (this.jsonEditor) {
         this.jsonEditor.destroy()
       }

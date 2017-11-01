@@ -12,26 +12,33 @@ export default new Vuex.Store({
       filter: undefined,
       totalCount: undefined,
       search: undefined
+    },
+    subscriptions: {
+      items: [],
+      filter: undefined,
+      totalCount: undefined,
+      search: undefined
     }
   },
   mutations: {
-    setLocalNotifications(state, items) {
-      state.notifications.items = items
+    setLocalItems(state, payload) {
+      state[payload.model].items = payload.items
     },
-    setTotalNotificationCount(state, cnt) {
-      state.notifications.totalCount = cnt
+    setTotalItemCount(state, payload) {
+      state[payload.model].totalCount = payload.cnt
     },
-    setNotificationsFilter(state, filter) {
-      state.notifications.filter = filter
+    setItemFilter(state, payload) {
+      state[payload.model].filter = payload.filter
     },
-    setNotificationsSearch(state, value) {
-      state.notifications.search = value
+    setItemSearch(state, payload) {
+      state[payload.model].search = payload.value
     }
   },
   actions: {
-    async setNotification({ commit, dispatch }, item) {
+    async setItem({ commit, dispatch }, payload) {
       let id,
-        method = 'post'
+        method = 'post',
+        item = payload.item
       if (item.id) {
         id = item.id
         method = 'patch'
@@ -41,29 +48,36 @@ export default new Vuex.Store({
       }
       await axios({
         method: method,
-        url: ApiUrlPrefix + '/notifications' + (id ? '/' + id : ''),
+        url: ApiUrlPrefix + '/' + payload.model + (id ? '/' + id : ''),
         data: item
       })
     },
-    async fetchNotifications({ commit, state }, filter) {
+    async fetchItems({ commit, state }, payload) {
+      let filter = payload.filter
       if (filter) {
-        filter = Object.assign({}, state.notifications.filter, filter)
+        filter = Object.assign({}, state[payload.model].filter, filter)
       } else {
-        commit('setNotificationsSearch', undefined)
+        commit('setItemSearch', { model: payload.model })
       }
-      commit('setNotificationsFilter', filter)
-      let url = ApiUrlPrefix + '/notifications'
+      commit('setItemFilter', {
+        model: payload.model,
+        filter: filter
+      })
+      let url = ApiUrlPrefix + '/' + payload.model
       if (filter) {
         url += '?filter=' + encodeURIComponent(JSON.stringify(filter))
       }
       let items = await axios.get(url)
-      commit('setLocalNotifications', items.data)
-      url = ApiUrlPrefix + '/notifications/count'
+      commit('setLocalItems', { model: payload.model, items: items.data })
+      url = ApiUrlPrefix + '/' + payload.model + '/count'
       if (filter && filter.where) {
         url += '?where=' + encodeURIComponent(JSON.stringify(filter.where))
       }
       let response = await axios.get(url)
-      commit('setTotalNotificationCount', response.data.count)
+      commit('setTotalItemCount', {
+        model: payload.model,
+        cnt: response.data.count
+      })
     }
   },
   strict: process.env.NODE_ENV !== 'production'
