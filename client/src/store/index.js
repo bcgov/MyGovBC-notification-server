@@ -64,6 +64,12 @@ export default new Vuex.Store({
         data: item
       })
     },
+    async deleteItem(context, payload) {
+      await axios({
+        method: 'delete',
+        url: ApiUrlPrefix + '/' + payload.model + '/' + payload.item.id
+      })
+    },
     async fetchItems({ commit, state }, payload) {
       let filter = payload.filter
       if (filter) {

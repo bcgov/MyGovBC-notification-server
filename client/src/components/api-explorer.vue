@@ -17,9 +17,6 @@ export default {
     this.iframes = $('#nb-api-explorer').iFrameResize({
       log: false
     })
-  },
-  beforeDestroy: function(){
-    console.log(this.iframes)
   }
 }
 </script>

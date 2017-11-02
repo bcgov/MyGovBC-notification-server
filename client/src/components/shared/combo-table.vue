@@ -3,7 +3,7 @@
     <v-text-field append-icon="search" hint='Enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search, for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
     <v-data-table :headers="headers" :items="$store.state[this.model].items" class="elevation-1" :pagination.sync="pagination" :total-items="$store.state[this.model].totalCount" :loading="loading">
       <template slot="items" slot-scope="props">
-        <slot :props='props' :viewItem='viewItem' :editItem='editItem' />
+        <slot :props='props' :viewItem='viewItem' :editItem='editItem' :deleteItem='deleteItem' />
       </template>
       <template slot="expand" slot-scope="props">
         <component :is='currentExpanderView' class='ma-2' @submit="submitEditPanel(props)" @cancel="cancelEditPanel(props)" :item='props.item' :schema='schema' :model='model' />
@@ -107,6 +107,16 @@ export default {
     },
     cancelNewPanel: function() {
       this.newPanelExpanded = false
+    },
+    deleteItem: async function(props) {
+      await this.$store.dispatch('deleteItem', {
+        model: this.model,
+        item: props.item
+      })
+      await this.$store.dispatch('fetchItems', {
+        model: this.model,
+        filter: {}
+      })
     }
   },
   watch: {

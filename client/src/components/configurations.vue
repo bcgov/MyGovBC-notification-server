@@ -6,11 +6,14 @@
         <td>{{ props.props.item.serviceName }}</td>
         <td class='text-xs-right'>{{ props.props.item.updated }}</td>
         <td>
+          <v-btn @click="props.viewItem(props.props)" flat icon>
+            <v-icon>info</v-icon>
+          </v-btn>
           <v-btn @click="props.editItem(props.props)" flat icon>
             <v-icon>create</v-icon>
           </v-btn>
-          <v-btn @click="props.viewItem(props.props)" flat icon>
-            <v-icon>info</v-icon>
+          <v-btn @click="props.deleteItem(props.props)" flat icon>
+            <v-icon color='red darken-2'>delete</v-icon>
           </v-btn>
         </td>
       </tr>

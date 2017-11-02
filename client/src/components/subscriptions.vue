@@ -7,11 +7,11 @@
         <td>{{ props.props.item.state }}</td>
         <td class='text-xs-right'>{{ props.props.item.updated }}</td>
         <td>
-          <v-btn @click="props.editItem(props.props)" flat icon>
-            <v-icon>create</v-icon>
-          </v-btn>
           <v-btn @click="props.viewItem(props.props)" flat icon>
             <v-icon>info</v-icon>
+          </v-btn>
+          <v-btn @click="props.editItem(props.props)" flat icon>
+            <v-icon>create</v-icon>
           </v-btn>
         </td>
       </tr>
