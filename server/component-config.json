@@ -2,6 +2,7 @@
   "loopback-component-explorer":
   {
     "mountPath": "/explorer",
+    "uiDirs": "node_modules/iframe-resizer/js",
     "apiInfo":
     {
       "title": "NotifyBC",
