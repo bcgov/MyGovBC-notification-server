@@ -13,7 +13,7 @@
             <v-icon>create</v-icon>
           </v-btn>
           <v-btn @click="props.deleteItem(props.props)" flat icon>
-            <v-icon color='red darken-2'>delete</v-icon>
+            <v-icon color='red darken-2'>delete_forever</v-icon>
           </v-btn>
         </td>
       </tr>
