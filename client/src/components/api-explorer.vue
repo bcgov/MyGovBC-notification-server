@@ -1,6 +1,6 @@
 <template>
   <div>
-    <iframe id='api-explorer' :src='ApiExplorerUrlPrefix' />
+    <iframe id='nb-api-explorer' :src='ApiExplorerUrlPrefix' />
   </div>
 </template>
 
@@ -9,14 +9,18 @@ import iFrameResize from 'iframe-resizer'
 export default {
   data: function() {
     return {
-      ApiExplorerUrlPrefix: window.ApiExplorerUrlPrefix || '/explorer'
+      ApiExplorerUrlPrefix: window.ApiExplorerUrlPrefix || '/explorer',
+      iframes: undefined
     }
   },
   mounted: async function() {
-    $('#api-explorer').iFrameResize({
+    this.iframes = $('#nb-api-explorer').iFrameResize({
       log: false
     })
   },
+  beforeDestroy: function(){
+    console.log(this.iframes)
+  }
 }
 </script>
 

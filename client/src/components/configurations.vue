@@ -42,27 +42,17 @@ export default {
               hidden: true
             }
           },
-          serviceName: {
+          name: {
             type: 'string',
             propertyOrder: 100
           },
-          channel: {
-            enum: ['email', 'sms'],
+          serviceName: {
             type: 'string',
             propertyOrder: 200
           },
-          userId: {
-            type: 'string',
-            propertyOrder: 250
-          },
-          userChannelId: {
-            type: 'string',
+          value:{
+            type: 'object',
             propertyOrder: 300
-          },
-          state: {
-            type: 'string',
-            enum: ['unconfirmed', 'confirmed', 'deleted'],
-            propertyOrder: 800
           },
           created: {
             type: 'string',
