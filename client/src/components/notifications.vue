@@ -1,11 +1,21 @@
 <template>
-  <combo-table :headers='headers' :schema='schema' model='notifications' editableStates='new'>
+  <combo-table :headers='headers' :schema='schema' model='notifications'>
     <template slot-scope='props'>
-      <td>{{ props.props.item.serviceName }}</td>
-      <td>{{ props.props.item.channel }}</td>
-      <td>{{ props.props.item.state }}</td>
-      <td>{{ props.props.item.isBroadcast }}</td>
-      <td class='text-xs-right'>{{ props.props.item.updated }}</td>
+      <tr>
+        <td>{{ props.props.item.serviceName }}</td>
+        <td>{{ props.props.item.channel }}</td>
+        <td>{{ props.props.item.state }}</td>
+        <td>{{ props.props.item.isBroadcast }}</td>
+        <td class='text-xs-right'>{{ props.props.item.updated }}</td>
+        <td>
+          <v-btn @click="props.editItem(props.props)" flat icon v-if="props.props.item.state === 'new'">
+            <v-icon>create</v-icon>
+          </v-btn>
+          <v-btn @click="props.viewItem(props.props)" flat icon>
+            <v-icon>info</v-icon>
+          </v-btn>
+        </td>
+      </tr>
     </template>
   </combo-table>
 </template>

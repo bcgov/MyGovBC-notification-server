@@ -3,15 +3,7 @@
     <v-text-field append-icon="search" hint='Enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search, for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
     <v-data-table :headers="headers" :items="$store.state[this.model].items" class="elevation-1" :pagination.sync="pagination" :total-items="$store.state[this.model].totalCount" :loading="loading">
       <template slot="items" slot-scope="props">
-        <slot :props='props' />
-        <td>
-          <v-btn @click="editItem(props)" v-if="!editableStates || editableStates.indexOf(props.item.state) >= 0" flat icon>
-            <v-icon>create</v-icon>
-          </v-btn>
-          <v-btn @click="viewItem(props)" flat icon>
-            <v-icon>info</v-icon>
-          </v-btn>
-        </td>
+        <slot :props='props' :viewItem='viewItem' :editItem='editItem' />
       </template>
       <template slot="expand" slot-scope="props">
         <component :is='currentExpanderView' class='ma-2' @submit="submitEditPanel(props)" @cancel="cancelEditPanel(props)" :item='props.item' :schema='schema' :model='model' />
@@ -46,7 +38,7 @@ export default {
     ModelEditor,
     ModelViewer
   },
-  props: ['model', 'headers', 'schema', 'editableStates'],
+  props: ['model', 'headers', 'schema'],
   computed: {
     search: {
       get() {
