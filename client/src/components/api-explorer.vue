@@ -3,24 +3,26 @@
     <iframe id='nb-api-explorer' :src='ApiExplorerUrlPrefix' />
   </div>
 </template>
-
 <script>
 import iFrameResize from 'iframe-resizer'
 export default {
   data: function() {
     return {
       ApiExplorerUrlPrefix: window.ApiExplorerUrlPrefix || '/explorer',
-      iframes: undefined
+      iFrameResizer: undefined
     }
   },
   mounted: async function() {
-    this.iframes = $('#nb-api-explorer').iFrameResize({
+    $('#nb-api-explorer').iFrameResize({
       log: false
     })
+    this.iFrameResizer = $('#nb-api-explorer')[0].iFrameResizer
+  },
+  beforeDestroy: function() {
+    this.iFrameResizer && this.iFrameResizer.close()
   }
 }
 </script>
-
 <style scoped>
 iframe {
   min-width: 100%;
