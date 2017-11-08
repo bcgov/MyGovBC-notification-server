@@ -2,7 +2,7 @@
   <v-app id="inspire">
     <v-navigation-drawer persistent v-model="drawer" enable-resize-watcher app>
       <v-list dense>
-        <v-list-tile to="/">
+        <v-list-tile to="/home">
           <v-list-tile-action>
             <v-icon>home</v-icon>
           </v-list-tile-action>
