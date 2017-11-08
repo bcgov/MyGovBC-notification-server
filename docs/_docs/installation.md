@@ -60,11 +60,11 @@ If successful, you will see following output
 > notification@1.0.0 start .../notification
 > node .
 
+...
 Web server listening at: http://localhost:3000
-Browse your REST API at http://localhost:3000/explorer
 ```
 
-Now browse to <a href="http://localhost:3000/explorer" target="_blank">http://localhost:3000/explorer</a> the page displays StrongLoop API Explorer.
+Now browse to <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> the page displays NotifyBC Web Console.
 
 ## Deploy Docker Container
 If you have git and Docker installed, you can run following command to deploy *NotifyBC* Docker container:

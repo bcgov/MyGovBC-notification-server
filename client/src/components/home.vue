@@ -1,7 +1,7 @@
 <template>
   <div>
     <h6>Welcome</h6>
-    <p>If you are a NotifyBC administrator, you can manage following items
+    <p>If you are a NotifyBC administrator, you can manage following items in curated web console UI
       <ul>
         <li><router-link to="/subscriptions">Subscriptions</router-link></li>
         <li><router-link to="/notifications">Notifications</router-link></li>

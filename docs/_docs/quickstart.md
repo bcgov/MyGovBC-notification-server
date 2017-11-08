@@ -13,7 +13,7 @@ notifyBC
 ~ $ cd notifyBC
 ~/notifyBC $ npm install
 ~/notifyBC $ npm start
-# => Now browse to http://localhost:3000/explorer
+# => Now browse to http://localhost:3000
 ```
 
 
