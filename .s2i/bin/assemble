@@ -3,20 +3,26 @@
 shopt -s dotglob nullglob
 # fail fast
 set -e
+echo "---> Installing application source"
+pushd /tmp/src
+rm -rf node_modules docs utils client/node_modules client/dist
+mv .s2i/configs/datasources.production.js server/
+mv .s2i/configs/config.production.json server/
 # restore build artifacts
 if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
     echo "---> restore build artifacts"
-    mv /tmp/artifacts/* ./
+    cp -r /tmp/artifacts/* ./
 fi
-echo "---> Installing application source"
-rm -rf /tmp/src/node_modules /tmp/src/docs /tmp/src/utils
-mv /tmp/src/.s2i/configs/datasources.production.js /tmp/src/server/
-mv /tmp/src/.s2i/configs/config.production.json /tmp/src/server/
-chmod -R a+rwx /tmp/src
-mv -f /tmp/src/* ./
+chmod -R a+rwx ./
 echo "---> Building your Node application from source"
-npm install
+npm i --ignore-scripts
+pushd client
+npm i
+npm run build
+popd
 if [ -n "${RUN_TEST+x}" ]; then
   echo "---> Run automated tests"
   npm test
 fi
+popd
+mv /tmp/src/* ./
