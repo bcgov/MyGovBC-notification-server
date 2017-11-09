@@ -57,6 +57,7 @@ export default {
           },
           name: {
             type: 'string',
+            enum: ['notification', 'subscription'],
             propertyOrder: 100
           },
           serviceName: {
