@@ -159,3 +159,9 @@ export default {
   overflow-y: visible;
 }
 </style>
+
+<style lang='less'>
+.table__overflow .btn.btn--disabled {
+  pointer-events: unset;
+}
+</style>
