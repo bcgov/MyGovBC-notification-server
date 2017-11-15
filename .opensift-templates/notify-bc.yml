@@ -252,7 +252,8 @@ objects:
   metadata:
     annotations:
       description: Exposes and load balances the application pods
-      service.alpha.openshift.io/dependencies: '[{"name":"${DATABASE_SERVICE_NAME}","kind":"Service"}]'    name: notify-bc
+      service.alpha.openshift.io/dependencies: '[{"name":"${DATABASE_SERVICE_NAME}","kind":"Service"}]'    
+    name: notify-bc
   spec:
     ports:
     - name: web
