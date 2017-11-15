@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-text-field append-icon="search" hint='Enter free style text for full text search or LoopBack <i>where filter</i> compatible JSON string for parametrized search, for example {"channel": "email"}.' label="Search" single-line hide-details v-model="search"></v-text-field>
-    <v-data-table :headers="headers" :items="$store.state[this.model].items" class="elevation-1" :pagination.sync="pagination" :total-items="$store.state[this.model].totalCount" :loading="loading">
+    <v-data-table :headers="headers" :items="$store.state[this.model].items" class="elevation-1" :pagination.sync="pagination" :total-items="$store.state[this.model].totalCount" :loading="loading" :no-data-text="noDataText">
       <template slot="items" slot-scope="props">
         <slot :props='props' :viewItem='viewItem' :editItem='editItem' :deleteItem='deleteItem' />
       </template>
@@ -33,6 +33,7 @@
 <script>
 import ModelEditor from './editor'
 import ModelViewer from './viewer'
+const NoDataText = 'No data available'
 export default {
   components: {
     ModelEditor,
@@ -74,10 +75,15 @@ export default {
   methods: {
     fetchItems: async function(filter) {
       this.loading = true
-      await this.$store.dispatch('fetchItems', {
-        model: this.model,
-        filter: filter
-      })
+      this.noDataText = NoDataText
+      try {
+        await this.$store.dispatch('fetchItems', {
+          model: this.model,
+          filter: filter
+        })
+      } catch (ex) {
+        this.noDataText = 'Error getting data'
+      }
       this.loading = false
     },
     editItem: function(props) {
@@ -148,7 +154,8 @@ export default {
       newPanelExpanded: false,
       currentExpanderView: 'modelEditor',
       pagination: {},
-      loading: true
+      loading: true,
+      noDataText: NoDataText
     }
   }
 }
