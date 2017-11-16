@@ -48,7 +48,7 @@ export default {
         keep_oneof_values: false,
         required_by_default: false,
         // required: ['serviceName', 'channel', 'message'],
-        remove_empty_properties: false,
+        remove_empty_properties: true,
         disable_collapse: true,
         startval: this.item,
         schema: this.schema
