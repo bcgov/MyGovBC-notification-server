@@ -37,8 +37,6 @@ export default {
     },
     createJsonEditor: function() {
       let element = $('#nb-item-editor', this.$el).get(0)
-      window.JSONEditor.plugins.sceditor.style = '/sceditor/minified/jquery.sceditor.default.min.css'
-      window.JSONEditor.plugins.sceditor.width = '98%'
       if (this.jsonEditor) {
         this.jsonEditor.destroy()
       }
@@ -62,7 +60,6 @@ export default {
 </script>
 
 <style lang='less'>
-@import '~sceditor/minified/themes/default.min.css';
 .datatable__expand-content:not(.v-leave-active) {
   height: auto!important;
 }
@@ -75,11 +72,6 @@ export default {
   }
   .btn {
     min-width: unset;
-  }
-  .sceditor-container {
-    * {
-      box-sizing: content-box;
-    }
   }
 }
 </style>
