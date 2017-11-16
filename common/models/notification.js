@@ -10,6 +10,7 @@ module.exports = function(Notification) {
     'find',
     'create',
     'patchAttributes',
+    'replaceById',
     'deleteItemById',
     'count'
   ])
@@ -141,6 +142,7 @@ module.exports = function(Notification) {
   }
 
   Notification.beforeRemote('create', Notification.preCreationValidation)
+  Notification.beforeRemote('replaceById', Notification.preCreationValidation)
 
   Notification.dispatchNotification = function(ctx, res, next) {
     // send non-inApp notifications immediately
@@ -169,6 +171,7 @@ module.exports = function(Notification) {
     }
   }
   Notification.afterRemote('create', Notification.dispatchNotification)
+  Notification.afterRemote('replaceById', Notification.dispatchNotification)
 
   function beforePatchAttributes() {
     var ctx = arguments[0]
@@ -507,8 +510,8 @@ module.exports = function(Notification) {
                       return
                     }
                     data.errorWhenSendingToUsers = (data.errorWhenSendingToUsers ||
-                      [])
-                      .concat(errorWhenSendingToUsers)
+                      []
+                    ).concat(errorWhenSendingToUsers)
                   } else {
                     data.state = 'error'
                   }

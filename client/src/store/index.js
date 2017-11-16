@@ -53,7 +53,7 @@ export default new Vuex.Store({
         item = payload.item
       if (item.id) {
         id = item.id
-        method = 'patch'
+        method = 'put'
         delete item.id
         delete item.updated
         delete item.created

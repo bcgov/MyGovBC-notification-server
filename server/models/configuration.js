@@ -4,6 +4,7 @@ module.exports = function(Configuration) {
     'find',
     'create',
     'patchAttributes',
+    'replaceById',
     'deleteById',
     'count'
   ])

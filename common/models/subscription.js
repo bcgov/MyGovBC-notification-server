@@ -11,6 +11,7 @@ module.exports = function(Subscription) {
     'find',
     'create',
     'patchAttributes',
+    'replaceById',
     'deleteItemById',
     'verify',
     'count'
@@ -207,6 +208,17 @@ module.exports = function(Subscription) {
     ) {
       next(handleConfirmationRequestError)
     })
+  })
+
+  Subscription.beforeRemote('replaceById', function() {
+    var ctx = arguments[0]
+    var next = arguments[arguments.length - 1]
+    if (Subscription.isAdminReq(ctx)) {
+      return next()
+    }
+    var error = new Error('Forbidden')
+    error.status = 403
+    return next(error)
   })
 
   Subscription.beforeRemote('prototype.patchAttributes', function() {
