@@ -46,7 +46,7 @@ export default {
         theme: 'bootstrap3',
         iconlib: 'fontawesome4',
         keep_oneof_values: false,
-        required_by_default: true,
+        required_by_default: false,
         // required: ['serviceName', 'channel', 'message'],
         remove_empty_properties: true,
         disable_collapse: true,
