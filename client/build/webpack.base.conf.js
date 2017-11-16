@@ -28,7 +28,8 @@ module.exports = {
     alias: {
       vue$: 'vue/dist/vue.esm.js',
       '@': resolve('src')
-    }
+    },
+    modules: [path.resolve(__dirname, '../node_modules')]
   },
   module: {
     rules: [
@@ -82,7 +83,6 @@ module.exports = {
       $: 'jquery',
       jQuery: 'jquery',
       'window.jQuery': 'jquery'
-    }),
-    new CopyWebpackPlugin([{ from: 'node_modules/sceditor', to: 'sceditor' }])
+    })
   ]
 }

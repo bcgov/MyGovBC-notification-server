@@ -151,10 +151,9 @@ export default {
                 htmlBody: {
                   type: 'string',
                   format: 'html',
-                  // todo: fix https://github.com/jdorn/json-editor/issues/651
-                  // options: {
-                  //   wysiwyg: true
-                  // }
+                  options: {
+                    wysiwyg: "summernote"
+                  }
                 }
               }
             }, {

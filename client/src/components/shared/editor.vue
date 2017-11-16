@@ -8,7 +8,7 @@
 
 <script>
 import 'json-editor'
-import 'sceditor/src/jquery.sceditor.js'
+import 'summernote'
 export default {
   data: function() {
     return {
@@ -69,8 +69,12 @@ export default {
 
 #nb-item-editor {
   @import '~bootstrap/less/bootstrap.less';
+  @import (less) '~summernote/dist/summernote.css';
   select {
     -webkit-appearance: menulist-button;
+  }
+  .btn {
+    min-width: unset;
   }
   .sceditor-container {
     * {

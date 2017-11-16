@@ -140,5 +140,8 @@
   },
   {
     "path": "../loopback-component-explorer"
+  },
+  {
+    "path": "../json-editor"
   }]
 }
