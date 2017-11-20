@@ -74,4 +74,9 @@ export default {
     min-width: unset;
   }
 }
+
+// 3 note-popover divs are appended to body, creating extra empty bottom space
+body > .note-popover.popover.bottom.in {
+  display: none;
+}
 </style>
