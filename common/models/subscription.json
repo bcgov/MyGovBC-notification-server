@@ -176,6 +176,24 @@
         "path": "/verify",
         "verb": "get"
       }]
+    },
+    "getSubscribedServiceNames": {
+      "accepts": [{
+        "arg": "options",
+        "type": "object",
+        "http": "optionsFromRequest"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": ["string"],
+        "root": true,
+        "description": "operation outcome"
+      }],
+      "description": "unique list of subscribed service names",
+      "http": [{
+        "path": "/services",
+        "verb": "get"
+      }]
     }
   }
 }

@@ -14,7 +14,8 @@ module.exports = function(Subscription) {
     'replaceById',
     'deleteItemById',
     'verify',
-    'count'
+    'count',
+    'getSubscribedServiceNames'
   ])
 
   function accessCheckForGetRequest() {
@@ -578,5 +579,31 @@ module.exports = function(Subscription) {
         ]
       })
     })
+  }
+
+  Subscription.getSubscribedServiceNames = function(options, cb) {
+    if (!Subscription.isAdminReq(options.httpContext)) {
+      let error = new Error('Forbidden')
+      error.status = 403
+      return cb(error)
+    }
+    Subscription.find(
+      {
+        fields: { serviceName: true },
+        where: { state: 'confirmed' }
+      },
+      (err, data) => {
+        if (err) {
+          return cb(err)
+        }
+        let uniq = _.uniqWith(data, (e, o) => {
+          return e.serviceName === o.serviceName
+        }).reduce((a, e) => {
+          a.push(e.serviceName)
+          return a
+        }, [])
+        return cb(null, uniq)
+      }
+    )
   }
 }

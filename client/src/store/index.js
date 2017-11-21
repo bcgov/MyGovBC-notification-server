@@ -96,6 +96,11 @@ export default new Vuex.Store({
         model: payload.model,
         cnt: response.data.count
       })
+    },
+    async getSubscribedServiceNames() {
+      let url = ApiUrlPrefix + '/subscriptions/services'
+      let res = await axios.get(url)
+      return res.data
     }
   },
   strict: process.env.NODE_ENV !== 'production'

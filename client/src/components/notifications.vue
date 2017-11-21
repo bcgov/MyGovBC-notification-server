@@ -1,5 +1,5 @@
 <template>
-  <combo-table :headers='headers' :schema='schema' model='notifications'>
+  <combo-table id='nb-wc-notification-table' :headers='headers' :schema='schema' model='notifications'>
     <template slot-scope='props'>
       <tr>
         <td>{{ props.props.item.serviceName }}</td>
@@ -22,9 +22,40 @@
 
 <script>
 import ComboTable from './shared/combo-table'
+import 'jquery-ui-bundle'
+import {
+  mapActions
+} from 'vuex'
 export default {
   components: {
     ComboTable
+  },
+  methods: {
+    ...mapActions([
+      'getSubscribedServiceNames'
+    ])
+  },
+  mounted: async function() {
+    let items = await this.getSubscribedServiceNames()
+    $.widget("custom.annotatedAutoComplete", $.ui.autocomplete, {
+      _create: function() {
+        this._super();
+        this.widget().menu("option", "items", "> :not(.disabled)");
+      },
+      _renderMenu: function(ul, items) {
+        $("<li>")
+          .attr('class', 'disabled')
+          .append('matching services having confirmed subscribers:')
+          .appendTo(ul)
+        $.each(items, (i, e) => {
+          this._renderItemData(ul, e)
+        })
+      }
+    })
+    $("#nb-wc-notification-table [name='root[serviceName]']").annotatedAutoComplete({
+      source: items,
+      appendTo: '#nb-wc-notification-table'
+    })
   },
   data: function() {
     return {
@@ -176,3 +207,13 @@ export default {
   }
 }
 </script>
+
+<style lang='less'>
+#nb-wc-notification-table {
+  @import (less) '~jquery-ui-bundle/jquery-ui.css';
+  .disabled {
+    pointer-events: none; //This makes it not clickable
+    opacity: 0.6; //This grays it out to look disabled
+  }
+}
+</style>
