@@ -587,19 +587,31 @@ module.exports = function(Subscription) {
       error.status = 403
       return cb(error)
     }
+    let subscriptionCollection = Subscription.getDataSource().connector.collection(
+      Subscription.modelName
+    )
+    // distinct is db-dependent feature. MongoDB supports it
+    if (typeof subscriptionCollection.distinct === 'function') {
+      subscriptionCollection.distinct('serviceName', { state: 'confirmed' }, cb)
+      return
+    }
     Subscription.find(
       {
         fields: { serviceName: true },
-        where: { state: 'confirmed' }
+        where: { state: 'confirmed' },
+        order: 'serviceName ASC'
       },
       (err, data) => {
         if (err) {
           return cb(err)
         }
-        let uniq = _.uniqWith(data, (e, o) => {
-          return e.serviceName === o.serviceName
-        }).reduce((a, e) => {
-          a.push(e.serviceName)
+        if (!data || data.length === 0) {
+          return cb()
+        }
+        let uniq = data.reduce((a, e) => {
+          if (a.length === 0 || a[a.length - 1] !== e.serviceName) {
+            a.push(e.serviceName)
+          }
           return a
         }, [])
         return cb(null, uniq)
