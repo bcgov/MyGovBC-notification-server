@@ -89,6 +89,7 @@ export default {
     editItem: function(props) {
       props.expanded = (this.currentExpanderView === 'modelEditor') ? !props.expanded : true
       this.currentExpanderView = 'modelEditor'
+      this.$emit('inputFormExpanded')
     },
     viewItem: function(props) {
       props.expanded = (this.currentExpanderView === 'modelViewer') ? !props.expanded : true
@@ -147,6 +148,9 @@ export default {
         return
       },
       deep: true
+    },
+    newPanelExpanded: function(newVal) {
+      newVal && this.$emit('inputFormExpanded')
     }
   },
   data: function() {

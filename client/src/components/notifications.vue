@@ -1,5 +1,5 @@
 <template>
-  <combo-table id='nb-wc-notification-table' :headers='headers' :schema='schema' model='notifications'>
+  <combo-table id='nb-wc-notification-table' :headers='headers' :schema='schema' model='notifications' @inputFormExpanded='createAutoCompleteServiceNameWidget'>
     <template slot-scope='props'>
       <tr>
         <td>{{ props.props.item.serviceName }}</td>
@@ -26,6 +26,22 @@ import 'jquery-ui-bundle'
 import {
   mapActions
 } from 'vuex'
+// one-time definition of custom jquery-ui widget
+$.widget("custom.annotatedAutoComplete", $.ui.autocomplete, {
+  _create: function() {
+    this._super();
+    this.widget().menu("option", "items", "> :not(.disabled)");
+  },
+  _renderMenu: function(ul, items) {
+    $("<li>")
+      .attr('class', 'disabled')
+      .append('matching services having confirmed subscribers:')
+      .appendTo(ul)
+    $.each(items, (i, e) => {
+      this._renderItemData(ul, e)
+    })
+  }
+})
 export default {
   components: {
     ComboTable
@@ -33,29 +49,14 @@ export default {
   methods: {
     ...mapActions([
       'getSubscribedServiceNames'
-    ])
-  },
-  mounted: async function() {
-    let items = await this.getSubscribedServiceNames()
-    $.widget("custom.annotatedAutoComplete", $.ui.autocomplete, {
-      _create: function() {
-        this._super();
-        this.widget().menu("option", "items", "> :not(.disabled)");
-      },
-      _renderMenu: function(ul, items) {
-        $("<li>")
-          .attr('class', 'disabled')
-          .append('matching services having confirmed subscribers:')
-          .appendTo(ul)
-        $.each(items, (i, e) => {
-          this._renderItemData(ul, e)
-        })
-      }
-    })
-    $("#nb-wc-notification-table [name='root[serviceName]']").annotatedAutoComplete({
-      source: items,
-      appendTo: '#nb-wc-notification-table'
-    })
+    ]),
+    createAutoCompleteServiceNameWidget: async function() {
+      let items = await this.getSubscribedServiceNames()
+      $("#nb-wc-notification-table [name='root[serviceName]']").annotatedAutoComplete({
+        appendTo: '#nb-wc-notification-table',
+        source: items
+      })
+    }
   },
   data: function() {
     return {
