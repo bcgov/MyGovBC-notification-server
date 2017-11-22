@@ -154,3 +154,27 @@ DELETE /configurations/{id}
   
   For admin request, delete the config item requested; forbidden for user request
 
+
+## Replace a Configuration
+
+```
+PUT /configurations/{id}
+```
+This API is intended to be only used by admin web console to modify a configuration.
+
+* inputs
+  * configuration id
+    * parameter name: id
+    * required: true
+    * parameter type: path
+    * data type: string
+  * configuration data
+    * parameter name: data
+    * required: true
+    * parameter type: body
+    * data type: object
+* outcome
+  
+  For admin requests, replace configuration identified by *id* with  parameter *data* and save to database.
+  
+

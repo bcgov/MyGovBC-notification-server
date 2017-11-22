@@ -355,7 +355,7 @@ GET /notifications/count
   }
   ```
 
-## Send Notifications
+## Create/Send Notifications
 ```
 POST /notifications
 ```
@@ -466,3 +466,25 @@ DELETE /notifications/{id}
     * parameter type: path
     * data type: string
 * outcome: same as the outcome of [Update a Notification](#update-a-notification) with *state* set to *deleted*.
+
+## Replace a Notification
+
+```
+PUT /notifications/{id}
+```
+This API is intended to be only used by admin web console to modify a notification in *new* state. Notifications in such state are typically  future-dated or of channel *in-app*.
+
+* inputs
+  * notification id
+    * parameter name: id
+    * required: true
+    * parameter type: path
+    * data type: string
+  * notification data
+    * parameter name: data
+    * required: true
+    * parameter type: body
+    * data type: object
+* outcome
+
+  *NotifyBC* process the request same way as [Create/Send Notifications](#createsend-notifications) except that notification data is saved with *id* supplied in the parameter, replacing exsiting one.

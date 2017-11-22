@@ -496,3 +496,37 @@ This API allows an anonymous subscriber to undo an unsubscription.
 * example 
 
   To allow an anonymous subscriber to undo unsubscription, provide link token *{unsubscription_reversion_url}* in unsubscription acknowledgement notification, which is by default set. When sending notification, [mail merge](../overview/#mail-merge) is performed on this token resolving to the API url and parameters.
+
+## Get all services with confirmed subscribers
+
+```
+GET /subscriptions/services
+```
+This API is designed to facilitate implementing autocomplete for admin web console.
+
+* inputs - none
+* outcome
+  * for admin requests, returns an array of unique service names with confirmed subscribers
+  * forbidden for non-admin requests
+
+## Replace a Subscription
+
+```
+PUT /subscriptions/{id}
+```
+This API is intended to be only used by admin web console to modify a subscription without triggering any cofirmation or acknowledgement notificaiton.
+
+* inputs
+  * subscription id
+    * parameter name: id
+    * required: true
+    * parameter type: path
+    * data type: string
+  * subscription data
+    * parameter name: data
+    * required: true
+    * parameter type: body
+    * data type: object
+* outcome
+  * for admin requests, replace subscription identified by *id* with  parameter *data* and save to database. No notification is sent.
+  * forbidden for non-admin requests
