@@ -51,11 +51,13 @@ export default {
       'getSubscribedServiceNames'
     ]),
     createAutoCompleteServiceNameWidget: async function() {
-      let items = await this.getSubscribedServiceNames()
-      $("#nb-wc-notification-table [name='root[serviceName]']").annotatedAutoComplete({
-        appendTo: '#nb-wc-notification-table',
-        source: items
-      })
+      try {
+        let items = await this.getSubscribedServiceNames()
+        $("#nb-wc-notification-table [name='root[serviceName]']").annotatedAutoComplete({
+          appendTo: '#nb-wc-notification-table',
+          source: items
+        })
+      } catch (ex) {}
     }
   },
   data: function() {
