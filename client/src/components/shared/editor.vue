@@ -55,6 +55,9 @@ export default {
   },
   mounted: function() {
     this.createJsonEditor()
+  },
+  beforeDestroy: function() {
+    this.jsonEditor && this.jsonEditor.destroy()
   }
 }
 </script>
