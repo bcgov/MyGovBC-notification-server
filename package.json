@@ -9,7 +9,9 @@
     "postinstall": "cd client && npm i && npm run build && cd ..",
     "test": "cross-env NODE_ENV=test istanbul cover node_modules/jasmine/bin/jasmine.js",
     "pretest": "jshint .",
-    "posttest": "nsp check"
+    "posttest": "nsp check",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
     "async": "^2.0.1",
@@ -41,7 +43,8 @@
     "smtp-server": "^3.1.0",
     "strong-error-handler": "^1.0.1",
     "twilio": "^3.7.0",
-    "underscore.string": "^3.3.4"
+    "underscore.string": "^3.3.4",
+    "snyk": "^1.52.1"
   },
   "devDependencies": {
     "connect-history-api-fallback": "^1.4.0",
@@ -64,5 +67,6 @@
   },
   "license": "Apache-2.0",
   "description": "notification",
-  "private": true
+  "private": true,
+  "snyk": true
 }
