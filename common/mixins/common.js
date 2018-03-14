@@ -1,15 +1,15 @@
-module.exports = function(Model, options) {
+module.exports = function (Model, options) {
   var ipRangeCheck = require('ip-range-check')
   var _ = require('lodash')
   var toSentence = require('underscore.string/toSentence')
   var pluralize = require('pluralize')
-  Model.createOptionsFromRemotingContext = function(ctx) {
+  Model.createOptionsFromRemotingContext = function (ctx) {
     var base = this.base.createOptionsFromRemotingContext(ctx)
     base.httpContext = ctx
     return base
   }
 
-  Model.isAdminReq = function(httpCtx, ignoreAccessToken, ignoreSurrogate) {
+  Model.isAdminReq = function (httpCtx, ignoreAccessToken, ignoreSurrogate) {
     // internal requests
     if (!httpCtx || !httpCtx.req) {
       return true
@@ -30,19 +30,19 @@ module.exports = function(Model, options) {
         if (token && token.userId) {
           return true
         }
-      } catch (ex) {}
+      } catch (ex) { }
     }
 
     var adminIps = Model.app.get('adminIps') || Model.app.get('defaultAdminIps')
     if (adminIps) {
-      return adminIps.some(function(e, i) {
+      return adminIps.some(function (e, i) {
         return ipRangeCheck(httpCtx.req.ip, e)
       })
     }
     return false
   }
 
-  Model.getCurrentUser = function(httpCtx) {
+  Model.getCurrentUser = function (httpCtx) {
     // internal requests
     if (!httpCtx) return null
 
@@ -64,7 +64,7 @@ module.exports = function(Model, options) {
     }
     // rely on express 'trust proxy' settings to obtain real ip
     var realIp = httpCtx.req.ip
-    var isFromSM = siteMinderReverseProxyIps.some(function(e) {
+    var isFromSM = siteMinderReverseProxyIps.some(function (e) {
       return ipRangeCheck(realIp, e)
     })
     return isFromSM ? currUser : null
@@ -72,7 +72,7 @@ module.exports = function(Model, options) {
 
   let smsClient
   const Twillio = require('twilio')
-  Model.sendSMS = function(to, textBody, cb) {
+  Model.sendSMS = function (to, textBody, cb) {
     var smsServiceProvider = Model.app.get('smsServiceProvider')
     switch (smsServiceProvider) {
       default:
@@ -90,7 +90,7 @@ module.exports = function(Model, options) {
             from: smsConfig.fromNumber,
             body: textBody
           },
-          function(err, message) {
+          function (err, message) {
             cb(err, message)
           }
         )
@@ -100,7 +100,7 @@ module.exports = function(Model, options) {
   let nodemailer = require('nodemailer')
   const directTransport = require('nodemailer-direct-transport')
   let transporter
-  Model.sendEmail = function(mailOptions, cb) {
+  Model.sendEmail = function (mailOptions, cb) {
     if (!transporter) {
       let smtpCfg = Model.app.get('smtp') || Model.app.get('defaultSmtp')
       if (smtpCfg.direct) {
@@ -109,27 +109,27 @@ module.exports = function(Model, options) {
         transporter = nodemailer.createTransport(smtpCfg)
       }
     }
-    transporter.sendMail(mailOptions, function(error, info) {
+    transporter.sendMail(mailOptions, function (error, info) {
       try {
         if (!error && info.accepted.length < 1) {
           error = new Error('delivery failed')
         }
-      } catch (ex) {}
+      } catch (ex) { }
       cb && cb(error, info)
     })
   }
 
-  Model.mailMerge = function(srcTxt, data, httpCtx) {
+  Model.mailMerge = function (srcTxt, data, httpCtx) {
     let output = srcTxt
     try {
       output = output.replace(
         /\{subscription_confirmation_code\}/gi,
         data.confirmationRequest.confirmationCode
       )
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(/\{service_name\}/gi, data.serviceName)
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       if (output.match(/\{unsubscription_service_names\}/i)) {
         let serviceNames = _.union(
@@ -141,11 +141,11 @@ module.exports = function(Model, options) {
         output = output.replace(
           /\{unsubscription_service_names\}/gi,
           pluralize('service', serviceNames.length) +
-            ' ' +
-            toSentence(serviceNames)
+          ' ' +
+          toSentence(serviceNames)
         )
       }
-    } catch (ex) {}
+    } catch (ex) { }
     let httpHost
     try {
       if (httpCtx.req) {
@@ -157,67 +157,67 @@ module.exports = function(Model, options) {
         httpHost = httpCtx.instance.httpHost
       }
       output = output.replace(/\{http_host\}/gi, httpHost)
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(
         /\{rest_api_root\}/gi,
         Model.app.get('restApiRoot')
       )
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(/\{subscription_id\}/gi, data.id)
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(
         /\{unsubscription_code\}/gi,
         data.unsubscriptionCode
       )
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(
         /\{unsubscription_url\}/gi,
         httpHost +
-          Model.app.get('restApiRoot') +
-          '/subscriptions/' +
-          data.id +
-          '/unsubscribe?unsubscriptionCode=' +
-          data.unsubscriptionCode
+        Model.app.get('restApiRoot') +
+        '/subscriptions/' +
+        data.id +
+        '/unsubscribe?unsubscriptionCode=' +
+        data.unsubscriptionCode
       )
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(
         /\{unsubscription_all_url\}/gi,
         httpHost +
-          Model.app.get('restApiRoot') +
-          '/subscriptions/' +
-          data.id +
-          '/unsubscribe?unsubscriptionCode=' +
-          data.unsubscriptionCode +
-          '&additionalServices=_all'
+        Model.app.get('restApiRoot') +
+        '/subscriptions/' +
+        data.id +
+        '/unsubscribe?unsubscriptionCode=' +
+        data.unsubscriptionCode +
+        '&additionalServices=_all'
       )
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(
         /\{subscription_confirmation_url\}/gi,
         httpHost +
-          Model.app.get('restApiRoot') +
-          '/subscriptions/' +
-          data.id +
-          '/verify?confirmationCode=' +
-          data.confirmationRequest.confirmationCode
+        Model.app.get('restApiRoot') +
+        '/subscriptions/' +
+        data.id +
+        '/verify?confirmationCode=' +
+        data.confirmationRequest.confirmationCode
       )
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(
         /\{unsubscription_reversion_url\}/gi,
         httpHost +
-          Model.app.get('restApiRoot') +
-          '/subscriptions/' +
-          data.id +
-          '/unsubscribe/undo?unsubscriptionCode=' +
-          data.unsubscriptionCode
+        Model.app.get('restApiRoot') +
+        '/subscriptions/' +
+        data.id +
+        '/unsubscribe/undo?unsubscriptionCode=' +
+        data.unsubscriptionCode
       )
-    } catch (ex) {}
+    } catch (ex) { }
 
     // for backward compatibilities
     try {
@@ -225,34 +225,34 @@ module.exports = function(Model, options) {
         /\{confirmation_code\}/gi,
         data.confirmationRequest.confirmationCode
       )
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(/\{serviceName\}/gi, data.serviceName)
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(/\{restApiRoot\}/gi, Model.app.get('restApiRoot'))
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(/\{subscriptionId\}/gi, data.id)
-    } catch (ex) {}
+    } catch (ex) { }
     try {
       output = output.replace(
         /\{unsubscriptionCode\}/gi,
         data.unsubscriptionCode
       )
-    } catch (ex) {}
+    } catch (ex) { }
     if (data.data) {
       // substitute all other tokens with matching data.data properties
       let matches = output.match(/{.+?}/g)
       if (matches) {
-        matches.forEach(function(e) {
+        matches.forEach(function (e) {
           try {
             let token = e.match(/{(.+)}/)[1]
             let val = _.get(data.data, token)
             if (val) {
               output = output.replace(e, val)
             }
-          } catch (ex) {}
+          } catch (ex) { }
         })
       }
     }
@@ -260,19 +260,32 @@ module.exports = function(Model, options) {
   }
 
   Model.observe('before save', function updateTimestamp(ctx, next) {
+    let token
+    try {
+      token = ctx.options.httpContext.args.options && ctx.options.httpContext.args.options.accessToken
+    }
+    catch (ex) { }
     try {
       if (ctx.instance) {
         ctx.instance.updated = new Date()
-        ctx.instance.updatedByIp = ctx.options.httpContext.req.ip
+        ctx.instance.updatedBy = {
+          ip: ctx.options.httpContext.req.ip
+        }
+        if (token && token.userId) {
+          ctx.instance.updatedBy.adminUser = token.userId
+        }
       } else if (ctx.data) {
         ctx.data.updated = new Date()
-        ctx.data.updatedByIp = ctx.options.httpContext.req.ip
+        ctx.data.updatedBy = { ip: ctx.options.httpContext.req.ip }
+        if (token && token.userId) {
+          ctx.data.updatedBy.adminUser = token.userId
+        }
       }
-    } catch (ex) {}
+    } catch (ex) { }
     next()
   })
 
-  Model.getMergedConfig = function(configName, serviceName, next) {
+  Model.getMergedConfig = function (configName, serviceName, next) {
     Model.app.models.Configuration.findOne(
       {
         where: {
@@ -287,10 +300,10 @@ module.exports = function(Model, options) {
         }
         try {
           res = _.merge({}, Model.app.get(configName))
-        } catch (ex) {}
+        } catch (ex) { }
         try {
           res = _.merge({}, res, data.value)
-        } catch (ex) {}
+        } catch (ex) { }
         return next(null, res)
       }
     )
