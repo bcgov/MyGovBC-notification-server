@@ -263,8 +263,10 @@ module.exports = function(Model, options) {
     try {
       if (ctx.instance) {
         ctx.instance.updated = new Date()
+        ctx.instance.updatedByIp = ctx.options.httpContext.req.ip
       } else if (ctx.data) {
         ctx.data.updated = new Date()
+        ctx.data.updatedByIp = ctx.options.httpContext.req.ip
       }
     } catch (ex) {}
     next()

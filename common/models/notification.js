@@ -59,6 +59,7 @@ module.exports = function(Notification) {
           e.readBy = null
           e.deletedBy = null
         }
+        e.unsetAttribute("updatedByIp")
         p.push(e)
         return p
       }, [])

@@ -88,9 +88,11 @@ module.exports = function(Subscription) {
       if (data instanceof Array) {
         data.forEach(function(e) {
           e.confirmationRequest = undefined
+          e.unsetAttribute("updatedByIp")
         })
       } else if (data instanceof Object) {
         data.confirmationRequest = undefined
+        data.unsetAttribute("updatedByIp")
       }
     }
     return next()
