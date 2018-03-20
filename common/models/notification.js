@@ -60,6 +60,7 @@ module.exports = function(Notification) {
           e.deletedBy = null
         }
         e.unsetAttribute("updatedBy")
+        e.unsetAttribute("createdBy")
         p.push(e)
         return p
       }, [])

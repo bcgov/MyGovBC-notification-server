@@ -89,10 +89,12 @@ module.exports = function(Subscription) {
         data.forEach(function(e) {
           e.confirmationRequest = undefined
           e.unsetAttribute("updatedBy")
+          e.unsetAttribute("createdBy")
         })
       } else if (data instanceof Object) {
         data.confirmationRequest = undefined
         data.unsetAttribute("updatedBy")
+        data.unsetAttribute("createdBy")
       }
     }
     return next()
