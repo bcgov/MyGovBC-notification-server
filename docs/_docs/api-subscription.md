@@ -257,11 +257,11 @@ GET /subscriptions
 ## Get Subscription Count
 
 ```
-GET /subscriptions/count
+GET /subscriptions/count?where[property]=value
 ```
 * inputs 
   * a [where filter](https://loopback.io/doc/en/lb3/Where-filter.html)
-    * parameter name: filter
+    * parameter name: where
     * required: false
     * parameter type: query
     * data type: object
@@ -274,6 +274,9 @@ GET /subscriptions/count
     "count": <number>
   }
   ```
+* examples
+
+  See LoopBack [Get instance count](http://loopback.io/doc/en/lb3/PersistedModel-REST-API.html#get-instance-count) for examples.
 
 ## Create a Subscription
 ```
