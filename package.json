@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node .",
     "start:dev": "cross-env NODE_ENV=dev node .",
-    "postinstall": "cd client && npm i && npm run build && cd ..",
+    "postinstall": "cd client && yarn install && yarn run build && cd ..",
     "test": "cross-env NODE_ENV=test istanbul cover node_modules/jasmine/bin/jasmine.js",
     "pretest": "jshint .",
     "posttest": "nsp check",

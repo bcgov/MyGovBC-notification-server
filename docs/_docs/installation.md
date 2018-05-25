@@ -50,7 +50,7 @@ run following commands
 https://github.com/bcgov/MyGovBC-notification-server.git \
 notifyBC
 ~ $ cd notifyBC
-~/notifyBC $ npm install
+~/notifyBC $ npm i -g yarn && yarn install
 ~/notifyBC $ npm start
 ```
 

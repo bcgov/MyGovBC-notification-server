@@ -11,7 +11,7 @@ For the impatient, here's how to get a boilerplate *NotifyBC* instance up and ru
 https://github.com/bcgov/MyGovBC-notification-server.git \
 notifyBC
 ~ $ cd notifyBC
-~/notifyBC $ npm install
+~/notifyBC $ npm i -g yarn && yarn install
 ~/notifyBC $ npm start
 # => Now browse to http://localhost:3000
 ```
