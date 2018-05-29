@@ -11,7 +11,7 @@
     "pretest": "jshint .",
     "posttest": "nsp check",
     "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "prepublishOnly": "npm run snyk-protect"
   },
   "dependencies": {
     "async": "^2.0.1",
