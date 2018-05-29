@@ -43,6 +43,25 @@ installing from source code is preferred.
     * a tcp proxy server of which port 25 is open to internet. This proxy server can reach *NotifyBC* on a tcp port. 
 
 ### Installation
+<div class="note">
+  <h5>ProTips™ install from behind firewall</h5>
+  <p>If you want to install on a server behind firewall which restricts internet connection, you can work around the firewall as long as you have access to a http(s) forward proxy server. Assuming the proxy server is http://my_proxy:8080 which proxies both http and https requests, to use it:</p>
+  <ul>
+    <li>For Linux, run
+        <p>export http_proxy=http://my_proxy:8080</p>
+        <p>export https_proxy=http://my_proxy:8080</p>
+        <p>git config --global url."https://".insteadOf git://</p>
+    </li>
+    <li>For Windows, run
+        <p>git config --global http.proxy http://my_proxy:8080</p>
+        <p>git config --global url."https://".insteadOf git://</p>
+        <p>npm config set proxy http://my_proxy:8080</p>
+        <p>npm i -g yarn</p>
+        <p>yarn config set proxy http://my_proxy:8080</p>
+    </li>
+  </ul>
+</div>
+
 run following commands
 
 ```sh
