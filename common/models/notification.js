@@ -5,7 +5,7 @@ var _ = require('lodash')
 var request = require('request')
 var jmespath = require('jmespath')
 
-module.exports = function(Notification) {
+module.exports = function (Notification) {
   disableAllMethods(Notification, [
     'find',
     'create',
@@ -15,7 +15,7 @@ module.exports = function(Notification) {
     'count'
   ])
 
-  Notification.observe('access', function(ctx, next) {
+  Notification.observe('access', function (ctx, next) {
     var httpCtx = ctx.options.httpContext
     ctx.query.where = ctx.query.where || {}
     var currUser = Notification.getCurrentUser(httpCtx)
@@ -36,13 +36,13 @@ module.exports = function(Notification) {
     next()
   })
 
-  Notification.afterRemote('find', function(ctx, res, next) {
+  Notification.afterRemote('find', function (ctx, res, next) {
     if (!res) {
       return
     }
     var currUser = Notification.getCurrentUser(ctx)
     if (currUser) {
-      ctx.result = res.reduce(function(p, e, i) {
+      ctx.result = res.reduce(function (p, e, i) {
         if (e.validTill && Date.parse(e.validTill) < new Date()) {
           return p
         }
@@ -68,7 +68,7 @@ module.exports = function(Notification) {
     next()
   })
 
-  Notification.preCreationValidation = function() {
+  Notification.preCreationValidation = function () {
     let ctx = arguments[0]
     let next = arguments[arguments.length - 1]
     let error
@@ -128,7 +128,7 @@ module.exports = function(Notification) {
       {
         where: whereClause
       },
-      function(err, subscription) {
+      function (err, subscription) {
         if (err || !subscription) {
           var error = new Error('invalid user')
           error.status = 403
@@ -146,7 +146,7 @@ module.exports = function(Notification) {
   Notification.beforeRemote('create', Notification.preCreationValidation)
   Notification.beforeRemote('replaceById', Notification.preCreationValidation)
 
-  Notification.dispatchNotification = function(ctx, res, next) {
+  Notification.dispatchNotification = function (ctx, res, next) {
     // send non-inApp notifications immediately
     switch (res.channel) {
       case 'email':
@@ -154,7 +154,7 @@ module.exports = function(Notification) {
         if (res.invalidBefore && Date.parse(res.invalidBefore) > new Date()) {
           return next()
         }
-        sendPushNotification(ctx, res, function(errSend) {
+        sendPushNotification(ctx, res, function (errSend) {
           if (errSend) {
             res.state = 'error'
           } else if (res.isBroadcast && res.asyncBroadcastPushNotification) {
@@ -162,7 +162,7 @@ module.exports = function(Notification) {
           } else {
             res.state = 'sent'
           }
-          res.save(function(errSave) {
+          res.save(function (errSave) {
             next(errSend || errSave)
           })
         })
@@ -225,7 +225,7 @@ module.exports = function(Notification) {
   Notification.afterRemote('prototype.patchAttributes', afterPatchAttributes)
   Notification.beforeRemote('prototype.deleteItemById', beforePatchAttributes)
   Notification.afterRemote('prototype.deleteItemById', afterPatchAttributes)
-  Notification.prototype.deleteItemById = function(options, callback) {
+  Notification.prototype.deleteItemById = function (options, callback) {
     this.patchAttributes(options.httpContext.args.data, options, callback)
   }
 
@@ -271,6 +271,7 @@ module.exports = function(Notification) {
               text: textBody,
               html: htmlBody,
               list: {
+                id: data.httpHost + '/' + encodeURIComponent(data.serviceName),
                 unsubscribe: listUnsub
               }
             }
@@ -295,14 +296,14 @@ module.exports = function(Notification) {
               skip: startIdx,
               limit: broadcastSubscriberChunkSize
             },
-            function(err, subscribers) {
+            function (err, subscribers) {
               let jmespathSearchOpts = {}
               try {
                 jmespathSearchOpts.functionTable = Notification.app.get(
                   'notification'
                 ).broadcastCustomFilterFunctions
-              } catch (ex) {}
-              var tasks = subscribers.reduce(function(a, e, i) {
+              } catch (ex) { }
+              var tasks = subscribers.reduce(function (a, e, i) {
                 if (e.broadcastPushNotificationFilter && data.data) {
                   let match
                   try {
@@ -311,19 +312,19 @@ module.exports = function(Notification) {
                       '[?' + e.broadcastPushNotificationFilter + ']',
                       jmespathSearchOpts
                     )
-                  } catch (ex) {}
+                  } catch (ex) { }
                   if (!match || match.length === 0) {
                     return a
                   }
                 }
-                a.push(function(cb) {
-                  var notificationMsgCB = function(err) {
+                a.push(function (cb) {
+                  var notificationMsgCB = function (err) {
                     if (err) {
                       data.errorWhenSendingToUsers =
                         data.errorWhenSendingToUsers || []
                       try {
                         data.errorWhenSendingToUsers.push(e.userChannelId)
-                      } catch (ex) {}
+                      } catch (ex) { }
                     }
                     cb(null, err && e.userChannelId)
                   }
@@ -380,6 +381,7 @@ module.exports = function(Notification) {
                         text: textBody,
                         html: htmlBody,
                         list: {
+                          id: data.httpHost + '/' + encodeURIComponent(data.serviceName),
                           unsubscribe: listUnsub
                         }
                       }
@@ -388,7 +390,7 @@ module.exports = function(Notification) {
                 })
                 return a
               }, [])
-              parallel(tasks, function(err, res) {
+              parallel(tasks, function (err, res) {
                 if (
                   !data.asyncBroadcastPushNotification ||
                   typeof ctx.args.start === 'number'
@@ -400,7 +402,7 @@ module.exports = function(Notification) {
                   } else {
                     data.state = 'sent'
                   }
-                  data.save(function(errSave) {
+                  data.save(function (errSave) {
                     if (
                       typeof data.asyncBroadcastPushNotification === 'string'
                     ) {
@@ -426,7 +428,7 @@ module.exports = function(Notification) {
               state: 'confirmed',
               channel: data.channel
             },
-            function(err, count) {
+            function (err, count) {
               if (count <= broadcastSubscriberChunkSize) {
                 startIdx = 0
                 broadcastToChunkSubscribers()
@@ -438,7 +440,7 @@ module.exports = function(Notification) {
                   httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
                 }
 
-                let q = queue(function(task, cb) {
+                let q = queue(function (task, cb) {
                   let uri =
                     httpHost +
                     Notification.app.get('restApiRoot') +
@@ -450,7 +452,7 @@ module.exports = function(Notification) {
                     json: true,
                     uri: uri
                   }
-                  request.get(options, function(error, response, body) {
+                  request.get(options, function (error, response, body) {
                     if (!error && response.statusCode === 200) {
                       return cb && cb(body)
                     }
@@ -466,20 +468,20 @@ module.exports = function(Notification) {
                         limit: broadcastSubscriberChunkSize,
                         fields: { userChannelId: true }
                       },
-                      function(err, subs) {
+                      function (err, subs) {
                         return cb && cb(err || subs.map(e => e.userChannelId))
                       }
                     )
                   })
                 }, broadcastSubRequestBatchSize)
-                q.drain = function() {
+                q.drain = function () {
                   if (!data.asyncBroadcastPushNotification) {
                     cb()
                   } else {
                     if (data.state !== 'error') {
                       data.state = 'sent'
                     }
-                    data.save(function(errSave) {
+                    data.save(function (errSave) {
                       if (
                         typeof data.asyncBroadcastPushNotification === 'string'
                       ) {
@@ -503,7 +505,7 @@ module.exports = function(Notification) {
                   })
                   i++
                 }
-                q.push(queuedTasks, function(errorWhenSendingToUsers) {
+                q.push(queuedTasks, function (errorWhenSendingToUsers) {
                   if (!errorWhenSendingToUsers) {
                     return
                   }
@@ -537,7 +539,7 @@ module.exports = function(Notification) {
    * @param {Function(Error, array)} callback
    */
 
-  Notification.prototype.broadcastToChunkSubscribers = function(
+  Notification.prototype.broadcastToChunkSubscribers = function (
     options,
     start,
     callback
