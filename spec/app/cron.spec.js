@@ -344,6 +344,7 @@ describe('CRON dispatchLiveNotifications', function() {
           text: 'this is a test http://foo.com',
           html: undefined,
           list: {
+            id: 'http://foo.com/myService',
             unsubscribe: [
               [
                 'un-1-12345@invalid.local',
