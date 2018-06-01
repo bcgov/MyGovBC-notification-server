@@ -15,11 +15,8 @@ if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
 fi
 chmod -R a+rwx ./
 echo "---> Building your Node application from source"
-npm i --ignore-scripts
-pushd client
-npm i
-npm run build
-popd
+npm i -g yarn
+yarn install
 if [ -n "${RUN_TEST+x}" ]; then
   echo "---> Run automated tests"
   npm test
