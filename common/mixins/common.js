@@ -259,7 +259,7 @@ module.exports = function (Model, options) {
     return output
   }
 
-  Model.observe('before save', function updateTimestamp(ctx, next) {
+  Model.updateTimestamp = function (ctx, next) {
     let token
     try {
       token = ctx.options.httpContext.args.options && ctx.options.httpContext.args.options.accessToken
@@ -299,7 +299,9 @@ module.exports = function (Model, options) {
       }
     } catch (ex) { }
     next()
-  })
+  }
+
+  Model.observe('before save', (ctx, next) => { Model.updateTimestamp(ctx, next) })
 
   Model.getMergedConfig = function (configName, serviceName, next) {
     Model.app.models.Configuration.findOne(

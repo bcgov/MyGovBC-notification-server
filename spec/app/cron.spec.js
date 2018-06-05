@@ -4,17 +4,20 @@ var parallel = require('async/parallel')
 var path = require('path')
 var fs = require('fs')
 beforeAll(done => {
-  require('../../server/server.js')(function(err, data) {
+  require('../../server/server.js')(function (err, data) {
     app = data
     done()
   })
 })
 
-describe('CRON purgeData', function() {
-  beforeEach(function(done) {
+describe('CRON purgeData', function () {
+  beforeEach(function (done) {
+    spyOn(app.models.Subscription, 'updateTimestamp').and.callFake(function (ctx, next) {
+      return next()
+    })
     parallel(
       [
-        function(cb) {
+        function (cb) {
           app.models.Notification.create(
             {
               channel: 'email',
@@ -27,12 +30,12 @@ describe('CRON purgeData', function() {
               created: '2010-01-01',
               state: 'sent'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Notification.create(
             {
               channel: 'email',
@@ -45,12 +48,12 @@ describe('CRON purgeData', function() {
               created: '2020-01-01',
               state: 'sent'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Notification.create(
             {
               channel: 'inApp',
@@ -63,12 +66,12 @@ describe('CRON purgeData', function() {
               validTill: '2010-01-01',
               state: 'new'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Notification.create(
             {
               channel: 'inApp',
@@ -81,12 +84,12 @@ describe('CRON purgeData', function() {
               validTill: '3010-01-01',
               state: 'new'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Notification.create(
             {
               channel: 'inApp',
@@ -98,12 +101,12 @@ describe('CRON purgeData', function() {
               serviceName: 'deletedService',
               state: 'deleted'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'unconfirmedService',
@@ -120,44 +123,44 @@ describe('CRON purgeData', function() {
               },
               updated: '2010-01-01'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         }
       ],
-      function(err, results) {
+      function (err, results) {
         expect(err).toBeNull()
         done()
       }
     )
   })
 
-  it('should deleted old non-inApp notifications', function(done) {
-    cronTasks.purgeData(app, function(err, results) {
+  it('should deleted old non-inApp notifications', function (done) {
+    cronTasks.purgeData(app, function (err, results) {
       expect(err).toBeNull()
       parallel(
         [
-          function(cb) {
+          function (cb) {
             app.models.Notification.find(
               { where: { serviceName: 'futureService', channel: 'email' } },
-              function(err, data) {
+              function (err, data) {
                 expect(data.length).toBe(1)
                 cb(err, data)
               }
             )
           },
-          function(cb) {
+          function (cb) {
             app.models.Notification.find(
               { where: { serviceName: 'pastService', channel: 'email' } },
-              function(err, data) {
+              function (err, data) {
                 expect(data.length).toBe(0)
                 cb(err, data)
               }
             )
           }
         ],
-        function(err, results) {
+        function (err, results) {
           expect(err).toBeNull()
           done()
         }
@@ -165,12 +168,12 @@ describe('CRON purgeData', function() {
     })
   })
 
-  it('should delete all expired inApp notifications', function(done) {
-    cronTasks.purgeData(app, function(err, results) {
+  it('should delete all expired inApp notifications', function (done) {
+    cronTasks.purgeData(app, function (err, results) {
       expect(err).toBeNull()
       parallel(
         [
-          function(cb) {
+          function (cb) {
             app.models.Notification.find(
               {
                 where: {
@@ -178,13 +181,13 @@ describe('CRON purgeData', function() {
                   channel: 'inApp'
                 }
               },
-              function(err, data) {
+              function (err, data) {
                 expect(data.length).toBe(1)
                 cb(err, data)
               }
             )
           },
-          function(cb) {
+          function (cb) {
             app.models.Notification.find(
               {
                 where: {
@@ -192,14 +195,14 @@ describe('CRON purgeData', function() {
                   channel: 'inApp'
                 }
               },
-              function(err, data) {
+              function (err, data) {
                 expect(data.length).toBe(0)
                 cb(err, data)
               }
             )
           }
         ],
-        function(err, results) {
+        function (err, results) {
           expect(err).toBeNull()
           done()
         }
@@ -207,12 +210,12 @@ describe('CRON purgeData', function() {
     })
   })
 
-  it('should delete all deleted inApp notifications', function(done) {
-    cronTasks.purgeData(app, function(err, results) {
+  it('should delete all deleted inApp notifications', function (done) {
+    cronTasks.purgeData(app, function (err, results) {
       expect(err).toBeNull()
       parallel(
         [
-          function(cb) {
+          function (cb) {
             app.models.Notification.find(
               {
                 where: {
@@ -220,14 +223,14 @@ describe('CRON purgeData', function() {
                   channel: 'inApp'
                 }
               },
-              function(err, data) {
+              function (err, data) {
                 expect(data.length).toBe(0)
                 cb(err, data)
               }
             )
           }
         ],
-        function(err, results) {
+        function (err, results) {
           expect(err).toBeNull()
           done()
         }
@@ -235,12 +238,12 @@ describe('CRON purgeData', function() {
     })
   })
 
-  xit('should delete all old non-confirmed subscriptions', function(done) {
-    cronTasks.purgeData(app, function(err, results) {
+  it('should delete all old non-confirmed subscriptions', function (done) {
+    cronTasks.purgeData(app, function (err, results) {
       expect(err).toBeNull()
       parallel(
         [
-          function(cb) {
+          function (cb) {
             app.models.Subscription.find(
               {
                 where: {
@@ -248,15 +251,14 @@ describe('CRON purgeData', function() {
                   channel: 'email'
                 }
               },
-              function(err, data) {
-                // todo: need to figure out how to disable 'before save' operation hook in common.js first
+              function (err, data) {
                 expect(data.length).toBe(0)
                 cb(err, data)
               }
             )
           }
         ],
-        function(err, results) {
+        function (err, results) {
           expect(err).toBeNull()
           done()
         }
@@ -265,11 +267,11 @@ describe('CRON purgeData', function() {
   })
 })
 
-describe('CRON dispatchLiveNotifications', function() {
-  beforeEach(function(done) {
+describe('CRON dispatchLiveNotifications', function () {
+  beforeEach(function (done) {
     parallel(
       [
-        function(cb) {
+        function (cb) {
           app.models.Notification.create(
             {
               channel: 'email',
@@ -285,12 +287,12 @@ describe('CRON dispatchLiveNotifications', function() {
               invalidBefore: '2010-01-01',
               state: 'new'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Notification.create(
             {
               channel: 'email',
@@ -305,12 +307,12 @@ describe('CRON dispatchLiveNotifications', function() {
               invalidBefore: '3010-01-01',
               state: 'new'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -319,21 +321,21 @@ describe('CRON dispatchLiveNotifications', function() {
               state: 'confirmed',
               unsubscriptionCode: '12345'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         }
       ],
-      function(err, results) {
+      function (err, results) {
         expect(err).toBeNull()
         done()
       }
     )
   })
 
-  it('should send all live push notifications', function(done) {
-    cronTasks.dispatchLiveNotifications(app, function(err, results) {
+  it('should send all live push notifications', function (done) {
+    cronTasks.dispatchLiveNotifications(app, function (err, results) {
       expect(err).toBeNull()
       expect(results.length).toBe(1)
       expect(app.models.Notification.sendEmail).toHaveBeenCalledWith(
@@ -358,7 +360,7 @@ describe('CRON dispatchLiveNotifications', function() {
       expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
       parallel(
         [
-          function(cb) {
+          function (cb) {
             app.models.Notification.find(
               {
                 where: {
@@ -367,14 +369,14 @@ describe('CRON dispatchLiveNotifications', function() {
                   state: 'sent'
                 }
               },
-              function(err, data) {
+              function (err, data) {
                 expect(data.length).toBe(1)
                 cb(err, data)
               }
             )
           }
         ],
-        function(err, results) {
+        function (err, results) {
           expect(err).toBeNull()
           done()
         }
@@ -383,11 +385,11 @@ describe('CRON dispatchLiveNotifications', function() {
   })
 })
 
-describe('CRON checkRssConfigUpdates', function() {
-  beforeEach(function(done) {
-    spyOn(cronTasks, 'request').and.callFake(function() {
+describe('CRON checkRssConfigUpdates', function () {
+  beforeEach(function (done) {
+    spyOn(cronTasks, 'request').and.callFake(function () {
       var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
-      setTimeout(function() {
+      setTimeout(function () {
         output.emit('response', { statusCode: 200 })
       }, 0)
       return output
@@ -395,7 +397,7 @@ describe('CRON checkRssConfigUpdates', function() {
     spyOn(cronTasks.request, 'post')
     parallel(
       [
-        function(cb) {
+        function (cb) {
           app.models.Configuration.create(
             {
               name: 'notification',
@@ -419,12 +421,12 @@ describe('CRON checkRssConfigUpdates', function() {
                 httpHost: 'http://foo'
               }
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -433,23 +435,23 @@ describe('CRON checkRssConfigUpdates', function() {
               state: 'confirmed',
               unsubscriptionCode: '12345'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         }
       ],
-      function(err, results) {
+      function (err, results) {
         expect(err).toBeNull()
         done()
       }
     )
   })
 
-  it('should create rss task and post notifications at initial run', function(
+  it('should create rss task and post notifications at initial run', function (
     done
   ) {
-    cronTasks.checkRssConfigUpdates(app, function(err, rssTasks) {
+    cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
       expect(err).toBeNull()
       expect(rssTasks['1']).not.toBeNull()
       expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
@@ -466,7 +468,7 @@ describe('CRON checkRssConfigUpdates', function() {
     })
   })
 
-  it('should avoid sending notification for unchanged items', function(done) {
+  it('should avoid sending notification for unchanged items', function (done) {
     app.models.Rss.create(
       {
         serviceName: 'myService',
@@ -494,8 +496,8 @@ describe('CRON checkRssConfigUpdates', function() {
         ],
         lastPoll: '1970-01-01T00:00:00.000Z'
       },
-      function(err, res) {
-        cronTasks.checkRssConfigUpdates(app, function(err, rssTasks) {
+      function (err, res) {
+        cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
           expect(cronTasks.request.post).not.toHaveBeenCalled()
           app.models.Rss.find((err, results) => {
             expect(results[0].items[0].author).toBe('foo')
@@ -506,18 +508,18 @@ describe('CRON checkRssConfigUpdates', function() {
     )
   })
 
-  it('should send notification for updated item', function(done) {
+  it('should send notification for updated item', function (done) {
     parallel(
       [
-        function(cb) {
-          app.models.Configuration.findById(1, function(err, res) {
+        function (cb) {
+          app.models.Configuration.findById(1, function (err, res) {
             let newVal = res.value
             newVal.rss.includeUpdatedItems = true
             newVal.rss.outdatedItemRetentionGenerations = 100
             res.updateAttribute('value', newVal, cb)
           })
         },
-        function(cb) {
+        function (cb) {
           app.models.Rss.create(
             {
               serviceName: 'myService',
@@ -538,8 +540,8 @@ describe('CRON checkRssConfigUpdates', function() {
           )
         }
       ],
-      function(err, results) {
-        cronTasks.checkRssConfigUpdates(app, function(err, rssTasks) {
+      function (err, results) {
+        cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
           expect(cronTasks.request.post).toHaveBeenCalledTimes(1)
           done()
         })
@@ -547,16 +549,16 @@ describe('CRON checkRssConfigUpdates', function() {
     )
   })
 
-  it('should handle error', function(done) {
-    cronTasks.request = jasmine.createSpy().and.callFake(function() {
+  it('should handle error', function (done) {
+    cronTasks.request = jasmine.createSpy().and.callFake(function () {
       var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
-      setTimeout(function() {
+      setTimeout(function () {
         output.emit('response', { statusCode: 300 })
       }, 0)
       return output
     })
 
-    cronTasks.checkRssConfigUpdates(app, function(err, rssTasks) {
+    cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
       expect(err).not.toBeNull()
       expect(rssTasks['1']).not.toBeNull()
       done()
