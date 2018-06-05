@@ -375,17 +375,18 @@ POST /notifications
   3. for push notification, if field *httpHost* is empty, it is populated based on request's http protocol and host.
   4. the notification request is saved to database
   5. if the notification is future-dated, then all subsequent request processing is skipped and response is sent back to user. Steps 7-10 below will be carried out later on by the cron job when the notification becomes current. 
-  6. if it's an async broadcast push notification, then response is sent back to user but steps 7-10 below is processed separately 
+  6. if it's an async broadcast push notification, then response is sent back to user but steps 7-11 below is processed separately 
   7. for unicast push notification, the message is sent to targeted user; for broadcast push notification, following actions are performed:
       1. number of confirmed subscriptions is retrieved
       2. the subscriptions are partitioned and processed concurrently as described in config section [Broadcast Push Notification Task Concurrency](../configuration/#broadcast-push-notification-task-concurrency)
       3. when processing an individual subscription, if the subscription has filter rule defined in field *broadcastPushNotificationFilter* and notification contains field *data*, then the data is matched against the filter rule. Notification message is only sent if there is a match.
 
       In both cases, mail merge is performed on messages.
-  8. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains the list of *userChannelId*s the message failed to deliver to, but the state will still be set to *sent*
-  9. the updated notification is saved back to database
-  10. if it's an async broadcast push notification with a callback url, then the url is called with POST verb containing the notification with updated status as the request body
-  11. for synchronous notification, the saved record is returned unless there is an error saving to database, in which case error is returned
+  8. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains a list of objects of {userChannelId, subscriptionId, error} the message failed to deliver to, but the state will still be set to *sent*.
+  9. For broadcast push notifications, if delivery failure to a user is caused by mailbox unavailable (smtp response code 550), then the user is unsubscribed automatically. No unsubscription acknowledgement is sent.
+  10. the updated notification is saved back to database
+  11. if it's an async broadcast push notification with a callback url, then the url is called with POST verb containing the notification with updated status as the request body
+  12. for synchronous notification, the saved record is returned unless there is an error saving to database, in which case error is returned
 
 * example
 

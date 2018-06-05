@@ -274,7 +274,7 @@ module.exports = function (Model, options) {
         if (token && token.userId) {
           ctx.instance.updatedBy.adminUser = token.userId
         }
-        if(ctx.isNewInstance){
+        if (ctx.isNewInstance) {
           ctx.instance.createdBy = {
             ip: ctx.options.httpContext.req.ip
           }
@@ -284,11 +284,11 @@ module.exports = function (Model, options) {
         }
       } else if (ctx.data) {
         ctx.data.updated = new Date()
-        ctx.data.updatedBy = { ip: ctx.options.httpContext.req.ip }
+        ctx.data.updatedBy = { ip: ctx.options.httpContext && ctx.options.httpContext.req.ip }
         if (token && token.userId) {
           ctx.data.updatedBy.adminUser = token.userId
         }
-        if(ctx.isNewInstance){
+        if (ctx.isNewInstance) {
           ctx.data.createdBy = {
             ip: ctx.options.httpContext.req.ip
           }

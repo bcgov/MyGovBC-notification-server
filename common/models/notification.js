@@ -284,7 +284,7 @@ module.exports = function (Notification) {
         let broadcastSubRequestBatchSize = Notification.app.get('notification')
           .broadcastSubRequestBatchSize
         let startIdx = ctx.args.start
-        let broadcastToChunkSubscribers = () => {
+        let broadcastToChunkSubscribers = (broadcastToChunkSubscribersCB) => {
           Notification.app.models.Subscription.find(
             {
               where: {
@@ -319,14 +319,20 @@ module.exports = function (Notification) {
                 }
                 a.push(function (cb) {
                   var notificationMsgCB = function (err) {
+                    let errData = null
                     if (err) {
+                      errData = {
+                        subscriptionId: e.id,
+                        userChannelId: e.userChannelId,
+                        error: err
+                      }
                       data.errorWhenSendingToUsers =
                         data.errorWhenSendingToUsers || []
                       try {
-                        data.errorWhenSendingToUsers.push(e.userChannelId)
+                        data.errorWhenSendingToUsers.push(errData)
                       } catch (ex) { }
                     }
-                    cb(null, err && e.userChannelId)
+                    return cb(null, errData)
                   }
                   let tokenData = _.assignIn({}, e, { data: data.data })
                   var textBody =
@@ -395,7 +401,7 @@ module.exports = function (Notification) {
                   !data.asyncBroadcastPushNotification ||
                   typeof ctx.args.start === 'number'
                 ) {
-                  cb(err, _.compact(res))
+                  return (broadcastToChunkSubscribersCB || cb)(err, _.compact(res))
                 } else {
                   if (err) {
                     data.state = 'error'
@@ -422,6 +428,22 @@ module.exports = function (Notification) {
           )
         }
         if (typeof startIdx !== 'number') {
+          let unSubscribeInvaidUsers = function (unSubscribeInvaidUsersCB) {
+            // unsub invalid users
+            let unsubTasks = (data.errorWhenSendingToUsers || []).reduce((a, e, i) => {
+              if (data.channel === 'email' && e.error && e.subscriptionId && e.error.responseCode === 550) {
+                a.push(function (cb) {
+                  Notification.app.models.Subscription.updateAll({ id: e.subscriptionId }, { state: "deleted" }, (err, res) => {
+                    return cb(null, null)
+                  })
+                })
+              }
+              return a
+            }, [])
+            parallel(unsubTasks, function (err, res) {
+              unSubscribeInvaidUsersCB(err, res)
+            })
+          }
           Notification.app.models.Subscription.count(
             {
               serviceName: data.serviceName,
@@ -431,7 +453,9 @@ module.exports = function (Notification) {
             function (err, count) {
               if (count <= broadcastSubscriberChunkSize) {
                 startIdx = 0
-                broadcastToChunkSubscribers()
+                broadcastToChunkSubscribers((err, res) => {
+                  unSubscribeInvaidUsers(cb)
+                })
               } else {
                 // call broadcastToChunkSubscribers, coordinate output
                 let chunks = Math.ceil(count / broadcastSubscriberChunkSize)
@@ -475,27 +499,29 @@ module.exports = function (Notification) {
                   })
                 }, broadcastSubRequestBatchSize)
                 q.drain = function () {
-                  if (!data.asyncBroadcastPushNotification) {
-                    cb()
-                  } else {
-                    if (data.state !== 'error') {
-                      data.state = 'sent'
-                    }
-                    data.save(function (errSave) {
-                      if (
-                        typeof data.asyncBroadcastPushNotification === 'string'
-                      ) {
-                        let options = {
-                          uri: data.asyncBroadcastPushNotification,
-                          headers: {
-                            'Content-Type': 'application/json'
-                          },
-                          json: data
-                        }
-                        request.post(options)
+                  unSubscribeInvaidUsers(() => {
+                    if (!data.asyncBroadcastPushNotification) {
+                      cb()
+                    } else {
+                      if (data.state !== 'error') {
+                        data.state = 'sent'
                       }
-                    })
-                  }
+                      data.save(function (errSave) {
+                        if (
+                          typeof data.asyncBroadcastPushNotification === 'string'
+                        ) {
+                          let options = {
+                            uri: data.asyncBroadcastPushNotification,
+                            headers: {
+                              'Content-Type': 'application/json'
+                            },
+                            json: data
+                          }
+                          request.post(options)
+                        }
+                      })
+                    }
+                  })
                 }
                 let queuedTasks = [],
                   i = 0
