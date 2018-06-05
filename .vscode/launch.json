@@ -7,11 +7,19 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}\\server\\server.js",
+            "name": "notifyBC",
+            "program": "${workspaceFolder}/server/server.js",
             "env": {
-                "NOTIFYBC_NODE_ROLE": "master",
                 "NODE_ENV": "dev"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "jasmine",
+            "program": "${workspaceFolder}/node_modules/jasmine/bin/jasmine.js",
+            "env": {
+                "NODE_ENV": "test"
             }
         }
     ]
