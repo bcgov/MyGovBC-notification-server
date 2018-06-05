@@ -195,6 +195,17 @@ describe('POST /notifications', function () {
             },
             cb
           )
+        },
+        function (cb) {
+          app.models.Subscription.create(
+            {
+              serviceName: 'myInvalideEmailService',
+              channel: 'email',
+              userChannelId: 'bar@invalid.local',
+              state: 'confirmed'
+            },
+            cb
+          )
         }
       ],
       function (err, results) {
@@ -861,6 +872,75 @@ describe('POST /notifications', function () {
             expect(data.length).toBe(1)
             expect(data[0].state).toBe('sent')
             done()
+          }
+        )
+      })
+  })
+
+  it('should unsubscribe recipients of invalid emails', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    app.models.Notification.sendEmail = jasmine
+      .createSpy()
+      .and.callFake(function () {
+        let cb = arguments[arguments.length - 1]
+        let to = arguments[0].to
+        let error = null
+        if (to.indexOf('invalid') >= 0) {
+          error = {
+            responseCode: 550
+          }
+        }
+        console.log('faking sendEmail with error for invalid recipient')
+        return cb(error, null)
+      })
+    request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myInvalideEmailService',
+        message: {
+          from: 'no_reply@invalid.local',
+          subject: 'test',
+          textBody: 'test'
+        },
+        channel: 'email',
+        isBroadcast: true
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        app.models.Notification.find(
+          {
+            where: {
+              serviceName: 'myInvalideEmailService'
+            }
+          },
+          function (err, data) {
+            expect(data.length).toBe(1)
+            expect(data[0].state).toBe('sent')
+            expect(
+              app.models.Notification.sendEmail
+            ).toHaveBeenCalledTimes(1)
+            expect(data[0].errorWhenSendingToUsers.length).toBe(1)
+            expect(data[0].errorWhenSendingToUsers[0]).toEqual(
+              jasmine.objectContaining({
+                userChannelId: 'bar@invalid.local', error: { responseCode: 550 }
+              })
+            )
+            app.models.Subscription.find(
+              {
+                where: {
+                  serviceName: 'myInvalideEmailService'
+                }
+              },
+              function (err, data) {
+                expect(data.length).toBe(1)
+                expect(data[0].state).toBe('deleted')
+                done()
+              }
+            )
+
           }
         )
       })
