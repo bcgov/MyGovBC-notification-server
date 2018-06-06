@@ -2,15 +2,15 @@ let app
 var request = require('supertest')
 var parallel = require('async/parallel')
 beforeAll(done => {
-  require('../../server/server.js')(function(err, data) {
+  require('../../server/server.js')(function (err, data) {
     app = data
     done()
   })
 })
 
-describe('GET /subscriptions', function() {
+describe('GET /subscriptions', function () {
   var data
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     app.models.Subscription.create(
       {
         serviceName: 'myService',
@@ -28,7 +28,7 @@ describe('GET /subscriptions', function() {
         },
         unsubscriptionCode: '50032'
       },
-      function(err, res) {
+      function (err, res) {
         expect(err).toBeNull()
         data = res
         done()
@@ -36,35 +36,35 @@ describe('GET /subscriptions', function() {
     )
   })
 
-  it('should be forbidden by anonymous user', function(done) {
+  it('should be forbidden by anonymous user', function (done) {
     request(app)
       .get('/api/subscriptions')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(403)
         done()
       })
   })
 
-  it("should return sm user's own subscription", function(done) {
+  it("should return sm user's own subscription", function (done) {
     request(app)
       .get('/api/subscriptions')
       .set('Accept', 'application/json')
       .set('SM_USER', 'baz')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(res.body.length).toBe(0)
         done()
       })
   })
 
-  it('should have confirmationRequest field removed for sm user requests', function(
+  it('should have confirmationRequest field removed for sm user requests', function (
     done
   ) {
     request(app)
       .get('/api/subscriptions')
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(res.body.length).toBe(1)
         expect(res.body[0].confirmationRequest).toBeUndefined()
@@ -72,13 +72,13 @@ describe('GET /subscriptions', function() {
       })
   })
 
-  it('should be allowed by admin users', function(done) {
-    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function() {
+  it('should be allowed by admin users', function (done) {
+    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
       return true
     })
     request(app)
       .get('/api/subscriptions')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(res.body.length).toBe(1)
         expect(res.body[0].confirmationRequest).not.toBeUndefined()
@@ -87,11 +87,11 @@ describe('GET /subscriptions', function() {
   })
 })
 
-describe('POST /subscriptions', function() {
-  it('should allow admin users create subscriptions without sending confirmation request', function(
+describe('POST /subscriptions', function () {
+  it('should allow admin users create subscriptions without sending confirmation request', function (
     done
   ) {
-    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function() {
+    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
       return true
     })
     request(app)
@@ -106,7 +106,7 @@ describe('POST /subscriptions', function() {
         }
       })
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).not.toHaveBeenCalled()
         app.models.Subscription.find(
@@ -116,7 +116,7 @@ describe('POST /subscriptions', function() {
               userChannelId: 'bar@foo.com'
             }
           },
-          function(err, data) {
+          function (err, data) {
             expect(data[0].state).toBe('confirmed')
             done()
           }
@@ -124,10 +124,10 @@ describe('POST /subscriptions', function() {
       })
   })
 
-  it('should allow admin users create subscriptions and send confirmation request with proper mail merge', function(
+  it('should allow admin users create subscriptions and send confirmation request with proper mail merge', function (
     done
   ) {
-    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function() {
+    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
       return true
     })
     request(app)
@@ -147,7 +147,7 @@ describe('POST /subscriptions', function() {
         }
       })
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).toHaveBeenCalled()
         expect(
@@ -217,7 +217,7 @@ describe('POST /subscriptions', function() {
               userChannelId: 'foo@bar.com'
             }
           },
-          function(err, data) {
+          function (err, data) {
             expect(data.length).toBe(1)
             done()
           }
@@ -225,10 +225,10 @@ describe('POST /subscriptions', function() {
       })
   })
 
-  it('should generate unsubscription code for subscriptions created by admin user', function(
+  it('should generate unsubscription code for subscriptions created by admin user', function (
     done
   ) {
-    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function() {
+    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
       return true
     })
     request(app)
@@ -239,7 +239,7 @@ describe('POST /subscriptions', function() {
         userChannelId: '12345'
       })
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
         app.models.Subscription.find(
@@ -249,7 +249,7 @@ describe('POST /subscriptions', function() {
               userChannelId: '12345'
             }
           },
-          function(err, data) {
+          function (err, data) {
             expect(data[0].unsubscriptionCode).toMatch(/\d{5}/)
             done()
           }
@@ -257,7 +257,7 @@ describe('POST /subscriptions', function() {
       })
   })
 
-  it('should allow non-admin user create subscriptions', function(done) {
+  it('should allow non-admin user create subscriptions', function (done) {
     request(app)
       .post('/api/subscriptions')
       .send({
@@ -266,7 +266,7 @@ describe('POST /subscriptions', function() {
         userChannelId: '12345'
       })
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
         app.models.Subscription.find(
@@ -276,7 +276,7 @@ describe('POST /subscriptions', function() {
               userChannelId: '12345'
             }
           },
-          function(err, data) {
+          function (err, data) {
             expect(data[0].unsubscriptionCode).toMatch(/\d{5}/)
             done()
           }
@@ -284,7 +284,7 @@ describe('POST /subscriptions', function() {
       })
   })
 
-  it('should ignore message supplied by non-admin user when creating a subscription', function(
+  it('should ignore message supplied by non-admin user when creating a subscription', function (
     done
   ) {
     request(app)
@@ -303,7 +303,7 @@ describe('POST /subscriptions', function() {
         }
       })
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).toHaveBeenCalledTimes(1)
         app.models.Subscription.find(
@@ -313,7 +313,7 @@ describe('POST /subscriptions', function() {
               userChannelId: 'nobody@local.invalid'
             }
           },
-          function(err, data) {
+          function (err, data) {
             expect(data[0].confirmationRequest.textBody).not.toContain(
               'spoofed'
             )
@@ -326,7 +326,7 @@ describe('POST /subscriptions', function() {
       })
   })
 
-  it('should reject subscriptions with invalid broadcastPushNotificationFilter', function(
+  it('should reject subscriptions with invalid string broadcastPushNotificationFilter', function (
     done
   ) {
     request(app)
@@ -338,7 +338,7 @@ describe('POST /subscriptions', function() {
         broadcastPushNotificationFilter: "a === 'b'"
       })
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(400)
         app.models.Subscription.find(
           {
@@ -347,7 +347,7 @@ describe('POST /subscriptions', function() {
               userChannelId: '12345'
             }
           },
-          function(err, data) {
+          function (err, data) {
             expect(data.length).toBe(0)
             done()
           }
@@ -355,7 +355,7 @@ describe('POST /subscriptions', function() {
       })
   })
 
-  it('should accept subscriptions with valid broadcastPushNotificationFilter', function(
+  it('should accept subscriptions with valid broadcastPushNotificationFilter', function (
     done
   ) {
     request(app)
@@ -367,7 +367,7 @@ describe('POST /subscriptions', function() {
         broadcastPushNotificationFilter: "a == 'b'"
       })
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
         app.models.Subscription.find(
@@ -377,7 +377,7 @@ describe('POST /subscriptions', function() {
               userChannelId: '12345'
             }
           },
-          function(err, data) {
+          function (err, data) {
             expect(data[0].unsubscriptionCode).toMatch(/\d{5}/)
             done()
           }
@@ -386,8 +386,8 @@ describe('POST /subscriptions', function() {
   })
 })
 
-describe('PATCH /subscriptions/{id}', function() {
-  beforeEach(function(done) {
+describe('PATCH /subscriptions/{id}', function () {
+  beforeEach(function (done) {
     app.models.Subscription.create(
       {
         serviceName: 'myService',
@@ -405,13 +405,13 @@ describe('PATCH /subscriptions/{id}', function() {
         },
         unsubscriptionCode: '50032'
       },
-      function(err, res) {
+      function (err, res) {
         expect(err).toBeNull()
         done()
       }
     )
   })
-  it('should allow sm users change their user channel id', function(done) {
+  it('should allow sm users change their user channel id', function (done) {
     request(app)
       .patch('/api/subscriptions/1')
       .send({
@@ -419,13 +419,13 @@ describe('PATCH /subscriptions/{id}', function() {
       })
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.body.state).toBe('unconfirmed')
         expect(res.body.userChannelId).toBe('baz@foo.com')
         done()
       })
   })
-  it("should deny sm user from changing other user's subscription", function(
+  it("should deny sm user from changing other user's subscription", function (
     done
   ) {
     request(app)
@@ -435,31 +435,31 @@ describe('PATCH /subscriptions/{id}', function() {
       })
       .set('Accept', 'application/json')
       .set('SM_USER', 'baz')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(404)
         done()
       })
   })
-  it("should deny anonymous user's access", function(done) {
+  it("should deny anonymous user's access", function (done) {
     request(app)
       .patch('/api/subscriptions/1')
       .send({
         userChannelId: 'baz@foo.com'
       })
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(403)
         done()
       })
   })
 })
 
-describe('GET /subscriptions/{id}/verify', function() {
+describe('GET /subscriptions/{id}/verify', function () {
   let data
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     parallel(
       [
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -476,12 +476,12 @@ describe('GET /subscriptions/{id}/verify', function() {
                 confirmationCode: '37688'
               }
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -498,13 +498,13 @@ describe('GET /subscriptions/{id}/verify', function() {
               },
               unsubscriptionCode: '50032'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         }
       ],
-      function(err, results) {
+      function (err, results) {
         expect(err).toBeNull()
         data = results
         done()
@@ -512,44 +512,44 @@ describe('GET /subscriptions/{id}/verify', function() {
     )
   })
 
-  it('should verify confirmation code sent by sm user', function(done) {
+  it('should verify confirmation code sent by sm user', function (done) {
     request(app)
       .get(
         '/api/subscriptions/' + data[0].id + '/verify?confirmationCode=37688'
       )
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.findById(data[0].id, function(err, res) {
+        app.models.Subscription.findById(data[0].id, function (err, res) {
           expect(res.state).toBe('confirmed')
           done()
         })
       })
   })
 
-  it('should verify confirmation code sent by anonymous user', function(done) {
+  it('should verify confirmation code sent by anonymous user', function (done) {
     request(app)
       .get(
         '/api/subscriptions/' + data[1].id + '/verify?confirmationCode=37689'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.findById(data[1].id, function(err, res) {
+        app.models.Subscription.findById(data[1].id, function (err, res) {
           expect(res.state).toBe('confirmed')
           done()
         })
       })
   })
 
-  it('should deny incorrect confirmation code', function(done) {
+  it('should deny incorrect confirmation code', function (done) {
     request(app)
       .get('/api/subscriptions/' + data[1].id + '/verify?confirmationCode=0000')
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(403)
-        app.models.Subscription.findById(data[1].id, function(err, res) {
+        app.models.Subscription.findById(data[1].id, function (err, res) {
           expect(res.state).toBe('unconfirmed')
           done()
         })
@@ -557,12 +557,12 @@ describe('GET /subscriptions/{id}/verify', function() {
   })
 })
 
-describe('DELETE /subscriptions/{id}', function() {
+describe('DELETE /subscriptions/{id}', function () {
   let data
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     parallel(
       [
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -579,12 +579,12 @@ describe('DELETE /subscriptions/{id}', function() {
                 confirmationCode: '37688'
               }
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -601,12 +601,12 @@ describe('DELETE /subscriptions/{id}', function() {
               },
               unsubscriptionCode: '50032'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -622,12 +622,12 @@ describe('DELETE /subscriptions/{id}', function() {
                 confirmationCode: '37689'
               }
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'redirectAck',
@@ -639,7 +639,7 @@ describe('DELETE /subscriptions/{id}', function() {
             cb
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Configuration.create(
             {
               name: 'subscription',
@@ -658,7 +658,7 @@ describe('DELETE /subscriptions/{id}', function() {
           )
         }
       ],
-      function(err, results) {
+      function (err, results) {
         expect(err).toBeNull()
         data = results
         done()
@@ -666,107 +666,107 @@ describe('DELETE /subscriptions/{id}', function() {
     )
   })
 
-  it('should allow unsubscription by sm user', function(done) {
+  it('should allow unsubscription by sm user', function (done) {
     request(app)
       .delete('/api/subscriptions/' + data[0].id)
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.findById(data[0].id, function(err, res) {
+        app.models.Subscription.findById(data[0].id, function (err, res) {
           expect(res.state).toBe('deleted')
           done()
         })
       })
   })
 
-  it('should allow unsubscription by anonymous user', function(done) {
+  it('should allow unsubscription by anonymous user', function (done) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[1].id +
-          '/unsubscribe?unsubscriptionCode=50032'
+        data[1].id +
+        '/unsubscribe?unsubscriptionCode=50032'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.findById(data[1].id, function(err, res) {
+        app.models.Subscription.findById(data[1].id, function (err, res) {
           expect(res.state).toBe('deleted')
           done()
         })
       })
   })
 
-  it('should deny unsubscription by anonymous user with incorrect unsubscriptionCode', function(
+  it('should deny unsubscription by anonymous user with incorrect unsubscriptionCode', function (
     done
   ) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[1].id +
-          '/unsubscribe?unsubscriptionCode=50033'
+        data[1].id +
+        '/unsubscribe?unsubscriptionCode=50033'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(403)
-        app.models.Subscription.findById(data[1].id, function(err, res) {
+        app.models.Subscription.findById(data[1].id, function (err, res) {
           expect(res.state).toBe('confirmed')
           done()
         })
       })
   })
 
-  it('should deny unsubscription if state is not confirmed', function(done) {
+  it('should deny unsubscription if state is not confirmed', function (done) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[2].id +
-          '/unsubscribe?unsubscriptionCode=50033'
+        data[2].id +
+        '/unsubscribe?unsubscriptionCode=50033'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(403)
-        app.models.Subscription.findById(data[2].id, function(err, res) {
+        app.models.Subscription.findById(data[2].id, function (err, res) {
           expect(res.state).toBe('unconfirmed')
           done()
         })
       })
   })
 
-  it('should deny unsubscription by another sm user', function(done) {
+  it('should deny unsubscription by another sm user', function (done) {
     request(app)
       .delete('/api/subscriptions/' + data[0].id)
       .set('Accept', 'application/json')
       .set('SM_USER', 'baz')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(404)
-        app.models.Subscription.findById(data[0].id, function(err, res) {
+        app.models.Subscription.findById(data[0].id, function (err, res) {
           expect(res.state).toBe('confirmed')
           done()
         })
       })
   })
 
-  it('should redirect onscreen acknowledgements', function(done) {
+  it('should redirect onscreen acknowledgements', function (done) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[3].id +
-          '/unsubscribe?unsubscriptionCode=12345'
+        data[3].id +
+        '/unsubscribe?unsubscriptionCode=12345'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(302)
         expect(res.header.location).toBe('http://nowhere')
-        app.models.Subscription.findById(data[3].id, function(err, res) {
+        app.models.Subscription.findById(data[3].id, function (err, res) {
           expect(res.state).toBe('deleted')
           done()
         })
       })
   })
 
-  it('should redirect onscreen acknowledgements with error', function(done) {
-    spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(function() {
+  it('should redirect onscreen acknowledgements with error', function (done) {
+    spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(function () {
       let cb = arguments[arguments.length - 1]
       process.nextTick(cb, 'error', {
         anonymousUnsubscription: {
@@ -780,22 +780,22 @@ describe('DELETE /subscriptions/{id}', function() {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[3].id +
-          '/unsubscribe?unsubscriptionCode=12345'
+        data[3].id +
+        '/unsubscribe?unsubscriptionCode=12345'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(302)
         expect(res.header.location).toBe('http://nowhere?err=error')
-        app.models.Subscription.findById(data[3].id, function(err, res) {
+        app.models.Subscription.findById(data[3].id, function (err, res) {
           expect(res.state).toBe('deleted')
           done()
         })
       })
   })
 
-  it('should display onScreen acknowledgements failureMessage', function(done) {
-    spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(function() {
+  it('should display onScreen acknowledgements failureMessage', function (done) {
+    spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(function () {
       let cb = arguments[arguments.length - 1]
       process.nextTick(cb, 'error', {
         anonymousUnsubscription: {
@@ -809,15 +809,15 @@ describe('DELETE /subscriptions/{id}', function() {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[3].id +
-          '/unsubscribe?unsubscriptionCode=12345'
+        data[3].id +
+        '/unsubscribe?unsubscriptionCode=12345'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(res.text).toBe('fail')
         expect(res.type).toBe('text/plain')
-        app.models.Subscription.findById(data[3].id, function(err, res) {
+        app.models.Subscription.findById(data[3].id, function (err, res) {
           expect(res.state).toBe('deleted')
           done()
         })
@@ -825,12 +825,12 @@ describe('DELETE /subscriptions/{id}', function() {
   })
 })
 
-describe('GET /subscriptions/{id}/unsubscribe', function() {
+describe('GET /subscriptions/{id}/unsubscribe', function () {
   let data
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     parallel(
       [
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService1',
@@ -842,7 +842,7 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
             cb
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService2',
@@ -854,7 +854,7 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
             cb
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService3',
@@ -867,7 +867,7 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
           )
         }
       ],
-      function(err, results) {
+      function (err, results) {
         expect(err).toBeNull()
         data = results
         done()
@@ -875,16 +875,16 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
     )
   })
 
-  it('should allow bulk unsubscribing all services', function(done) {
+  it('should allow bulk unsubscribing all services', function (done) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[0].id +
-          '/unsubscribe?unsubscriptionCode=12345&additionalServices=_all'
+        data[0].id +
+        '/unsubscribe?unsubscriptionCode=12345&additionalServices=_all'
       )
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.find({ where: { state: 'deleted' } }, function(
+        app.models.Subscription.find({ where: { state: 'deleted' } }, function (
           err,
           res
         ) {
@@ -897,18 +897,18 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
       })
   })
 
-  it('should allow bulk unsubscribing selcted additional service', function(
+  it('should allow bulk unsubscribing selcted additional service', function (
     done
   ) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[0].id +
-          '/unsubscribe?unsubscriptionCode=12345&additionalServices=myService3'
+        data[0].id +
+        '/unsubscribe?unsubscriptionCode=12345&additionalServices=myService3'
       )
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.find({ where: { state: 'deleted' } }, function(
+        app.models.Subscription.find({ where: { state: 'deleted' } }, function (
           err,
           res
         ) {
@@ -918,18 +918,18 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
       })
   })
 
-  it('should allow bulk unsubscribing selcted additional service as an array', function(
+  it('should allow bulk unsubscribing selcted additional service as an array', function (
     done
   ) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[0].id +
-          '/unsubscribe?unsubscriptionCode=12345&additionalServices=["myService3"]'
+        data[0].id +
+        '/unsubscribe?unsubscriptionCode=12345&additionalServices=["myService3"]'
       )
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.find({ where: { state: 'deleted' } }, function(
+        app.models.Subscription.find({ where: { state: 'deleted' } }, function (
           err,
           res
         ) {
@@ -940,12 +940,12 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
   })
 })
 
-describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
+describe('GET /subscriptions/{id}/unsubscribe/undo', function () {
   let data
-  beforeEach(function(done) {
+  beforeEach(function (done) {
     parallel(
       [
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -957,7 +957,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
             cb
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService',
@@ -974,12 +974,12 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
               },
               unsubscriptionCode: '50032'
             },
-            function(err, res) {
+            function (err, res) {
               cb(err, res)
             }
           )
         },
-        function(cb) {
+        function (cb) {
           app.models.Subscription.create(
             {
               serviceName: 'myService2',
@@ -996,7 +996,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
           )
         }
       ],
-      function(err, results) {
+      function (err, results) {
         expect(err).toBeNull()
         data = results
         done()
@@ -1004,62 +1004,62 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
     )
   })
 
-  it('should allow undelete subscription by anonymous user', function(done) {
+  it('should allow undelete subscription by anonymous user', function (done) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[0].id +
-          '/unsubscribe/undo?unsubscriptionCode=50032'
+        data[0].id +
+        '/unsubscribe/undo?unsubscriptionCode=50032'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.findById(data[0].id, function(err, res) {
+        app.models.Subscription.findById(data[0].id, function (err, res) {
           expect(res.state).toBe('confirmed')
           done()
         })
       })
   })
 
-  it('should forbid undelete subscription by anonymous user with incorrect unsubscriptionCode', function(
+  it('should forbid undelete subscription by anonymous user with incorrect unsubscriptionCode', function (
     done
   ) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[0].id +
-          '/unsubscribe/undo?unsubscriptionCode=50033'
+        data[0].id +
+        '/unsubscribe/undo?unsubscriptionCode=50033'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(403)
-        app.models.Subscription.findById(data[0].id, function(err, res) {
+        app.models.Subscription.findById(data[0].id, function (err, res) {
           expect(res.state).toBe('deleted')
           done()
         })
       })
   })
 
-  it('should forbid undelete subscription where state is not deleted', function(
+  it('should forbid undelete subscription where state is not deleted', function (
     done
   ) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[1].id +
-          '/unsubscribe/undo?unsubscriptionCode=50032'
+        data[1].id +
+        '/unsubscribe/undo?unsubscriptionCode=50032'
       )
       .set('Accept', 'application/json')
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(403)
-        app.models.Subscription.findById(data[1].id, function(err, res) {
+        app.models.Subscription.findById(data[1].id, function (err, res) {
           expect(res.state).toBe('unconfirmed')
           done()
         })
       })
   })
 
-  it('should redirect response if set so', function(done) {
+  it('should redirect response if set so', function (done) {
     app.models.Configuration.create(
       {
         name: 'subscription',
@@ -1070,17 +1070,17 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
           }
         }
       },
-      function(err, res) {
+      function (err, res) {
         request(app)
           .get(
             '/api/subscriptions/' +
-              data[0].id +
-              '/unsubscribe/undo?unsubscriptionCode=50032'
+            data[0].id +
+            '/unsubscribe/undo?unsubscriptionCode=50032'
           )
-          .end(function(err, res) {
+          .end(function (err, res) {
             expect(res.statusCode).toBe(302)
             expect(res.headers.location).toBe('http://nowhere')
-            app.models.Subscription.findById(data[0].id, function(err, res) {
+            app.models.Subscription.findById(data[0].id, function (err, res) {
               expect(res.state).toBe('confirmed')
               done()
             })
@@ -1089,24 +1089,138 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
     )
   })
 
-  it('should allow bulk undo unsubscriptions by anonymous user', function(
+  it('should allow bulk undo unsubscriptions by anonymous user', function (
     done
   ) {
     request(app)
       .get(
         '/api/subscriptions/' +
-          data[2].id +
-          '/unsubscribe/undo?unsubscriptionCode=12345'
+        data[2].id +
+        '/unsubscribe/undo?unsubscriptionCode=12345'
       )
-      .end(function(err, res) {
+      .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.findById(data[0].id, function(err, res) {
+        app.models.Subscription.findById(data[0].id, function (err, res) {
           expect(res.state).toBe('confirmed')
-          app.models.Subscription.findById(data[2].id, function(err, res) {
+          app.models.Subscription.findById(data[2].id, function (err, res) {
             expect(res.unsubscribedAdditionalServices).toBeUndefined()
             done()
           })
         })
+      })
+  })
+})
+
+describe('PUT /subscriptions/{id}', function () {
+  beforeEach(function (done) {
+    app.models.Subscription.create(
+      {
+        serviceName: 'myService',
+        channel: 'email',
+        userId: 'bar',
+        userChannelId: 'bar@invalid.local',
+        state: 'confirmed',
+        confirmationRequest: {
+          confirmationCodeRegex: '\\d{5}',
+          sendRequest: true,
+          from: 'no_reply@invlid.local',
+          subject: 'Subscription confirmation',
+          textBody: 'enter {confirmation_code} in this email',
+          confirmationCode: '37688'
+        },
+        unsubscriptionCode: '50032'
+      },
+      function (err, res) {
+        expect(err).toBeNull()
+        done()
+      }
+    )
+  })
+  it('should allow admin user replace subscription', function (done) {
+    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app)
+      .put('/api/subscriptions/1')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        userId: 'bar',
+        userChannelId: 'bar@invalid.local',
+        state: 'deleted',
+        unsubscriptionCode: '50033'
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.body.state).toBe('deleted')
+        expect(res.body.confirmationRequest).toBeUndefined()
+        done()
+      })
+  })
+  it("should deny anonymous user replace subscription", function (done) {
+    request(app)
+      .put('/api/subscriptions/1')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        userId: 'bar',
+        userChannelId: 'bar@invalid.local',
+        state: 'deleted',
+        unsubscriptionCode: '50032'
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
+      })
+  })
+})
+
+describe('GET /subscriptions/services', function () {
+  beforeEach(function (done) {
+    app.models.Subscription.create(
+      {
+        serviceName: 'myService',
+        channel: 'email',
+        userId: 'bar',
+        userChannelId: 'bar@invalid.local',
+        state: 'confirmed',
+        confirmationRequest: {
+          confirmationCodeRegex: '\\d{5}',
+          sendRequest: true,
+          from: 'no_reply@invlid.local',
+          subject: 'Subscription confirmation',
+          textBody: 'enter {confirmation_code} in this email',
+          confirmationCode: '37688'
+        },
+        unsubscriptionCode: '50032'
+      },
+      function (err, res) {
+        expect(err).toBeNull()
+        done()
+      }
+    )
+  })
+  it(`should allow admin user's access`, function (done) {
+    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app)
+      .get('/api/subscriptions/services')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.body instanceof Array).toBe(true)
+        expect(res.body.length).toBe(1)
+        done()
+      })
+  })
+  it("should deny anonymous user's access", function (done) {
+    request(app)
+      .get('/api/subscriptions/services')
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(403)
+        done()
       })
   })
 })
