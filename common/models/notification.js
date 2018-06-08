@@ -433,7 +433,7 @@ module.exports = function (Notification) {
             let unsubTasks = (data.errorWhenSendingToUsers || []).reduce((a, e, i) => {
               if (data.channel === 'email' && e.error && e.subscriptionId && e.error.responseCode === 550) {
                 a.push(function (cb) {
-                  Notification.app.models.Subscription.updateAll({ id: e.subscriptionId }, { state: "deleted" }, (err, res) => {
+                  Notification.app.models.Subscription.updateAll({ id: e.subscriptionId }, { state: "deleted" }, { eventSrc: { notification: { id: data.id } } }, (err, res) => {
                     return cb(null, null)
                   })
                 })
