@@ -19,3 +19,4 @@ npm-debug.log
 server/id_rsa*
 /coverage/
 /server/database/data.json
+/server/daemon/
