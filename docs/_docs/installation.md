@@ -85,6 +85,18 @@ Web server listening at: http://localhost:3000
 
 Now browse to <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> the page displays NotifyBC Web Console.
 
+#### Install Windows Service
+After get the app running interactivelly, if your server is Windows and you want to install the app as a Windows service, run
+
+```
+npm install -g node-windows
+npm link node-windows
+node 'windows service.js'
+```
+
+This will create and start service *notifyBC*. To change service name, modify file *windows service.js* before running it. See [node-windows](https://github.com/coreybutler/node-windows) for other operations such as uninstalling the service.
+
+
 ## Deploy Docker Container
 If you have git and Docker installed, you can run following command to deploy *NotifyBC* Docker container:
 
