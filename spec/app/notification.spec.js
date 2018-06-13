@@ -945,6 +945,71 @@ describe('POST /notifications', function () {
         )
       })
   })
+
+  it('should unsubscribe recipients of invalid emails when sending async broadcast email notifications', function (done) {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    let realGet = app.models.Notification.app.get
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
+      if (param === 'notification') {
+        return {
+          broadcastSubscriberChunkSize: 100,
+          broadcastSubRequestBatchSize: 10
+        }
+      } else {
+        return realGet.call(app, param)
+      }
+    })
+    app.models.Notification.sendEmail = jasmine
+      .createSpy()
+      .and.callFake(function () {
+        let cb = arguments[arguments.length - 1]
+        let to = arguments[0].to
+        let error = null
+        if (to.indexOf('invalid') >= 0) {
+          error = {
+            responseCode: 550
+          }
+        }
+        console.log('faking sendEmail with error for invalid recipient')
+        return cb(error, null)
+      })
+    request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myInvalideEmailService',
+        message: {
+          from: 'no_reply@bar.com',
+          subject: 'test',
+          textBody: 'test'
+        },
+        channel: 'email',
+        isBroadcast: true,
+        asyncBroadcastPushNotification: true
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        setTimeout(function () {
+          app.models.Subscription.find(
+            {
+              where: {
+                serviceName: 'myInvalideEmailService'
+              }
+            },
+            function (err, data) {
+              expect(data.length).toBe(1)
+              expect(data[0].state).toBe('deleted')
+              expect(
+                app.models.Notification.sendEmail
+              ).toHaveBeenCalledTimes(1)
+              done()
+            }
+          )
+        }, 3000)
+      })
+  })
 })
 describe('PATCH /notifications/{id}', function () {
   beforeEach(function (done) {

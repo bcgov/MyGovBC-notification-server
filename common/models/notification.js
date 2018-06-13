@@ -397,32 +397,7 @@ module.exports = function (Notification) {
                 return a
               }, [])
               parallel(tasks, function (err, res) {
-                if (
-                  !data.asyncBroadcastPushNotification ||
-                  typeof ctx.args.start === 'number'
-                ) {
-                  return (broadcastToChunkSubscribersCB || cb)(err, _.compact(res))
-                } else {
-                  if (err) {
-                    data.state = 'error'
-                  } else {
-                    data.state = 'sent'
-                  }
-                  data.save(function (errSave) {
-                    if (
-                      typeof data.asyncBroadcastPushNotification === 'string'
-                    ) {
-                      let options = {
-                        uri: data.asyncBroadcastPushNotification,
-                        headers: {
-                          'Content-Type': 'application/json'
-                        },
-                        json: data
-                      }
-                      request.post(options)
-                    }
-                  })
-                }
+                return (broadcastToChunkSubscribersCB || cb)(err, _.compact(res))
               })
             }
           )
@@ -444,6 +419,29 @@ module.exports = function (Notification) {
               unSubscribeInvaidUsersCB(err, res)
             })
           }
+          let unSubscribeInvaidUsersCB = function (err, res) {
+            if (!data.asyncBroadcastPushNotification) {
+              cb()
+            } else {
+              if (data.state !== 'error') {
+                data.state = 'sent'
+              }
+              data.save(function (errSave) {
+                if (
+                  typeof data.asyncBroadcastPushNotification === 'string'
+                ) {
+                  let options = {
+                    uri: data.asyncBroadcastPushNotification,
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    json: data
+                  }
+                  request.post(options)
+                }
+              })
+            }
+          }
           Notification.app.models.Subscription.count(
             {
               serviceName: data.serviceName,
@@ -454,7 +452,7 @@ module.exports = function (Notification) {
               if (count <= broadcastSubscriberChunkSize) {
                 startIdx = 0
                 broadcastToChunkSubscribers((err, res) => {
-                  unSubscribeInvaidUsers(cb)
+                  unSubscribeInvaidUsers(unSubscribeInvaidUsersCB)
                 })
               } else {
                 // call broadcastToChunkSubscribers, coordinate output
@@ -499,29 +497,7 @@ module.exports = function (Notification) {
                   })
                 }, broadcastSubRequestBatchSize)
                 q.drain = function () {
-                  unSubscribeInvaidUsers(() => {
-                    if (!data.asyncBroadcastPushNotification) {
-                      cb()
-                    } else {
-                      if (data.state !== 'error') {
-                        data.state = 'sent'
-                      }
-                      data.save(function (errSave) {
-                        if (
-                          typeof data.asyncBroadcastPushNotification === 'string'
-                        ) {
-                          let options = {
-                            uri: data.asyncBroadcastPushNotification,
-                            headers: {
-                              'Content-Type': 'application/json'
-                            },
-                            json: data
-                          }
-                          request.post(options)
-                        }
-                      })
-                    }
-                  })
+                  unSubscribeInvaidUsers(unSubscribeInvaidUsersCB)
                 }
                 let queuedTasks = [],
                   i = 0
