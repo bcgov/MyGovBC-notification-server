@@ -151,6 +151,9 @@ module.exports = function (Model, options) {
       if (httpCtx.req) {
         httpHost = httpCtx.req.protocol + '://' + httpCtx.req.get('host')
       }
+      if(Model.app.get('httpHost')){
+        httpHost = Model.app.get('httpHost')
+      }
       if (httpCtx.args && httpCtx.args.data && httpCtx.args.data.httpHost) {
         httpHost = httpCtx.args.data.httpHost
       } else if (httpCtx.instance && httpCtx.instance.httpHost) {
