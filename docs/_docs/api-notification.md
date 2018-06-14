@@ -229,7 +229,7 @@ The API operates on following notification data model fields:
   <tr>
     <td>
       <p class="name">httpHost</p>
-      <p class="description">This field is used to replace token <i>{http_host}</i> in push notification message template during <a href="../overview/#mail-merge">mail merge</a>.</p>
+      <p class="description">This field is used to replace token <i>{http_host}</i> in push notification message template during <a href="../overview/#mail-merge">mail merge</a> and overrides config <i>httpHost</i>.</p>
     </td>
     <td>
       <table>

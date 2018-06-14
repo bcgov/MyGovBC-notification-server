@@ -88,11 +88,6 @@ module.exports = function (Notification) {
       error.status = 403
       return next(error)
     }
-    if (!data.httpHost && data.channel !== 'inApp') {
-      if (ctx.req) {
-        data.httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
-      }
-    }
     if (
       data.channel === 'inApp' ||
       data.skipSubscriptionConfirmationCheck ||
@@ -153,6 +148,12 @@ module.exports = function (Notification) {
       case 'sms':
         if (res.invalidBefore && Date.parse(res.invalidBefore) > new Date()) {
           return next()
+        }
+        if (!res.httpHost && res.channel !== 'inApp') {
+          res.httpHost = Notification.app.get('httpHost')
+          if (!res.httpHost && ctx.req) {
+            res.httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
+          }
         }
         sendPushNotification(ctx, res, function (errSend) {
           if (errSend) {
@@ -459,7 +460,7 @@ module.exports = function (Notification) {
                 let chunks = Math.ceil(count / broadcastSubscriberChunkSize)
                 let httpHost = Notification.app.get('internalHttpHost')
                 if (!httpHost) {
-                  httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
+                  httpHost = data.httpHost || (ctx.req.protocol + '://' + ctx.req.get('host'))
                 }
 
                 let q = queue(function (task, cb) {

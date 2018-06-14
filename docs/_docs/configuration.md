@@ -85,6 +85,27 @@ The rule to determine if the incoming request is authenticated by SiteMinder is
 1. obtain the real client ip address by filtering out trusted proxy ips according to [Express behind proxies](https://expressjs.com/en/guide/behind-proxies.html)
 2. if the real client ip is contained in *siteMinderReverseProxyIps*, then the request is from SiteMinder, and its SiteMinder headers are trusted; otherwise, the request is considered as directly from internet, and its SiteMinder headers are ignored.
 
+## Http Host
+*httpHost* config sets the default http host used by
+
+* mail merge token substitution
+* interal HTTP requests spawned by *NotifyBC* 
+
+*httpHost* can be overridden by other configs or data. For example
+
+* *internalHttpHost* config
+* *httpHost* field in a notification
+
+There are contexts where there is no alternatives to *httpHost*. Therefore this config should be defined.
+
+Define the config, which has no default value, in */server/config.local.js*
+
+```js
+module.exports = {
+  "httpHost" : "http://foo.com"
+}
+```
+
 ## SMTP
 By default *NotifyBC* acts as the SMTP server itself and connects directly to recipient's SMTP server. To setup SMTP relay to a host, say *smtp.foo.com*, add following *smtp* config object to */server/config.local.js*
 
@@ -550,14 +571,14 @@ In a multi-node deployment, when the cluster is first started up, database is em
 </div>
 
 ## Internal Http Host
-By default, HTTP requests submitted by *NotifyBC* back to itself will be sent to the host of the incoming HTTP request that spawns such internal requests. But if config *internalHttpHost*, which has no default value, is defined, for example in file */server/config.local.js*
+By default, HTTP requests submitted by *NotifyBC* back to itself will be sent to *httpHost* if defined or the host of the incoming HTTP request that spawns such internal requests. But if config *internalHttpHost*, which has no default value, is defined, for example in file */server/config.local.js*
   
 ```js
 module.exports = {
   "internalHttpHost" : "http://notifybc:3000"
 }
 ```
-then the HTTP request will be sent to the configured host url. An internal request can be generated, for example, as a [sub-request of broadcast push notification](#broadcast-push-notification-task-concurrency) described above. *internalHttpHost* shouldn't be accessible from internet. 
+then the HTTP request will be sent to the configured host. An internal request can be generated, for example, as a [sub-request of broadcast push notification](#broadcast-push-notification-task-concurrency) described above. *internalHttpHost* shouldn't be accessible from internet. 
 
 All internal requests are supposed to be admin requests. The purpose of *internalHttpHost* is to facilitate identifying the internal server ip as admin ip.
  
