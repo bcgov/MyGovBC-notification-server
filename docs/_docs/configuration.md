@@ -85,7 +85,7 @@ The rule to determine if the incoming request is authenticated by SiteMinder is
 1. obtain the real client ip address by filtering out trusted proxy ips according to [Express behind proxies](https://expressjs.com/en/guide/behind-proxies.html)
 2. if the real client ip is contained in *siteMinderReverseProxyIps*, then the request is from SiteMinder, and its SiteMinder headers are trusted; otherwise, the request is considered as directly from internet, and its SiteMinder headers are ignored.
 
-## Http Host
+## HTTP Host
 *httpHost* config sets the default http host used by
 
 * mail merge token substitution
@@ -570,7 +570,7 @@ In a multi-node deployment, when the cluster is first started up, database is em
   <p>Dispite of the adjective public, NotifyBC's public key should only be distributed to trusted third party. The trusted third party should only use the public key at server backend. Using the public key in client-side JavaScript poses a security loophole.</p>
 </div>
 
-## Internal Http Host
+## Internal HTTP Host
 By default, HTTP requests submitted by *NotifyBC* back to itself will be sent to *httpHost* if defined or the host of the incoming HTTP request that spawns such internal requests. But if config *internalHttpHost*, which has no default value, is defined, for example in file */server/config.local.js*
   
 ```js
