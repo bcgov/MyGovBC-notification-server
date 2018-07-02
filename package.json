@@ -11,7 +11,8 @@
     "pretest": "jshint .",
     "posttest": "nsp check",
     "snyk-protect": "snyk protect",
-    "prepublishOnly": "npm run snyk-protect"
+    "prepublishOnly": "npm run snyk-protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "async": "^2.0.1",
@@ -44,7 +45,7 @@
     "strong-error-handler": "^1.0.1",
     "twilio": "^3.7.0",
     "underscore.string": "^3.3.4",
-    "snyk": "^1.52.1"
+    "snyk": "^1.88.0"
   },
   "devDependencies": {
     "connect-history-api-fallback": "^1.4.0",
