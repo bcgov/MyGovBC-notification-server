@@ -6,7 +6,7 @@ var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
 var jmespath = require('jmespath')
 
-module.exports = function(Subscription) {
+module.exports = function (Subscription) {
   disableAllMethods(Subscription, [
     'find',
     'create',
@@ -61,7 +61,7 @@ module.exports = function(Subscription) {
     }
   )
 
-  Subscription.observe('access', function(ctx, next) {
+  Subscription.observe('access', function (ctx, next) {
     var u = Subscription.getCurrentUser(ctx.options.httpContext)
     if (u) {
       ctx.query.where = ctx.query.where || {}
@@ -74,7 +74,7 @@ module.exports = function(Subscription) {
   /**
    * hide confirmation request field, especially confirmation code
    */
-  Subscription.afterRemote('**', function() {
+  Subscription.afterRemote('**', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (arguments.length <= 2) {
@@ -86,7 +86,7 @@ module.exports = function(Subscription) {
     }
     if (!Subscription.isAdminReq(ctx)) {
       if (data instanceof Array) {
-        data.forEach(function(e) {
+        data.forEach(function (e) {
           e.confirmationRequest = undefined
           e.unsetAttribute("updatedBy")
           e.unsetAttribute("createdBy")
@@ -179,14 +179,14 @@ module.exports = function(Subscription) {
           try {
             data.confirmationRequest =
               mergedSubscriptionConfig.confirmationRequest[data.channel]
-          } catch (ex) {}
-          data.confirmationRequest.confirmationCode = ''
+          } catch (ex) { }
+          data.confirmationRequest.confirmationCode = undefined
         }
-        if (data.confirmationRequest.confirmationCodeRegex) {
+        if (!data.confirmationRequest.confirmationCode && data.confirmationRequest.confirmationCodeRegex) {
           var confirmationCodeRegex = new RegExp(
             data.confirmationRequest.confirmationCodeRegex
           )
-          data.confirmationRequest.confirmationCode += new RandExp(
+          data.confirmationRequest.confirmationCode = new RandExp(
             confirmationCodeRegex
           ).gen()
         }
@@ -195,7 +195,7 @@ module.exports = function(Subscription) {
     )
   }
 
-  Subscription.beforeRemote('create', function() {
+  Subscription.beforeRemote('create', function () {
     var ctx = arguments[0]
     if (!Subscription.isAdminReq(ctx)) {
       delete ctx.args.data.state
@@ -203,11 +203,11 @@ module.exports = function(Subscription) {
     delete ctx.args.data.id
     beforeUpsert.apply(null, arguments)
   })
-  Subscription.afterRemote('create', function(ctx, res, next) {
+  Subscription.afterRemote('create', function (ctx, res, next) {
     if (!ctx.args.data.confirmationRequest) {
       return next()
     }
-    handleConfirmationRequest(ctx, res, function(
+    handleConfirmationRequest(ctx, res, function (
       handleConfirmationRequestError,
       info
     ) {
@@ -215,7 +215,7 @@ module.exports = function(Subscription) {
     })
   })
 
-  Subscription.beforeRemote('replaceById', function() {
+  Subscription.beforeRemote('replaceById', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (Subscription.isAdminReq(ctx)) {
@@ -226,7 +226,7 @@ module.exports = function(Subscription) {
     return next(error)
   })
 
-  Subscription.beforeRemote('prototype.patchAttributes', function() {
+  Subscription.beforeRemote('prototype.patchAttributes', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (Subscription.isAdminReq(ctx)) {
@@ -247,7 +247,7 @@ module.exports = function(Subscription) {
     beforeUpsert.apply(null, arguments)
   })
 
-  Subscription.afterRemote('prototype.patchAttributes', function(
+  Subscription.afterRemote('prototype.patchAttributes', function (
     ctx,
     instance,
     next
@@ -255,7 +255,7 @@ module.exports = function(Subscription) {
     if (!ctx.args.data.confirmationRequest) {
       return next()
     }
-    handleConfirmationRequest(ctx, instance, function(
+    handleConfirmationRequest(ctx, instance, function (
       handleConfirmationRequestError,
       info
     ) {
@@ -263,7 +263,7 @@ module.exports = function(Subscription) {
     })
   })
 
-  Subscription.prototype.deleteItemById = function(
+  Subscription.prototype.deleteItemById = function (
     options,
     unsubscriptionCode,
     additionalServices,
@@ -291,7 +291,7 @@ module.exports = function(Subscription) {
           ) {
             forbidden = true
           }
-        } catch (ex) {}
+        } catch (ex) { }
       }
     }
     if (this.state !== 'confirmed') {
@@ -321,7 +321,7 @@ module.exports = function(Subscription) {
                       case 'email':
                         var msg =
                           anonymousUnsubscription.acknowledgements.notification[
-                            this.channel
+                          this.channel
                           ]
                         var subject = Subscription.mailMerge(
                           msg.subject,
@@ -348,7 +348,7 @@ module.exports = function(Subscription) {
                         Subscription.sendEmail(mailOptions)
                         break
                     }
-                  } catch (ex) {}
+                  } catch (ex) { }
                 }
                 if (
                   anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
@@ -377,7 +377,7 @@ module.exports = function(Subscription) {
                       .successMessage
                   )
                 }
-              } catch (ex) {}
+              } catch (ex) { }
               return cb(err, 1)
             }
           )
@@ -459,7 +459,7 @@ module.exports = function(Subscription) {
     })
   }
 
-  Subscription.prototype.verify = function(options, confirmationCode, cb) {
+  Subscription.prototype.verify = function (options, confirmationCode, cb) {
     Subscription.getMergedConfig(
       'subscription',
       this.serviceName,
@@ -505,14 +505,14 @@ module.exports = function(Subscription) {
           return handleConfirmationAcknowledgement(error)
         }
         this.state = 'confirmed'
-        Subscription.replaceById(this.id, this, function(err, res) {
+        Subscription.replaceById(this.id, this, function (err, res) {
           return handleConfirmationAcknowledgement(err, 'OK')
         })
       }
     )
   }
 
-  Subscription.prototype.unDeleteItemById = function(
+  Subscription.prototype.unDeleteItemById = function (
     options,
     unsubscriptionCode,
     cb
@@ -536,7 +536,7 @@ module.exports = function(Subscription) {
       }
     }
     let revertItems = query => {
-      Subscription.updateAll(query, { state: 'confirmed' }, function(
+      Subscription.updateAll(query, { state: 'confirmed' }, function (
         writeErr,
         res
       ) {
@@ -585,7 +585,7 @@ module.exports = function(Subscription) {
     })
   }
 
-  Subscription.getSubscribedServiceNames = function(options, cb) {
+  Subscription.getSubscribedServiceNames = function (options, cb) {
     if (!Subscription.isAdminReq(options.httpContext)) {
       let error = new Error('Forbidden')
       error.status = 403
