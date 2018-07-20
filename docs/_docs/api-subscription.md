@@ -28,18 +28,6 @@ The API operates on following subscription data model fields:
   </tr>
   <tr>
     <td>
-      <p class="name">id</p>
-      <p class="description">subscription id</p>
-    </td>
-    <td>
-      <table>
-        <tr><td>type</td><td>string, format depends on db</td></tr>
-        <tr><td>auto-generated</td><td>true</td></tr>
-      </table>
-    </td>
-  </tr>
-  <tr>
-    <td>
       <p class="name">serviceName</p>
       <p class="description">name of the service. Avoid prefixing the name with underscore (_), or it may conflict with internal implemenation.</p>
     </td>
@@ -77,13 +65,26 @@ The API operates on following subscription data model fields:
   </tr>
   <tr>
     <td>
+      <p class="name">id</p>
+      <p class="description">subscription id</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>string, format depends on db</td></tr>
+        <tr><td>required</td><td>false</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
       <p class="name">state</p>
       <p class="description">state of subscription. Valid values: unconfirmed, confirmed, deleted</p>
     </td>
     <td>
       <table>
         <tr><td>type</td><td>string</td></tr>
-        <tr><td>required</td><td>true</td></tr>
+        <tr><td>required</td><td>false</td></tr>
         <tr><td>default</td><td>unconfirmed</td></tr>
       </table>
     </td>
@@ -108,6 +109,7 @@ The API operates on following subscription data model fields:
     <td>
       <table>
         <tr><td>type</td><td>date</td></tr>
+        <tr><td>required</td><td>false</td></tr>
         <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
@@ -120,6 +122,7 @@ The API operates on following subscription data model fields:
     <td>
       <table>
         <tr><td>type</td><td>date</td></tr>
+        <tr><td>required</td><td>false</td></tr>
         <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
@@ -183,7 +186,7 @@ The API operates on following subscription data model fields:
   </tr>
   <tr>
     <td>
-      <p class="name"><a name="broadcastPushNotificationFilter"/>broadcastPushNotificationFilter</p>
+      <p class="name"><a name="broadcastPushNotificationFilter"></a>broadcastPushNotificationFilter</p>
       <div class="description">a string conforming to jmespath <a href="http://jmespath.org/specification.html#filter-expressions">filter expressions syntax</a> after the question mark (?). The filter is matched against the <i><a href="../api-notification#data">data</a></i> field of broadcast push notification. Examples of filter
         <ul>
           <li>simple <br/> 
@@ -217,6 +220,7 @@ The API operates on following subscription data model fields:
     <td>
       <table>
         <tr><td>type</td><td>string</td></tr>
+        <tr><td>required</td><td>false</td></tr>
         <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
@@ -229,6 +233,7 @@ The API operates on following subscription data model fields:
     <td>
       <table>
         <tr><td>type</td><td>object</td></tr>
+        <tr><td>required</td><td>false</td></tr>
         <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>

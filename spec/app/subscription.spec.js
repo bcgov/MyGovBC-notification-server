@@ -257,6 +257,46 @@ describe('POST /subscriptions', function () {
       })
   })
 
+  it('should generate unsubscription code for subscriptions created by admin user with confirmationRequest field populated', function (
+    done
+  ) {
+    spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    request(app)
+      .post('/api/subscriptions')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        userChannelId: 'foo@bar.com',
+        confirmationRequest: {
+          from: 'foo@invalid.local',
+          subject: 'subject',
+          sendRequest: true,
+          textBody:
+            '{subscription_confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {unsubscription_url} {subscription_confirmation_url} {unsubscription_reversion_url}',
+          confirmationCodeRegex: '12345'
+        }
+      })
+      .set('Accept', 'application/json')
+      .end(function (err, res) {
+        expect(res.statusCode).toBe(200)
+        expect(app.models.Subscription.sendEmail).toHaveBeenCalledTimes(1)
+        app.models.Subscription.find(
+          {
+            where: {
+              serviceName: 'myService',
+              userChannelId: 'foo@bar.com'
+            }
+          },
+          function (err, data) {
+            expect(data[0].confirmationRequest.confirmationCode).toBe('12345')
+            done()
+          }
+        )
+      })
+  })
+
   it('should allow non-admin user create subscriptions', function (done) {
     request(app)
       .post('/api/subscriptions')
