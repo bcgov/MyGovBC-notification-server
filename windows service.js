@@ -2,7 +2,7 @@ var Service = require('node-windows').Service;
 
 // Create a new service object
 var svc = new Service({
-  name:'notifyBC',
+  name: process.argv[2] || 'notifyBC',
   description: 'notifyBC Windows Service',
   script: 'server\\server.js'
 });
