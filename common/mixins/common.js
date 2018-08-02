@@ -151,7 +151,7 @@ module.exports = function (Model, options) {
       if (httpCtx.req) {
         httpHost = httpCtx.req.protocol + '://' + httpCtx.req.get('host')
       }
-      if(Model.app.get('httpHost')){
+      if (Model.app.get('httpHost')) {
         httpHost = Model.app.get('httpHost')
       }
       if (httpCtx.args && httpCtx.args.data && httpCtx.args.data.httpHost) {
@@ -244,21 +244,24 @@ module.exports = function (Model, options) {
         data.unsubscriptionCode
       )
     } catch (ex) { }
-    if (data.data) {
-      // substitute all other tokens with matching data.data properties
-      let matches = output.match(/{.+?}/g)
-      if (matches) {
-        matches.forEach(function (e) {
-          try {
-            let token = e.match(/{(.+)}/)[1]
-            let val = _.get(data.data, token)
-            if (val) {
-              output = output.replace(e, val)
-            }
-          } catch (ex) { }
-        })
+    try {
+      if (data.data) {
+        // substitute all other tokens with matching data.data properties
+        let matches = output.match(/{.+?}/g)
+        if (matches) {
+          matches.forEach(function (e) {
+            try {
+              let token = e.match(/{(.+)}/)[1]
+              let val = _.get(data.data, token)
+              if (val) {
+                output = output.replace(e, val)
+              }
+            } catch (ex) { }
+          })
+        }
       }
     }
+    catch (ex) { }
     return output
   }
 
