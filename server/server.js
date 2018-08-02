@@ -1,5 +1,5 @@
 let app
-module.exports = function(cb) {
+module.exports = function (cb) {
   if (app) {
     return cb && process.nextTick(cb.bind(null, null, app))
   }
@@ -8,7 +8,7 @@ module.exports = function(cb) {
 
   app = loopback()
   app.use(loopback.token())
-  app.start = function() {
+  app.start = function () {
     if (process.env.NOTIFYBC_NODE_ROLE !== 'slave') {
       var CronJob = require('cron').CronJob
       var cronTasks = require('./cron-tasks')
@@ -17,7 +17,7 @@ module.exports = function(cb) {
       var cronConfigPurgeData = cronConfig.purgeData || {}
       new CronJob({
         cronTime: cronConfigPurgeData.timeSpec,
-        onTick: function() {
+        onTick: function () {
           cronTasks.purgeData(app)
         },
         start: true
@@ -27,7 +27,7 @@ module.exports = function(cb) {
         cronConfig.dispatchLiveNotifications || {}
       new CronJob({
         cronTime: cronConfigDispatchLiveNotifications.timeSpec,
-        onTick: function() {
+        onTick: function () {
           cronTasks.dispatchLiveNotifications(app)
         },
         start: true
@@ -37,7 +37,7 @@ module.exports = function(cb) {
         cronConfig.checkRssConfigUpdates || {}
       new CronJob({
         cronTime: cronConfigCheckRssConfigUpdates.timeSpec,
-        onTick: function() {
+        onTick: function () {
           cronTasks.checkRssConfigUpdates(app)
         },
         start: true
@@ -46,7 +46,7 @@ module.exports = function(cb) {
 
     app.set('trust proxy', app.get('trustedReverseProxyIps'))
     // start the web server
-    return app.listen(function() {
+    return app.listen(function () {
       // without following line, node.js closes socket after 2min
       this.setTimeout(0)
       app.emit('started')
@@ -62,7 +62,7 @@ module.exports = function(cb) {
 
   // Bootstrap the application, configure models, datasources and middleware.
   // Sub-apps like REST API are mounted via boot scripts.
-  boot(app, __dirname, function(err) {
+  boot(app, __dirname, function (err) {
     if (err && cb) {
       return cb(err)
     }
@@ -76,5 +76,41 @@ module.exports = function(cb) {
   })
 }
 if (require.main === module) {
-  module.exports()
+  let numWorkers = parseInt(process.env.NOTIFYBC_WORKER_PROCESS_COUNT)
+  if (isNaN(numWorkers)) {
+    numWorkers = require('os').cpus().length
+  }
+  if (numWorkers < 2) {
+    return module.exports()
+  }
+
+  const cluster = require('cluster')
+  if (cluster.isMaster) {
+    console.log(`# of worker processes = ${numWorkers}`)
+    console.log(`Master ${process.pid} is running`)
+    let masterWorker
+    // Fork workers.
+    for (let i = 0; i < numWorkers; i++) {
+      if (i > 0) {
+        cluster.fork({ NOTIFYBC_NODE_ROLE: 'slave' })
+      }
+      else {
+        masterWorker = cluster.fork()
+      }
+    }
+
+    cluster.on('exit', (worker, code, signal) => {
+      console.log(`worker ${worker.process.pid} died`);
+      if (worker === masterWorker) {
+        console.log(`worker ${worker.process.pid} is the master worker`);
+        masterWorker = cluster.fork()
+      }
+      else {
+        cluster.fork({ NOTIFYBC_NODE_ROLE: 'slave' })
+      }
+    })
+  } else {
+    module.exports()
+    console.log(`Worker ${process.pid} started`)
+  }
 }

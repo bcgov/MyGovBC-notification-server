@@ -56,6 +56,8 @@ objects:
             value: ${DATABASE_ADMIN_PASSWORD}
           - name: NOTIFYBC_NODE_ROLE
             value: slave
+          - name: NOTIFYBC_WORKER_PROCESS_COUNT
+            value: 1
           image: notify-bc
           livenessProbe:
             failureThreshold: 3
@@ -138,6 +140,8 @@ objects:
             value: ${DATABASE_ADMIN_PASSWORD}
           - name: NOTIFYBC_NODE_ROLE
             value: master
+          - name: NOTIFYBC_WORKER_PROCESS_COUNT
+            value: 1
           image: notify-bc
           livenessProbe:
             failureThreshold: 3

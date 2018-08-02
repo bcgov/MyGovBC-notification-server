@@ -11,7 +11,8 @@
             "program": "${workspaceFolder}/server/server.js",
             "env": {
                 "NODE_ENV": "dev"
-            }
+            },
+            "autoAttachChildProcesses": true
         },
         {
             "type": "node",
