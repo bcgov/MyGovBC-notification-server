@@ -201,13 +201,9 @@ module.exports = function (Subscription) {
       delete ctx.args.data.state
       const userId = Subscription.getCurrentUser(ctx)
       if (!userId) {
-        // anonymous user is only allowed to supply limited set of fields
-        ctx.args.data = {
-          serviceName: ctx.args.data.serviceName,
-          channel: ctx.args.data.channel,
-          userChannelId: ctx.args.data.userChannelId,
-          broadcastPushNotificationFilter: ctx.args.data.broadcastPushNotificationFilter,
-        }
+        // anonymous user is not allowed to supply data, 
+        // which could be used in mail merge
+        delete ctx.args.data.data
       }
     }
     delete ctx.args.data.id
