@@ -79,8 +79,7 @@ module.exports = function (Notification) {
     }
 
     var data = ctx.args.data
-    if (
-      !data.isBroadcast &&
+    if (!data.isBroadcast &&
       data.skipSubscriptionConfirmationCheck &&
       !data.userChannelId
     ) {
@@ -113,14 +112,15 @@ module.exports = function (Notification) {
         '\\$&'
       )
       var escapedUserChannelIdRegExp = new RegExp(escapedUserChannelId, 'i')
-      whereClause.userChannelId = { regexp: escapedUserChannelIdRegExp }
+      whereClause.userChannelId = {
+        regexp: escapedUserChannelIdRegExp
+      }
     }
     if (data.userId) {
       whereClause.userId = data.userId
     }
 
-    Notification.app.models.Subscription.findOne(
-      {
+    Notification.app.models.Subscription.findOne({
         where: whereClause
       },
       function (err, subscription) {
@@ -180,7 +180,9 @@ module.exports = function (Notification) {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (ctx.method.name === 'deleteItemById') {
-      ctx.args.data = { state: 'deleted' }
+      ctx.args.data = {
+        state: 'deleted'
+      }
     }
     // only allow changing state for non-admin requests
     if (!Notification.isAdminReq(ctx)) {
@@ -190,9 +192,10 @@ module.exports = function (Notification) {
         error.status = 403
         return next(error)
       }
-      ctx.args.data = ctx.args.data.state
-        ? { state: ctx.args.data.state }
-        : null
+      ctx.args.data = ctx.args.data.state ? {
+          state: ctx.args.data.state
+        } :
+        null
       if (ctx.instance.isBroadcast) {
         switch (ctx.args.data.state) {
           case 'read':
@@ -235,7 +238,9 @@ module.exports = function (Notification) {
       .unsubscriptionEmailDomain
     switch (data.isBroadcast) {
       case false:
-        let tokenData = _.assignIn({}, ctx.subscription, { data: data.data })
+        let tokenData = _.assignIn({}, ctx.subscription, {
+          data: data.data
+        })
         var textBody =
           data.message.textBody &&
           Notification.mailMerge(data.message.textBody, tokenData, ctx)
@@ -263,7 +268,9 @@ module.exports = function (Notification) {
                   tokenData,
                   ctx
                 ) + unsubscriptionEmailDomain
-              listUnsub = [[unsubEmail, unsubscriptUrl]]
+              listUnsub = [
+                [unsubEmail, unsubscriptUrl]
+              ]
             }
             let mailOptions = {
               from: data.message.from,
@@ -286,8 +293,7 @@ module.exports = function (Notification) {
           .broadcastSubRequestBatchSize
         let startIdx = ctx.args.start
         let broadcastToChunkSubscribers = (broadcastToChunkSubscribersCB) => {
-          Notification.app.models.Subscription.find(
-            {
+          Notification.app.models.Subscription.find({
               where: {
                 serviceName: data.serviceName,
                 state: 'confirmed',
@@ -303,7 +309,7 @@ module.exports = function (Notification) {
                 jmespathSearchOpts.functionTable = Notification.app.get(
                   'notification'
                 ).broadcastCustomFilterFunctions
-              } catch (ex) { }
+              } catch (ex) {}
               var tasks = subscribers.reduce(function (a, e, i) {
                 if (e.broadcastPushNotificationFilter && data.data) {
                   let match
@@ -313,7 +319,7 @@ module.exports = function (Notification) {
                       '[?' + e.broadcastPushNotificationFilter + ']',
                       jmespathSearchOpts
                     )
-                  } catch (ex) { }
+                  } catch (ex) {}
                   if (!match || match.length === 0) {
                     return a
                   }
@@ -331,11 +337,13 @@ module.exports = function (Notification) {
                         data.errorWhenSendingToUsers || []
                       try {
                         data.errorWhenSendingToUsers.push(errData)
-                      } catch (ex) { }
+                      } catch (ex) {}
                     }
                     return cb(null, errData)
                   }
-                  let tokenData = _.assignIn({}, e, { data: data.data })
+                  let tokenData = _.assignIn({}, e, {
+                    data: data.data
+                  })
                   var textBody =
                     data.message.textBody &&
                     Notification.mailMerge(
@@ -379,7 +387,9 @@ module.exports = function (Notification) {
                             tokenData,
                             ctx
                           ) + unsubscriptionEmailDomain
-                        listUnsub = [[unsubEmail, unsubscriptUrl]]
+                        listUnsub = [
+                          [unsubEmail, unsubscriptUrl]
+                        ]
                       }
                       let mailOptions = {
                         from: data.message.from,
@@ -409,7 +419,17 @@ module.exports = function (Notification) {
             let unsubTasks = (data.errorWhenSendingToUsers || []).reduce((a, e, i) => {
               if (data.channel === 'email' && e.error && e.subscriptionId && e.error.responseCode === 550) {
                 a.push(function (cb) {
-                  Notification.app.models.Subscription.updateAll({ id: e.subscriptionId }, { state: "deleted" }, { eventSrc: { notification: { id: data.id } } }, (err, res) => {
+                  Notification.app.models.Subscription.updateAll({
+                    id: e.subscriptionId
+                  }, {
+                    state: "deleted"
+                  }, {
+                    eventSrc: {
+                      notification: {
+                        id: data.id
+                      }
+                    }
+                  }, (err, res) => {
                     return cb(null, null)
                   })
                 })
@@ -443,8 +463,7 @@ module.exports = function (Notification) {
               })
             }
           }
-          Notification.app.models.Subscription.count(
-            {
+          Notification.app.models.Subscription.count({
               serviceName: data.serviceName,
               state: 'confirmed',
               channel: data.channel
@@ -479,8 +498,7 @@ module.exports = function (Notification) {
                     if (!error && response.statusCode === 200) {
                       return cb && cb(body)
                     }
-                    Notification.app.models.Subscription.find(
-                      {
+                    Notification.app.models.Subscription.find({
                         where: {
                           serviceName: data.serviceName,
                           state: 'confirmed',
@@ -489,7 +507,9 @@ module.exports = function (Notification) {
                         order: 'created ASC',
                         skip: startIdx,
                         limit: broadcastSubscriberChunkSize,
-                        fields: { userChannelId: true }
+                        fields: {
+                          userChannelId: true
+                        }
                       },
                       function (err, subs) {
                         return cb && cb(err || subs.map(e => e.userChannelId))
@@ -516,9 +536,7 @@ module.exports = function (Notification) {
                     if (errorWhenSendingToUsers.length <= 0) {
                       return
                     }
-                    data.errorWhenSendingToUsers = (data.errorWhenSendingToUsers ||
-                      []
-                    ).concat(errorWhenSendingToUsers)
+                    data.errorWhenSendingToUsers = (data.errorWhenSendingToUsers || []).concat(errorWhenSendingToUsers)
                   } else {
                     data.state = 'error'
                   }
