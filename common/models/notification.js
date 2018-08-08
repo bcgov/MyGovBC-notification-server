@@ -425,7 +425,8 @@ module.exports = function (Notification) {
             let unSubscribeInvaidUsers = function (unSubscribeInvaidUsersCB) {
               // unsub invalid users
               let unsubTasks = (data.errorWhenSendingToUsers || []).reduce((a, e, i) => {
-                if (data.channel === 'email' && e.error && e.subscriptionId && e.error.responseCode === 550) {
+                // todo: response code 550 is an unreliable criteria so skip auto unsub for now
+                if (false && data.channel === 'email' && e.error && e.subscriptionId && e.error.responseCode === 550) {
                   a.push(function (cb) {
                     Notification.app.models.Subscription.updateAll({
                       id: e.subscriptionId
