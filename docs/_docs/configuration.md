@@ -192,6 +192,7 @@ The following default subscription sub-property *confirmationRequest* defines co
 ```json
 {
   "subscription": {
+    ...
     "confirmationRequest": {
       "sms": {
         "confirmationCodeRegex": "\\d{5}",
@@ -217,6 +218,7 @@ You can customize *NotifyBC*'s on-screen response message to confirmation code v
 ```json
 {
   "subscription": {
+    ...
     "confirmationAcknowledgements": {
       "successMessage": "You have been subscribed.",
       "failureMessage": "Error happened while confirming subscription."
@@ -241,8 +243,32 @@ In addition to customizing the message, you can define a redirect URL instead of
 }
 EOF
 ```
-If error happened during unsubscription, query string *?err=\<error\>* will be appended to *redirectUrl*.
+If error happened during subscription confirmation, query string *?err=\<error\>* will be appended to *redirectUrl*.
 
+### Duplicated Subscription
+*NotifyBC* by default allows a user subscribe to a service through same channel multiple times. If this is undesirable, you can set config *subscription.detectDuplicatedSubscription* to true. In such case instead of sending user a confirmation request, *NotifyBC* sends user a duplicated subscription notification message. Unlike a confirmation request, duplicated subscription 
+notification message doesn't and shouldn't contain any information to allow user confirm the subscription. You can customize duplicated subscription notification message by setting config *subscription.duplicatedSubscriptionNotification* in either *config.local.js* or using configuration api for service-specific dynamic config. Following is the default settings defined in
+*config.json*
+
+```json
+{
+  ...
+  "subscription": {
+    ...
+    "detectDuplicatedSubscription": false,
+    "duplicatedSubscriptionNotification": {
+      "sms": {
+        "textBody": "A duplicated subscription was submitted and rejected. you will continue receiving notifications. If the request was not created by you, pls ignore this msg."
+      },
+      "email": {
+        "from": "no_reply@invalid.local",
+        "subject": "Duplicated Subscription",
+        "textBody": "A duplicated subscription was submitted and rejected. you will continue receiving notifications. If the request was not created by you, please ignore this message."
+      }
+    }
+  }
+}
+```
 
 ### Anonymous Unsubscription
 For anonymous subscription, *NotifyBC* supports one-click opt-out by allowing unsubscription URL provided in notifications. To thwart unauthorized unsubscription attempts, *NotifyBC* implemented and enabled by default two security measurements 

@@ -14,9 +14,10 @@ if [ "$(ls /tmp/artifacts/ 2>/dev/null)" ]; then
     cp -r /tmp/artifacts/* ./
 fi
 chmod -R a+rwx ./
+echo node version $(node -v)
 echo "---> Building your Node application from source"
 npm i -g yarn
-yarn install
+yarn install --ignore-engines
 if [ -n "${RUN_TEST+x}" ]; then
   echo "---> Run automated tests"
   npm test

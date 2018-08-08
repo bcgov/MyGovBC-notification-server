@@ -29,7 +29,7 @@ objects:
       sourceStrategy:
         from:
           kind: ImageStreamTag
-          name: nodejs:6
+          name: nodejs:latest
           namespace: openshift
         incremental: true
       type: Source

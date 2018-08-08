@@ -66,7 +66,9 @@ module.exports = function (Subscription) {
     if (u) {
       ctx.query.where = ctx.query.where || {}
       ctx.query.where.userId = u
-      ctx.query.where.state = { neq: 'deleted' }
+      ctx.query.where.state = {
+        neq: 'deleted'
+      }
     }
     next()
   })
@@ -90,42 +92,87 @@ module.exports = function (Subscription) {
           e.confirmationRequest = undefined
           e.unsetAttribute("updatedBy")
           e.unsetAttribute("createdBy")
+          e.unsetAttribute("unsubscriptionCode")
         })
       } else if (data instanceof Object) {
         data.confirmationRequest = undefined
         data.unsetAttribute("updatedBy")
         data.unsetAttribute("createdBy")
+        data.unsetAttribute("unsubscriptionCode")
       }
     }
     return next()
   })
 
-  function handleConfirmationRequest(ctx, data, cb) {
+  async function handleConfirmationRequest(ctx, data, cb) {
     if (data.state !== 'unconfirmed' || !data.confirmationRequest.sendRequest) {
       return cb(null, null)
     }
-    var textBody =
+    let textBody =
       data.confirmationRequest.textBody &&
       Subscription.mailMerge(data.confirmationRequest.textBody, data, ctx)
+    let mailSubject =
+      data.confirmationRequest.subject &&
+      Subscription.mailMerge(data.confirmationRequest.subject, data, ctx)
+    let mailHtmlBody =
+      data.confirmationRequest.htmlBody &&
+      Subscription.mailMerge(data.confirmationRequest.htmlBody, data, ctx)
+    let mailFrom = data.confirmationRequest.from
+
+    // handle duplicated request
+    let mergedSubscriptionConfig
+    try {
+      mergedSubscriptionConfig = await Subscription.getMergedConfig(
+        'subscription',
+        data.serviceName)
+    } catch (err) {
+      if (cb) {
+        return cb(err)
+      } else {
+        throw err
+      }
+    }
+    if (mergedSubscriptionConfig.detectDuplicatedSubscription) {
+      let whereClause = {
+        serviceName: data.serviceName,
+        state: 'confirmed',
+        channel: data.channel
+      }
+      if (data.userChannelId) {
+        // email address check should be case insensitive
+        var escapedUserChannelId = data.userChannelId.replace(
+          /[-[\]{}()*+?.,\\^$|#\s]/g,
+          '\\$&'
+        )
+        var escapedUserChannelIdRegExp = new RegExp(escapedUserChannelId, 'i')
+        whereClause.userChannelId = {
+          regexp: escapedUserChannelIdRegExp
+        }
+      }
+      let subCnt = await Subscription.count(whereClause)
+      if (subCnt > 0) {
+        mailFrom = mergedSubscriptionConfig.duplicatedSubscriptionNotification[data.channel].from
+        textBody = mergedSubscriptionConfig.duplicatedSubscriptionNotification[data.channel].textBody &&
+          Subscription.mailMerge(mergedSubscriptionConfig.duplicatedSubscriptionNotification[data.channel].textBody, data, ctx)
+        mailSubject = mergedSubscriptionConfig.duplicatedSubscriptionNotification.email.subject && Subscription.mailMerge(mergedSubscriptionConfig.duplicatedSubscriptionNotification.email.subject, data, ctx)
+        mailHtmlBody = mergedSubscriptionConfig.duplicatedSubscriptionNotification.email.htmlBody && Subscription.mailMerge(mergedSubscriptionConfig.duplicatedSubscriptionNotification.email.htmlBody, data, ctx)
+      }
+    }
     switch (data.channel) {
       case 'sms':
         Subscription.sendSMS(data.userChannelId, textBody, cb)
         break
       default:
-        var mailSubject =
-          data.confirmationRequest.subject &&
-          Subscription.mailMerge(data.confirmationRequest.subject, data, ctx)
-        var mailHtmlBody =
-          data.confirmationRequest.htmlBody &&
-          Subscription.mailMerge(data.confirmationRequest.htmlBody, data, ctx)
-        let mailOptions = {
-          from: data.confirmationRequest.from,
-          to: data.userChannelId,
-          subject: mailSubject,
-          text: textBody,
-          html: mailHtmlBody
+        {
+          let mailOptions = {
+            from: mailFrom,
+            to: data.userChannelId,
+            subject: mailSubject,
+            text: textBody,
+            html: mailHtmlBody
+          }
+          Subscription.sendEmail(mailOptions, cb)
         }
-        Subscription.sendEmail(mailOptions, cb)
     }
   }
 
@@ -179,7 +226,7 @@ module.exports = function (Subscription) {
           try {
             data.confirmationRequest =
               mergedSubscriptionConfig.confirmationRequest[data.channel]
-          } catch (ex) { }
+          } catch (ex) {}
           data.confirmationRequest.confirmationCode = undefined
         }
         if (!data.confirmationRequest.confirmationCode && data.confirmationRequest.confirmationCodeRegex) {
@@ -297,7 +344,7 @@ module.exports = function (Subscription) {
           ) {
             forbidden = true
           }
-        } catch (ex) { }
+        } catch (ex) {}
       }
     }
     if (this.state !== 'confirmed') {
@@ -309,7 +356,9 @@ module.exports = function (Subscription) {
       return cb(error)
     }
     let unsubscribeItems = (query, additionalServices) => {
-      Subscription.updateAll(query, { state: 'deleted' }, (writeErr, res) => {
+      Subscription.updateAll(query, {
+        state: 'deleted'
+      }, (writeErr, res) => {
         let handleUnsubscriptionResponse = writeErr => {
           Subscription.getMergedConfig(
             'subscription',
@@ -325,43 +374,45 @@ module.exports = function (Subscription) {
                   try {
                     switch (this.channel) {
                       case 'email':
-                        var msg =
-                          anonymousUnsubscription.acknowledgements.notification[
-                          this.channel
-                          ]
-                        var subject = Subscription.mailMerge(
-                          msg.subject,
-                          this,
-                          options.httpContext
-                        )
-                        var textBody = Subscription.mailMerge(
-                          msg.textBody,
-                          this,
-                          options.httpContext
-                        )
-                        var htmlBody = Subscription.mailMerge(
-                          msg.htmlBody,
-                          this,
-                          options.httpContext
-                        )
-                        let mailOptions = {
-                          from: msg.from,
-                          to: this.userChannelId,
-                          subject: subject,
-                          text: textBody,
-                          html: htmlBody
+                        {
+                          var msg =
+                            anonymousUnsubscription.acknowledgements.notification[
+                              this.channel
+                            ]
+                          var subject = Subscription.mailMerge(
+                            msg.subject,
+                            this,
+                            options.httpContext
+                          )
+                          var textBody = Subscription.mailMerge(
+                            msg.textBody,
+                            this,
+                            options.httpContext
+                          )
+                          var htmlBody = Subscription.mailMerge(
+                            msg.htmlBody,
+                            this,
+                            options.httpContext
+                          )
+                          let mailOptions = {
+                            from: msg.from,
+                            to: this.userChannelId,
+                            subject: subject,
+                            text: textBody,
+                            html: htmlBody
+                          }
+                          Subscription.sendEmail(mailOptions)
+                          break
                         }
-                        Subscription.sendEmail(mailOptions)
-                        break
                     }
-                  } catch (ex) { }
+                  } catch (ex) {}
                 }
                 if (
                   anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
                 ) {
                   var redirectUrl =
                     anonymousUnsubscription.acknowledgements.onScreen
-                      .redirectUrl
+                    .redirectUrl
                   if (err) {
                     redirectUrl += '?err=' + encodeURIComponent(err)
                   }
@@ -375,15 +426,15 @@ module.exports = function (Subscription) {
                   if (err) {
                     return options.httpContext.res.end(
                       anonymousUnsubscription.acknowledgements.onScreen
-                        .failureMessage
+                      .failureMessage
                     )
                   }
                   return options.httpContext.res.end(
                     anonymousUnsubscription.acknowledgements.onScreen
-                      .successMessage
+                    .successMessage
                   )
                 }
-              } catch (ex) { }
+              } catch (ex) {}
               return cb(err, 1)
             }
           )
@@ -401,15 +452,18 @@ module.exports = function (Subscription) {
       })
     }
     if (!additionalServices) {
-      return unsubscribeItems({ id: this.id })
+      return unsubscribeItems({
+        id: this.id
+      })
     }
     let getAdditionalServiceIds = cb => {
       if (additionalServices instanceof Array) {
-        return Subscription.find(
-          {
+        return Subscription.find({
             fields: ['id', 'serviceName'],
             where: {
-              serviceName: { inq: additionalServices },
+              serviceName: {
+                inq: additionalServices
+              },
               channel: this.channel,
               userChannelId: this.userChannelId
             }
@@ -424,8 +478,7 @@ module.exports = function (Subscription) {
       }
       if (typeof additionalServices === 'string') {
         if (additionalServices !== '_all') {
-          return Subscription.find(
-            {
+          return Subscription.find({
               fields: ['id', 'serviceName'],
               where: {
                 serviceName: additionalServices,
@@ -442,8 +495,7 @@ module.exports = function (Subscription) {
           )
         }
         // get all subscribed services
-        Subscription.find(
-          {
+        Subscription.find({
             fields: ['id', 'serviceName'],
             where: {
               userChannelId: this.userChannelId,
@@ -461,7 +513,11 @@ module.exports = function (Subscription) {
       }
     }
     getAdditionalServiceIds((err, data) => {
-      unsubscribeItems({ id: { inq: [].concat(this.id, data.ids) } }, data)
+      unsubscribeItems({
+        id: {
+          inq: [].concat(this.id, data.ids)
+        }
+      }, data)
     })
   }
 
@@ -473,6 +529,7 @@ module.exports = function (Subscription) {
         if (configErr) {
           return cb(configErr)
         }
+
         function handleConfirmationAcknowledgement(err, message) {
           if (!mergedSubscriptionConfig.confirmationAcknowledgements) {
             return cb(err, message)
@@ -492,12 +549,12 @@ module.exports = function (Subscription) {
               }
               return options.httpContext.res.end(
                 mergedSubscriptionConfig.confirmationAcknowledgements
-                  .failureMessage
+                .failureMessage
               )
             }
             return options.httpContext.res.end(
               mergedSubscriptionConfig.confirmationAcknowledgements
-                .successMessage
+              .successMessage
             )
           }
         }
@@ -542,7 +599,9 @@ module.exports = function (Subscription) {
       }
     }
     let revertItems = query => {
-      Subscription.updateAll(query, { state: 'confirmed' }, function (
+      Subscription.updateAll(query, {
+        state: 'confirmed'
+      }, function (
         writeErr,
         res
       ) {
@@ -575,17 +634,22 @@ module.exports = function (Subscription) {
       })
     }
     if (!this.unsubscribedAdditionalServices) {
-      return revertItems({ id: this.id })
+      return revertItems({
+        id: this.id
+      })
     }
     let unsubscribedAdditionalServicesIds = this.unsubscribedAdditionalServices.ids.slice()
     this.unsetAttribute('unsubscribedAdditionalServices')
     Subscription.replaceById(this.id, this, (err, res) => {
       return revertItems({
-        or: [
-          {
-            id: { inq: unsubscribedAdditionalServicesIds }
+        or: [{
+            id: {
+              inq: unsubscribedAdditionalServicesIds
+            }
           },
-          { id: this.id }
+          {
+            id: this.id
+          }
         ]
       })
     })
@@ -602,13 +666,18 @@ module.exports = function (Subscription) {
     )
     // distinct is db-dependent feature. MongoDB supports it
     if (typeof subscriptionCollection.distinct === 'function') {
-      subscriptionCollection.distinct('serviceName', { state: 'confirmed' }, cb)
+      subscriptionCollection.distinct('serviceName', {
+        state: 'confirmed'
+      }, cb)
       return
     }
-    Subscription.find(
-      {
-        fields: { serviceName: true },
-        where: { state: 'confirmed' },
+    Subscription.find({
+        fields: {
+          serviceName: true
+        },
+        where: {
+          state: 'confirmed'
+        },
         order: 'serviceName ASC'
       },
       (err, data) => {

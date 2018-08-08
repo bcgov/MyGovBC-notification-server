@@ -238,319 +238,328 @@ module.exports = function (Notification) {
       .unsubscriptionEmailDomain
     switch (data.isBroadcast) {
       case false:
-        let tokenData = _.assignIn({}, ctx.subscription, {
-          data: data.data
-        })
-        var textBody =
-          data.message.textBody &&
-          Notification.mailMerge(data.message.textBody, tokenData, ctx)
-        switch (data.channel) {
-          case 'sms':
-            Notification.sendSMS(data.userChannelId, textBody, cb)
-            break
-          default:
-            var htmlBody =
-              data.message.htmlBody &&
-              Notification.mailMerge(data.message.htmlBody, tokenData, ctx)
-            var subject =
-              data.message.subject &&
-              Notification.mailMerge(data.message.subject, tokenData, ctx)
-            let unsubscriptUrl = Notification.mailMerge(
-              '{unsubscription_url}',
-              tokenData,
-              ctx
-            )
-            let listUnsub = unsubscriptUrl
-            if (unsubscriptionEmailDomain) {
-              let unsubEmail =
-                Notification.mailMerge(
-                  'un-{subscription_id}-{unsubscription_code}@',
+        {
+          let tokenData = _.assignIn({}, ctx.subscription, {
+            data: data.data
+          })
+          var textBody =
+            data.message.textBody &&
+            Notification.mailMerge(data.message.textBody, tokenData, ctx)
+          switch (data.channel) {
+            case 'sms':
+              Notification.sendSMS(data.userChannelId, textBody, cb)
+              break
+            default:
+              {
+                var htmlBody =
+                  data.message.htmlBody &&
+                  Notification.mailMerge(data.message.htmlBody, tokenData, ctx)
+                var subject =
+                  data.message.subject &&
+                  Notification.mailMerge(data.message.subject, tokenData, ctx)
+                let unsubscriptUrl = Notification.mailMerge(
+                  '{unsubscription_url}',
                   tokenData,
                   ctx
-                ) + unsubscriptionEmailDomain
-              listUnsub = [
-                [unsubEmail, unsubscriptUrl]
-              ]
+                )
+                let listUnsub = unsubscriptUrl
+                if (unsubscriptionEmailDomain) {
+                  let unsubEmail =
+                    Notification.mailMerge(
+                      'un-{subscription_id}-{unsubscription_code}@',
+                      tokenData,
+                      ctx
+                    ) + unsubscriptionEmailDomain
+                  listUnsub = [
+                    [unsubEmail, unsubscriptUrl]
+                  ]
+                }
+                let mailOptions = {
+                  from: data.message.from,
+                  to: data.userChannelId,
+                  subject: subject,
+                  text: textBody,
+                  html: htmlBody,
+                  list: {
+                    id: data.httpHost + '/' + encodeURIComponent(data.serviceName),
+                    unsubscribe: listUnsub
+                  }
+                }
+                Notification.sendEmail(mailOptions, cb)
+              }
+              break
+          }
+          break
+        }
+      case true:
+        {
+          let broadcastSubscriberChunkSize = Notification.app.get('notification')
+            .broadcastSubscriberChunkSize
+          let broadcastSubRequestBatchSize = Notification.app.get('notification')
+            .broadcastSubRequestBatchSize
+          let startIdx = ctx.args.start
+          let broadcastToChunkSubscribers = (broadcastToChunkSubscribersCB) => {
+            Notification.app.models.Subscription.find({
+                where: {
+                  serviceName: data.serviceName,
+                  state: 'confirmed',
+                  channel: data.channel
+                },
+                order: 'created ASC',
+                skip: startIdx,
+                limit: broadcastSubscriberChunkSize
+              },
+              function (err, subscribers) {
+                let jmespathSearchOpts = {}
+                try {
+                  jmespathSearchOpts.functionTable = Notification.app.get(
+                    'notification'
+                  ).broadcastCustomFilterFunctions
+                } catch (ex) {}
+                var tasks = subscribers.reduce(function (a, e, i) {
+                  if (e.broadcastPushNotificationFilter && data.data) {
+                    let match
+                    try {
+                      match = jmespath.search(
+                        [data.data],
+                        '[?' + e.broadcastPushNotificationFilter + ']',
+                        jmespathSearchOpts
+                      )
+                    } catch (ex) {}
+                    if (!match || match.length === 0) {
+                      return a
+                    }
+                  }
+                  a.push(function (cb) {
+                    var notificationMsgCB = function (err) {
+                      let errData = null
+                      if (err) {
+                        errData = {
+                          subscriptionId: e.id,
+                          userChannelId: e.userChannelId,
+                          error: err
+                        }
+                        data.errorWhenSendingToUsers =
+                          data.errorWhenSendingToUsers || []
+                        try {
+                          data.errorWhenSendingToUsers.push(errData)
+                        } catch (ex) {}
+                      }
+                      return cb(null, errData)
+                    }
+                    let tokenData = _.assignIn({}, e, {
+                      data: data.data
+                    })
+                    var textBody =
+                      data.message.textBody &&
+                      Notification.mailMerge(
+                        data.message.textBody,
+                        tokenData,
+                        ctx
+                      )
+                    switch (e.channel) {
+                      case 'sms':
+                        Notification.sendSMS(
+                          e.userChannelId,
+                          textBody,
+                          notificationMsgCB
+                        )
+                        break
+                      default:
+                        {
+                          var subject =
+                            data.message.subject &&
+                            Notification.mailMerge(
+                              data.message.subject,
+                              tokenData,
+                              ctx
+                            )
+                          var htmlBody =
+                            data.message.htmlBody &&
+                            Notification.mailMerge(
+                              data.message.htmlBody,
+                              tokenData,
+                              ctx
+                            )
+                          let unsubscriptUrl = Notification.mailMerge(
+                            '{unsubscription_url}',
+                            tokenData,
+                            ctx
+                          )
+                          let listUnsub = unsubscriptUrl
+                          if (unsubscriptionEmailDomain) {
+                            let unsubEmail =
+                              Notification.mailMerge(
+                                'un-{subscription_id}-{unsubscription_code}@',
+                                tokenData,
+                                ctx
+                              ) + unsubscriptionEmailDomain
+                            listUnsub = [
+                              [unsubEmail, unsubscriptUrl]
+                            ]
+                          }
+                          let mailOptions = {
+                            from: data.message.from,
+                            to: e.userChannelId,
+                            subject: subject,
+                            text: textBody,
+                            html: htmlBody,
+                            list: {
+                              id: data.httpHost + '/' + encodeURIComponent(data.serviceName),
+                              unsubscribe: listUnsub
+                            }
+                          }
+                          Notification.sendEmail(mailOptions, notificationMsgCB)
+                        }
+                    }
+                  })
+                  return a
+                }, [])
+                parallel(tasks, function (err, res) {
+                  return (broadcastToChunkSubscribersCB || cb)(err, _.compact(res))
+                })
+              }
+            )
+          }
+          if (typeof startIdx !== 'number') {
+            let unSubscribeInvaidUsers = function (unSubscribeInvaidUsersCB) {
+              // unsub invalid users
+              let unsubTasks = (data.errorWhenSendingToUsers || []).reduce((a, e, i) => {
+                if (data.channel === 'email' && e.error && e.subscriptionId && e.error.responseCode === 550) {
+                  a.push(function (cb) {
+                    Notification.app.models.Subscription.updateAll({
+                      id: e.subscriptionId
+                    }, {
+                      state: "deleted"
+                    }, {
+                      eventSrc: {
+                        notification: {
+                          id: data.id
+                        }
+                      }
+                    }, (err, res) => {
+                      return cb(null, null)
+                    })
+                  })
+                }
+                return a
+              }, [])
+              parallel(unsubTasks, function (err, res) {
+                unSubscribeInvaidUsersCB(err, res)
+              })
             }
-            let mailOptions = {
-              from: data.message.from,
-              to: data.userChannelId,
-              subject: subject,
-              text: textBody,
-              html: htmlBody,
-              list: {
-                id: data.httpHost + '/' + encodeURIComponent(data.serviceName),
-                unsubscribe: listUnsub
+            let unSubscribeInvaidUsersCB = function (err, res) {
+              if (!data.asyncBroadcastPushNotification) {
+                cb()
+              } else {
+                if (data.state !== 'error') {
+                  data.state = 'sent'
+                }
+                data.save(function (errSave) {
+                  if (
+                    typeof data.asyncBroadcastPushNotification === 'string'
+                  ) {
+                    let options = {
+                      uri: data.asyncBroadcastPushNotification,
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      json: data
+                    }
+                    request.post(options)
+                  }
+                })
               }
             }
-            Notification.sendEmail(mailOptions, cb)
-        }
-        break
-      case true:
-        let broadcastSubscriberChunkSize = Notification.app.get('notification')
-          .broadcastSubscriberChunkSize
-        let broadcastSubRequestBatchSize = Notification.app.get('notification')
-          .broadcastSubRequestBatchSize
-        let startIdx = ctx.args.start
-        let broadcastToChunkSubscribers = (broadcastToChunkSubscribersCB) => {
-          Notification.app.models.Subscription.find({
-              where: {
+            Notification.app.models.Subscription.count({
                 serviceName: data.serviceName,
                 state: 'confirmed',
                 channel: data.channel
               },
-              order: 'created ASC',
-              skip: startIdx,
-              limit: broadcastSubscriberChunkSize
-            },
-            function (err, subscribers) {
-              let jmespathSearchOpts = {}
-              try {
-                jmespathSearchOpts.functionTable = Notification.app.get(
-                  'notification'
-                ).broadcastCustomFilterFunctions
-              } catch (ex) {}
-              var tasks = subscribers.reduce(function (a, e, i) {
-                if (e.broadcastPushNotificationFilter && data.data) {
-                  let match
-                  try {
-                    match = jmespath.search(
-                      [data.data],
-                      '[?' + e.broadcastPushNotificationFilter + ']',
-                      jmespathSearchOpts
-                    )
-                  } catch (ex) {}
-                  if (!match || match.length === 0) {
-                    return a
-                  }
-                }
-                a.push(function (cb) {
-                  var notificationMsgCB = function (err) {
-                    let errData = null
-                    if (err) {
-                      errData = {
-                        subscriptionId: e.id,
-                        userChannelId: e.userChannelId,
-                        error: err
-                      }
-                      data.errorWhenSendingToUsers =
-                        data.errorWhenSendingToUsers || []
-                      try {
-                        data.errorWhenSendingToUsers.push(errData)
-                      } catch (ex) {}
-                    }
-                    return cb(null, errData)
-                  }
-                  let tokenData = _.assignIn({}, e, {
-                    data: data.data
+              function (err, count) {
+                if (count <= broadcastSubscriberChunkSize) {
+                  startIdx = 0
+                  broadcastToChunkSubscribers((err, res) => {
+                    unSubscribeInvaidUsers(unSubscribeInvaidUsersCB)
                   })
-                  var textBody =
-                    data.message.textBody &&
-                    Notification.mailMerge(
-                      data.message.textBody,
-                      tokenData,
-                      ctx
-                    )
-                  switch (e.channel) {
-                    case 'sms':
-                      Notification.sendSMS(
-                        e.userChannelId,
-                        textBody,
-                        notificationMsgCB
-                      )
-                      break
-                    default:
-                      var subject =
-                        data.message.subject &&
-                        Notification.mailMerge(
-                          data.message.subject,
-                          tokenData,
-                          ctx
-                        )
-                      var htmlBody =
-                        data.message.htmlBody &&
-                        Notification.mailMerge(
-                          data.message.htmlBody,
-                          tokenData,
-                          ctx
-                        )
-                      let unsubscriptUrl = Notification.mailMerge(
-                        '{unsubscription_url}',
-                        tokenData,
-                        ctx
-                      )
-                      let listUnsub = unsubscriptUrl
-                      if (unsubscriptionEmailDomain) {
-                        let unsubEmail =
-                          Notification.mailMerge(
-                            'un-{subscription_id}-{unsubscription_code}@',
-                            tokenData,
-                            ctx
-                          ) + unsubscriptionEmailDomain
-                        listUnsub = [
-                          [unsubEmail, unsubscriptUrl]
-                        ]
-                      }
-                      let mailOptions = {
-                        from: data.message.from,
-                        to: e.userChannelId,
-                        subject: subject,
-                        text: textBody,
-                        html: htmlBody,
-                        list: {
-                          id: data.httpHost + '/' + encodeURIComponent(data.serviceName),
-                          unsubscribe: listUnsub
-                        }
-                      }
-                      Notification.sendEmail(mailOptions, notificationMsgCB)
+                } else {
+                  // call broadcastToChunkSubscribers, coordinate output
+                  let chunks = Math.ceil(count / broadcastSubscriberChunkSize)
+                  let httpHost = Notification.app.get('internalHttpHost')
+                  if (!httpHost) {
+                    httpHost = data.httpHost || (ctx.req.protocol + '://' + ctx.req.get('host'))
                   }
-                })
-                return a
-              }, [])
-              parallel(tasks, function (err, res) {
-                return (broadcastToChunkSubscribersCB || cb)(err, _.compact(res))
-              })
-            }
-          )
-        }
-        if (typeof startIdx !== 'number') {
-          let unSubscribeInvaidUsers = function (unSubscribeInvaidUsersCB) {
-            // unsub invalid users
-            let unsubTasks = (data.errorWhenSendingToUsers || []).reduce((a, e, i) => {
-              if (data.channel === 'email' && e.error && e.subscriptionId && e.error.responseCode === 550) {
-                a.push(function (cb) {
-                  Notification.app.models.Subscription.updateAll({
-                    id: e.subscriptionId
-                  }, {
-                    state: "deleted"
-                  }, {
-                    eventSrc: {
-                      notification: {
-                        id: data.id
-                      }
-                    }
-                  }, (err, res) => {
-                    return cb(null, null)
-                  })
-                })
-              }
-              return a
-            }, [])
-            parallel(unsubTasks, function (err, res) {
-              unSubscribeInvaidUsersCB(err, res)
-            })
-          }
-          let unSubscribeInvaidUsersCB = function (err, res) {
-            if (!data.asyncBroadcastPushNotification) {
-              cb()
-            } else {
-              if (data.state !== 'error') {
-                data.state = 'sent'
-              }
-              data.save(function (errSave) {
-                if (
-                  typeof data.asyncBroadcastPushNotification === 'string'
-                ) {
-                  let options = {
-                    uri: data.asyncBroadcastPushNotification,
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    json: data
-                  }
-                  request.post(options)
-                }
-              })
-            }
-          }
-          Notification.app.models.Subscription.count({
-              serviceName: data.serviceName,
-              state: 'confirmed',
-              channel: data.channel
-            },
-            function (err, count) {
-              if (count <= broadcastSubscriberChunkSize) {
-                startIdx = 0
-                broadcastToChunkSubscribers((err, res) => {
-                  unSubscribeInvaidUsers(unSubscribeInvaidUsersCB)
-                })
-              } else {
-                // call broadcastToChunkSubscribers, coordinate output
-                let chunks = Math.ceil(count / broadcastSubscriberChunkSize)
-                let httpHost = Notification.app.get('internalHttpHost')
-                if (!httpHost) {
-                  httpHost = data.httpHost || (ctx.req.protocol + '://' + ctx.req.get('host'))
-                }
 
-                let q = queue(function (task, cb) {
-                  let uri =
-                    httpHost +
-                    Notification.app.get('restApiRoot') +
-                    '/notifications/' +
-                    data.id +
-                    '/broadcastToChunkSubscribers?start=' +
-                    task.startIdx
-                  let options = {
-                    json: true,
-                    uri: uri
-                  }
-                  request.get(options, function (error, response, body) {
-                    if (!error && response.statusCode === 200) {
-                      return cb && cb(body)
+                  let q = queue(function (task, cb) {
+                    let uri =
+                      httpHost +
+                      Notification.app.get('restApiRoot') +
+                      '/notifications/' +
+                      data.id +
+                      '/broadcastToChunkSubscribers?start=' +
+                      task.startIdx
+                    let options = {
+                      json: true,
+                      uri: uri
                     }
-                    Notification.app.models.Subscription.find({
-                        where: {
-                          serviceName: data.serviceName,
-                          state: 'confirmed',
-                          channel: data.channel
-                        },
-                        order: 'created ASC',
-                        skip: startIdx,
-                        limit: broadcastSubscriberChunkSize,
-                        fields: {
-                          userChannelId: true
-                        }
-                      },
-                      function (err, subs) {
-                        return cb && cb(err || subs.map(e => e.userChannelId))
+                    request.get(options, function (error, response, body) {
+                      if (!error && response.statusCode === 200) {
+                        return cb && cb(body)
                       }
-                    )
-                  })
-                }, broadcastSubRequestBatchSize)
-                q.drain = function () {
-                  unSubscribeInvaidUsers(unSubscribeInvaidUsersCB)
-                }
-                let queuedTasks = [],
-                  i = 0
-                while (i < chunks) {
-                  queuedTasks.push({
-                    startIdx: i * broadcastSubscriberChunkSize
-                  })
-                  i++
-                }
-                q.push(queuedTasks, function (errorWhenSendingToUsers) {
-                  if (!errorWhenSendingToUsers) {
-                    return
+                      Notification.app.models.Subscription.find({
+                          where: {
+                            serviceName: data.serviceName,
+                            state: 'confirmed',
+                            channel: data.channel
+                          },
+                          order: 'created ASC',
+                          skip: startIdx,
+                          limit: broadcastSubscriberChunkSize,
+                          fields: {
+                            userChannelId: true
+                          }
+                        },
+                        function (err, subs) {
+                          return cb && cb(err || subs.map(e => e.userChannelId))
+                        }
+                      )
+                    })
+                  }, broadcastSubRequestBatchSize)
+                  q.drain = function () {
+                    unSubscribeInvaidUsers(unSubscribeInvaidUsersCB)
                   }
-                  if (errorWhenSendingToUsers instanceof Array) {
-                    if (errorWhenSendingToUsers.length <= 0) {
+                  let queuedTasks = [],
+                    i = 0
+                  while (i < chunks) {
+                    queuedTasks.push({
+                      startIdx: i * broadcastSubscriberChunkSize
+                    })
+                    i++
+                  }
+                  q.push(queuedTasks, function (errorWhenSendingToUsers) {
+                    if (!errorWhenSendingToUsers) {
                       return
                     }
-                    data.errorWhenSendingToUsers = (data.errorWhenSendingToUsers || []).concat(errorWhenSendingToUsers)
-                  } else {
-                    data.state = 'error'
-                  }
-                })
+                    if (errorWhenSendingToUsers instanceof Array) {
+                      if (errorWhenSendingToUsers.length <= 0) {
+                        return
+                      }
+                      data.errorWhenSendingToUsers = (data.errorWhenSendingToUsers || []).concat(errorWhenSendingToUsers)
+                    } else {
+                      data.state = 'error'
+                    }
+                  })
+                }
               }
+            )
+            if (data.asyncBroadcastPushNotification) {
+              cb(null)
             }
-          )
-          if (data.asyncBroadcastPushNotification) {
-            cb(null)
+          } else {
+            broadcastToChunkSubscribers()
           }
-        } else {
-          broadcastToChunkSubscribers()
+          break
         }
-        break
     }
   }
 

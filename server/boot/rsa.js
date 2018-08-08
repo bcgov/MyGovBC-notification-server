@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 var NodeRSA = require('node-rsa')
 
-module.exports = function(app, cb) {
+module.exports = function (app, cb) {
   /*
    * The `app` object provides access to a variety of LoopBack resources such as
    * models (e.g. `app.models.YourModelName`) or data sources (e.g.
@@ -11,9 +11,12 @@ module.exports = function(app, cb) {
    * for more info.
    */
 
-  ;(function getRSAKey() {
-    app.models.Configuration.findOne(
-      { where: { name: 'rsa' } },
+  +(function getRSAKey() {
+    app.models.Configuration.findOne({
+        where: {
+          name: 'rsa'
+        }
+      },
       (err, data) => {
         var key = new NodeRSA()
         if (!err && data) {
@@ -29,15 +32,14 @@ module.exports = function(app, cb) {
         // can generate RSA key pair by executing code below
         key.generateKeyPair()
         module.exports.key = key
-        app.models.Configuration.create(
-          {
+        app.models.Configuration.create({
             name: 'rsa',
             value: {
               private: key.exportKey('private'),
               public: key.exportKey('public')
             }
           },
-          function(err, data) {
+          function (err, data) {
             return cb()
           }
         )

@@ -30,7 +30,7 @@ module.exports = function (Model, options) {
         if (token && token.userId) {
           return true
         }
-      } catch (ex) { }
+      } catch (ex) {}
     }
 
     var adminIps = Model.app.get('adminIps') || Model.app.get('defaultAdminIps')
@@ -78,22 +78,21 @@ module.exports = function (Model, options) {
       default:
         // Twilio Credentials
         var smsConfig = Model.app.get('sms')[smsServiceProvider]
-        var accountSid = smsConfig.accountSid
-        var authToken = smsConfig.authToken
+      var accountSid = smsConfig.accountSid
+      var authToken = smsConfig.authToken
 
-        //require the Twilio module and create a REST client
-        smsClient = smsClient || new Twillio(accountSid, authToken)
+      //require the Twilio module and create a REST client
+      smsClient = smsClient || new Twillio(accountSid, authToken)
 
-        smsClient.messages.create(
-          {
-            to: to,
-            from: smsConfig.fromNumber,
-            body: textBody
-          },
-          function (err, message) {
-            cb(err, message)
-          }
-        )
+      smsClient.messages.create({
+          to: to,
+          from: smsConfig.fromNumber,
+          body: textBody
+        },
+        function (err, message) {
+          cb(err, message)
+        }
+      )
     }
   }
 
@@ -114,7 +113,7 @@ module.exports = function (Model, options) {
         if (!error && info.accepted.length < 1) {
           error = new Error('delivery failed')
         }
-      } catch (ex) { }
+      } catch (ex) {}
       cb && cb(error, info)
     })
   }
@@ -126,17 +125,17 @@ module.exports = function (Model, options) {
         /\{subscription_confirmation_code\}/gi,
         data.confirmationRequest.confirmationCode
       )
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(/\{service_name\}/gi, data.serviceName)
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       if (output.match(/\{unsubscription_service_names\}/i)) {
         let serviceNames = _.union(
           [data.serviceName],
-          data.unsubscribedAdditionalServices
-            ? data.unsubscribedAdditionalServices.names
-            : []
+          data.unsubscribedAdditionalServices ?
+          data.unsubscribedAdditionalServices.names :
+          []
         )
         output = output.replace(
           /\{unsubscription_service_names\}/gi,
@@ -145,7 +144,7 @@ module.exports = function (Model, options) {
           toSentence(serviceNames)
         )
       }
-    } catch (ex) { }
+    } catch (ex) {}
     let httpHost
     try {
       if (httpCtx.req) {
@@ -160,22 +159,22 @@ module.exports = function (Model, options) {
         httpHost = httpCtx.instance.httpHost
       }
       output = output.replace(/\{http_host\}/gi, httpHost)
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(
         /\{rest_api_root\}/gi,
         Model.app.get('restApiRoot')
       )
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(/\{subscription_id\}/gi, data.id)
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(
         /\{unsubscription_code\}/gi,
         data.unsubscriptionCode
       )
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(
         /\{unsubscription_url\}/gi,
@@ -186,7 +185,7 @@ module.exports = function (Model, options) {
         '/unsubscribe?unsubscriptionCode=' +
         data.unsubscriptionCode
       )
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(
         /\{unsubscription_all_url\}/gi,
@@ -198,7 +197,7 @@ module.exports = function (Model, options) {
         data.unsubscriptionCode +
         '&additionalServices=_all'
       )
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(
         /\{subscription_confirmation_url\}/gi,
@@ -209,7 +208,7 @@ module.exports = function (Model, options) {
         '/verify?confirmationCode=' +
         data.confirmationRequest.confirmationCode
       )
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(
         /\{unsubscription_reversion_url\}/gi,
@@ -220,7 +219,7 @@ module.exports = function (Model, options) {
         '/unsubscribe/undo?unsubscriptionCode=' +
         data.unsubscriptionCode
       )
-    } catch (ex) { }
+    } catch (ex) {}
 
     // for backward compatibilities
     try {
@@ -228,22 +227,22 @@ module.exports = function (Model, options) {
         /\{confirmation_code\}/gi,
         data.confirmationRequest.confirmationCode
       )
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(/\{serviceName\}/gi, data.serviceName)
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(/\{restApiRoot\}/gi, Model.app.get('restApiRoot'))
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(/\{subscriptionId\}/gi, data.id)
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       output = output.replace(
         /\{unsubscriptionCode\}/gi,
         data.unsubscriptionCode
       )
-    } catch (ex) { }
+    } catch (ex) {}
     try {
       if (data.data) {
         // substitute all other tokens with matching data.data properties
@@ -256,12 +255,11 @@ module.exports = function (Model, options) {
               if (val) {
                 output = output.replace(e, val)
               }
-            } catch (ex) { }
+            } catch (ex) {}
           })
         }
       }
-    }
-    catch (ex) { }
+    } catch (ex) {}
     return output
   }
 
@@ -269,8 +267,7 @@ module.exports = function (Model, options) {
     let token
     try {
       token = ctx.options.httpContext.args.options && ctx.options.httpContext.args.options.accessToken
-    }
-    catch (ex) { }
+    } catch (ex) {}
     try {
       if (ctx.instance) {
         ctx.instance.updated = new Date()
@@ -307,33 +304,39 @@ module.exports = function (Model, options) {
           }
         }
       }
-    } catch (ex) { }
+    } catch (ex) {}
     next()
   }
 
-  Model.observe('before save', (ctx, next) => { Model.updateTimestamp(ctx, next) })
+  Model.observe('before save', (ctx, next) => {
+    Model.updateTimestamp(ctx, next)
+  })
 
-  Model.getMergedConfig = function (configName, serviceName, next) {
-    Model.app.models.Configuration.findOne(
-      {
+  Model.getMergedConfig = async function (configName, serviceName, next) {
+    let data
+    try {
+      data = await Model.app.models.Configuration.findOne({
         where: {
           name: configName,
           serviceName: serviceName
         }
-      },
-      (err, data) => {
-        var res
-        if (err) {
-          return next(err, null)
-        }
-        try {
-          res = _.merge({}, Model.app.get(configName))
-        } catch (ex) { }
-        try {
-          res = _.merge({}, res, data.value)
-        } catch (ex) { }
-        return next(null, res)
+      })
+    } catch (ex) {
+      if(next){
+        return next(ex, null)
       }
-    )
+      else{
+        throw ex
+      }
+    }
+    let res
+    try {
+      res = _.merge({}, Model.app.get(configName))
+    } catch (ex) {}
+    try {
+      res = _.merge({}, res, data.value)
+    } catch (ex) {}
+    next && next(null, res)
+    return res
   }
 }
