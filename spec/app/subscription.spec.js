@@ -11,8 +11,7 @@ beforeAll(done => {
 describe('GET /subscriptions', function () {
   var data
   beforeEach(function (done) {
-    app.models.Subscription.create(
-      {
+    app.models.Subscription.create({
         serviceName: 'myService',
         channel: 'email',
         userId: 'bar',
@@ -109,8 +108,7 @@ describe('POST /subscriptions', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).not.toHaveBeenCalled()
-        app.models.Subscription.find(
-          {
+        app.models.Subscription.find({
             where: {
               serviceName: 'myService',
               userChannelId: 'bar@foo.com'
@@ -141,8 +139,7 @@ describe('POST /subscriptions', function () {
           from: 'a@b.com',
           subject: 'subject',
           sendRequest: true,
-          textBody:
-            '{subscription_confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {unsubscription_url} {subscription_confirmation_url} {unsubscription_reversion_url}',
+          textBody: '{subscription_confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {unsubscription_url} {subscription_confirmation_url} {unsubscription_reversion_url}',
           confirmationCode: '12345'
         }
       })
@@ -210,8 +207,7 @@ describe('POST /subscriptions', function () {
           '/api/subscriptions/1/unsubscribe/undo?unsubscriptionCode=54321'
         )
 
-        app.models.Subscription.find(
-          {
+        app.models.Subscription.find({
             where: {
               serviceName: 'myService',
               userChannelId: 'foo@bar.com'
@@ -242,8 +238,7 @@ describe('POST /subscriptions', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
-        app.models.Subscription.find(
-          {
+        app.models.Subscription.find({
             where: {
               serviceName: 'myService',
               userChannelId: '12345'
@@ -273,8 +268,7 @@ describe('POST /subscriptions', function () {
           from: 'foo@invalid.local',
           subject: 'subject',
           sendRequest: true,
-          textBody:
-            '{subscription_confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {unsubscription_url} {subscription_confirmation_url} {unsubscription_reversion_url}',
+          textBody: '{subscription_confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {unsubscription_url} {subscription_confirmation_url} {unsubscription_reversion_url}',
           confirmationCodeRegex: '12345'
         }
       })
@@ -282,8 +276,7 @@ describe('POST /subscriptions', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).toHaveBeenCalledTimes(1)
-        app.models.Subscription.find(
-          {
+        app.models.Subscription.find({
             where: {
               serviceName: 'myService',
               userChannelId: 'foo@bar.com'
@@ -309,8 +302,7 @@ describe('POST /subscriptions', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
-        app.models.Subscription.find(
-          {
+        app.models.Subscription.find({
             where: {
               serviceName: 'myService',
               userChannelId: '12345'
@@ -346,8 +338,7 @@ describe('POST /subscriptions', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendEmail).toHaveBeenCalledTimes(1)
-        app.models.Subscription.find(
-          {
+        app.models.Subscription.find({
             where: {
               serviceName: 'myService',
               userChannelId: 'nobody@local.invalid'
@@ -380,8 +371,7 @@ describe('POST /subscriptions', function () {
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(400)
-        app.models.Subscription.find(
-          {
+        app.models.Subscription.find({
             where: {
               serviceName: 'myService',
               userChannelId: '12345'
@@ -410,8 +400,7 @@ describe('POST /subscriptions', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
-        app.models.Subscription.find(
-          {
+        app.models.Subscription.find({
             where: {
               serviceName: 'myService',
               userChannelId: '12345'
@@ -428,8 +417,7 @@ describe('POST /subscriptions', function () {
 
 describe('PATCH /subscriptions/{id}', function () {
   beforeEach(function (done) {
-    app.models.Subscription.create(
-      {
+    app.models.Subscription.create({
         serviceName: 'myService',
         channel: 'email',
         userId: 'bar',
@@ -500,8 +488,7 @@ describe('GET /subscriptions/{id}/verify', function () {
     parallel(
       [
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userId: 'bar',
@@ -522,8 +509,7 @@ describe('GET /subscriptions/{id}/verify', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -603,8 +589,7 @@ describe('DELETE /subscriptions/{id}', function () {
     parallel(
       [
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userId: 'bar',
@@ -625,8 +610,7 @@ describe('DELETE /subscriptions/{id}', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -647,8 +631,7 @@ describe('DELETE /subscriptions/{id}', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -668,8 +651,7 @@ describe('DELETE /subscriptions/{id}', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'redirectAck',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -680,8 +662,7 @@ describe('DELETE /subscriptions/{id}', function () {
           )
         },
         function (cb) {
-          app.models.Configuration.create(
-            {
+          app.models.Configuration.create({
               name: 'subscription',
               serviceName: 'redirectAck',
               value: {
@@ -811,7 +792,9 @@ describe('DELETE /subscriptions/{id}', function () {
       process.nextTick(cb, 'error', {
         anonymousUnsubscription: {
           acknowledgements: {
-            onScreen: { redirectUrl: 'http://nowhere' }
+            onScreen: {
+              redirectUrl: 'http://nowhere'
+            }
           }
         }
       })
@@ -840,7 +823,9 @@ describe('DELETE /subscriptions/{id}', function () {
       process.nextTick(cb, 'error', {
         anonymousUnsubscription: {
           acknowledgements: {
-            onScreen: { failureMessage: 'fail' }
+            onScreen: {
+              failureMessage: 'fail'
+            }
           }
         }
       })
@@ -871,8 +856,7 @@ describe('GET /subscriptions/{id}/unsubscribe', function () {
     parallel(
       [
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService1',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -883,8 +867,7 @@ describe('GET /subscriptions/{id}/unsubscribe', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService2',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -895,8 +878,7 @@ describe('GET /subscriptions/{id}/unsubscribe', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService3',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -924,7 +906,11 @@ describe('GET /subscriptions/{id}/unsubscribe', function () {
       )
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.find({ where: { state: 'deleted' } }, function (
+        app.models.Subscription.find({
+          where: {
+            state: 'deleted'
+          }
+        }, function (
           err,
           res
         ) {
@@ -948,7 +934,11 @@ describe('GET /subscriptions/{id}/unsubscribe', function () {
       )
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.find({ where: { state: 'deleted' } }, function (
+        app.models.Subscription.find({
+          where: {
+            state: 'deleted'
+          }
+        }, function (
           err,
           res
         ) {
@@ -969,7 +959,11 @@ describe('GET /subscriptions/{id}/unsubscribe', function () {
       )
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Subscription.find({ where: { state: 'deleted' } }, function (
+        app.models.Subscription.find({
+          where: {
+            state: 'deleted'
+          }
+        }, function (
           err,
           res
         ) {
@@ -986,8 +980,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function () {
     parallel(
       [
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -998,8 +991,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -1020,8 +1012,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService2',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -1100,8 +1091,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function () {
   })
 
   it('should redirect response if set so', function (done) {
-    app.models.Configuration.create(
-      {
+    app.models.Configuration.create({
         name: 'subscription',
         serviceName: 'myService',
         value: {
@@ -1153,8 +1143,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function () {
 
 describe('PUT /subscriptions/{id}', function () {
   beforeEach(function (done) {
-    app.models.Subscription.create(
-      {
+    app.models.Subscription.create({
         serviceName: 'myService',
         channel: 'email',
         userId: 'bar',
@@ -1218,8 +1207,7 @@ describe('PUT /subscriptions/{id}', function () {
 
 describe('GET /subscriptions/services', function () {
   beforeEach(function (done) {
-    app.models.Subscription.create(
-      {
+    app.models.Subscription.create({
         serviceName: 'myService',
         channel: 'email',
         userId: 'bar',
