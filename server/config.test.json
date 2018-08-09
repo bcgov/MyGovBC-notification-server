@@ -3,6 +3,7 @@
   "httpHost": "",
   "internalHttpHost": "",
   "subscription": {
+    "detectDuplicatedSubscription": false,
     "unsubscriptionEmailDomain": "invalid.local"
   },
   "inboundSmtpServer": {

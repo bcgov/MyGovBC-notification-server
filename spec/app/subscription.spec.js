@@ -413,6 +413,84 @@ describe('POST /subscriptions', function () {
         )
       })
   })
+
+  it('should detect duplicated subscription', function (
+    done
+  ) {
+    spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(function () {
+      const res = {
+        detectDuplicatedSubscription: true,
+        duplicatedSubscriptionNotification: {
+          email: {
+            from: "no_reply@invalid.local",
+            subject: "Duplicated Subscription",
+            textBody: "A duplicated subscription was submitted and rejected. you will continue receiving notifications. If the request was not created by you, please ignore this message."
+          }
+        },
+        confirmationRequest: {
+          email: {
+            confirmationCodeRegex: "\\d{5}",
+            sendRequest: true,
+            from: "no_reply@invalid.local",
+            subject: "Subscription confirmation",
+            textBody: "Enter {subscription_confirmation_code} on screen"
+          }
+        },
+        anonymousUnsubscription: {
+          code: {
+            required: true,
+            regex: "\\d{5}"
+          },
+        },
+      }
+      let cb = arguments[arguments.length - 1]
+      if (typeof cb === 'function') {
+        return process.nextTick(cb, null, res)
+      } else {
+        return res
+      }
+    })
+
+    app.models.Subscription.create({
+        serviceName: 'myService',
+        channel: 'email',
+        userId: 'bar',
+        userChannelId: 'bar@invalid.local',
+        state: 'confirmed'
+      },
+      function (err, res) {
+        expect(err).toBeNull()
+        request(app)
+          .post('/api/subscriptions')
+          .send({
+            serviceName: 'myService',
+            channel: 'email',
+            userChannelId: 'bar@invalid.local',
+          })
+          .set('Accept', 'application/json')
+          .end(function (err, res) {
+            expect(res.statusCode).toBe(200)
+            expect(app.models.Subscription.sendEmail).toHaveBeenCalled()
+            expect(
+              app.models.Subscription.sendEmail.calls.argsFor(0)[0].text
+            ).toContain('A duplicated subscription')
+            app.models.Subscription.find({
+                where: {
+                  serviceName: 'myService',
+                  channel: 'email',
+                  state: 'unconfirmed',
+                  userChannelId: 'bar@invalid.local'
+                }
+              },
+              function (err, data) {
+                expect(data.length).toBe(1)
+                done()
+              }
+            )
+          })
+      }
+    )
+  })
 })
 
 describe('PATCH /subscriptions/{id}', function () {
