@@ -34,12 +34,12 @@
     "detectDuplicatedSubscription": false,
     "duplicatedSubscriptionNotification": {
       "sms": {
-        "textBody": "A duplicated subscription was submitted and rejected. you will continue receiving notifications. If the request was not created by you, pls ignore this msg."
+        "textBody": "A duplicated subscription was submitted and rejected. You will continue receiving notifications. If the request was not created by you, pls ignore this msg."
       },
       "email": {
         "from": "no_reply@invalid.local",
         "subject": "Duplicated Subscription",
-        "textBody": "A duplicated subscription was submitted and rejected. you will continue receiving notifications. If the request was not created by you, please ignore this message."
+        "textBody": "A duplicated subscription was submitted and rejected. You will continue receiving notifications. If the request was not created by you, please ignore this message."
       }
     },
     "confirmationRequest": {
