@@ -358,7 +358,7 @@ module.exports = function (Subscription) {
     let unsubscribeItems = (query, additionalServices) => {
       Subscription.updateAll(query, {
         state: 'deleted'
-      }, (writeErr, res) => {
+      }, options, (writeErr, res) => {
         let handleUnsubscriptionResponse = writeErr => {
           Subscription.getMergedConfig(
             'subscription',
@@ -568,7 +568,7 @@ module.exports = function (Subscription) {
           return handleConfirmationAcknowledgement(error)
         }
         this.state = 'confirmed'
-        Subscription.replaceById(this.id, this, function (err, res) {
+        Subscription.replaceById(this.id, this, options, function (err, res) {
           return handleConfirmationAcknowledgement(err, 'OK')
         })
       }
@@ -601,7 +601,7 @@ module.exports = function (Subscription) {
     let revertItems = query => {
       Subscription.updateAll(query, {
         state: 'confirmed'
-      }, function (
+      }, options, function (
         writeErr,
         res
       ) {
@@ -640,7 +640,7 @@ module.exports = function (Subscription) {
     }
     let unsubscribedAdditionalServicesIds = this.unsubscribedAdditionalServices.ids.slice()
     this.unsetAttribute('unsubscribedAdditionalServices')
-    Subscription.replaceById(this.id, this, (err, res) => {
+    Subscription.replaceById(this.id, this, options, (err, res) => {
       return revertItems({
         or: [{
             id: {

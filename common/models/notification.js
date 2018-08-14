@@ -163,7 +163,9 @@ module.exports = function (Notification) {
           } else {
             res.state = 'sent'
           }
-          res.save(function (errSave) {
+          res.save({
+            httpContext: ctx
+          }, function (errSave) {
             next(errSend || errSave)
           })
         })
@@ -456,7 +458,9 @@ module.exports = function (Notification) {
                 if (data.state !== 'error') {
                   data.state = 'sent'
                 }
-                data.save(function (errSave) {
+                data.save({
+                  httpContext: ctx
+                }, function (errSave) {
                   if (
                     typeof data.asyncBroadcastPushNotification === 'string'
                   ) {
