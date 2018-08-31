@@ -30,6 +30,12 @@ export default new Vuex.Store({
       filter: undefined,
       totalCount: undefined,
       search: undefined
+    },
+    bounces: {
+      items: [],
+      filter: undefined,
+      totalCount: undefined,
+      search: undefined
     }
   },
   mutations: {

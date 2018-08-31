@@ -9,7 +9,7 @@ To facilitate migrating subscriptions from other notification systems, *NotifyBC
 * Software installed
   * NodeJS@>=6.9.1
   * Git
-* Admin Access to a *NotifyBC* instance by adding your client ip to the [Admin IP List](../configuration/#admin-ip-list)
+* Admin Access to a *NotifyBC* instance by adding your client ip to the [Admin IP List](../config-adminIpList/)
 * a csv file with header row matching [subscription model schema](../api-subscription/#model-schema). A sample csv file is [provided](https://github.com/bcgov/MyGovBC-notification-server/tree/master/utils/bulk-import/sample-subscription.csv). Compound fields (of object type) should be dot-flattened as shown in the sample for field  *confirmationRequest.sendRequest*
 
 To run the utility

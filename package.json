@@ -1,7 +1,7 @@
 {
   "name": "notification",
   "version": "1.4.1",
-  "dbSchemaVersion": "0.5.0",
+  "dbSchemaVersion": "0.6.0",
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "async": "^2.0.1",
+    "axios": "^0.18.0",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
     "cron": "^1.2.1",
@@ -30,6 +31,7 @@
     "loopback-boot": "^2.6.5",
     "loopback-component-explorer": "f-w/loopback-component-explorer",
     "loopback-connector-mongodb": "^1.15.2",
+    "mailparser": "^2.3.2",
     "morgan": "^1.7.0",
     "node-getopt": "^0.2.3",
     "node-rsa": "^0.4.1",

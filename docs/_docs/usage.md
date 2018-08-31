@@ -6,7 +6,7 @@ permalink: /docs/usage/
 
 After [installing](../installation) *NotifyBC*, you can start exploring *NotifyBC* resources by opening web console [http://localhost:3000](http://localhost:3000). You can further explore APIs by clicking the API explorer in web console and expand the data models. The API calls you made with API explorer as well as API calls made by web console are by default treated as [admin requests](../overview/#architecture). To see the result for user requests, you can choose one of the following methods
 
-* [define admin ip list](../configuration/#admin-ip-list) and avoid putting localhost (127.0.0.1) in the list
+* [define admin ip list](../config-adminIpList/) and avoid putting localhost (127.0.0.1) in the list
 * access the API explorer from another ip
 
 Furthermore, to get results of an authenticated user, do one of the following

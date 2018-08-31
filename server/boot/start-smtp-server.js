@@ -1,16 +1,7 @@
-module.exports = function(app, cb) {
+module.exports = function (app, cb) {
   const smtpSvr = app.get('inboundSmtpServer')
-  const subscriptionCfg = app.get('subscription')
-  if (!smtpSvr) {
+  if (!smtpSvr.enabled) {
     return process.nextTick(cb)
   }
-  smtpSvr.listeningSmtpPort &&
-    (process.env.LISTENING_SMTP_PORT = smtpSvr.listeningSmtpPort)
-  subscriptionCfg.unsubscriptionEmailDomain &&
-    (process.env.ALLOWED_SMTP_DOMAINS =
-      subscriptionCfg.unsubscriptionEmailDomain)
-  smtpSvr.apiUrlPrefix && (process.env.API_URL_PREFIX = smtpSvr.apiUrlPrefix)
-  smtpSvr.options &&
-    (process.env.SMTP_SERVER_OPTIONS = JSON.stringify(smtpSvr.options))
-  return require('../smtp-server').app(cb)
+  return require('../smtp-server').app(app, cb)
 }

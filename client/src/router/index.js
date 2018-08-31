@@ -5,6 +5,7 @@ import Subscriptions from '@/components/subscriptions'
 import Notifications from '@/components/notifications'
 import Configurations from '@/components/configurations'
 import Administrators from '@/components/administrators'
+import Bounces from '@/components/bounces'
 import ApiExplorer from '@/components/api-explorer'
 
 Vue.use(Router)
@@ -40,6 +41,11 @@ export default new Router({
       path: '/administrators',
       name: 'Administrators',
       component: Administrators
+    },
+    {
+      path: '/bounces',
+      name: 'Bounces',
+      component: Bounces
     },
     {
       path: '/api-explorer',

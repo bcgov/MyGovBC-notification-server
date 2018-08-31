@@ -303,6 +303,13 @@ aws4@^1.6.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.7.0.tgz#d4d0e9b9dbfca77bf08eeb0a8a471550fe39e289"
 
+axios@^0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.18.0.tgz#32d53e4851efdc0a11993b6cd000789d70c05102"
+  dependencies:
+    follow-redirects "^1.3.0"
+    is-buffer "^1.1.5"
+
 babel-code-frame@^6.22.0, babel-code-frame@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-code-frame/-/babel-code-frame-6.26.0.tgz#63fd43f7dc1e3bb7ce35947db8fe369a3f58c74b"
@@ -1531,12 +1538,6 @@ eslint-plugin-es@^1.3.1:
     eslint-utils "^1.3.0"
     regexpp "^2.0.0"
 
-eslint-plugin-html@^4.0.5:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-html/-/eslint-plugin-html-4.0.5.tgz#e8ec7e16485124460f3bff312016feb0a54d9659"
-  dependencies:
-    htmlparser2 "^3.8.2"
-
 eslint-plugin-import@^2.13.0:
   version "2.13.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.13.0.tgz#df24f241175e312d91662dc91ca84064caec14ed"
@@ -1968,6 +1969,12 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
+follow-redirects@^1.3.0:
+  version "1.5.5"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.5.5.tgz#3c143ca599a2e22e62876687d68b23d55bad788b"
+  dependencies:
+    debug "^3.1.0"
+
 for-in@^0.1.3:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/for-in/-/for-in-0.1.8.tgz#d8773908e31256109952b1fdb9b3fa867d2775e1"
@@ -2265,6 +2272,10 @@ hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.0"
 
+he@1.1.1, he@^1.0.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
+
 helmet-csp@2.7.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/helmet-csp/-/helmet-csp-2.7.0.tgz#7934094617d1feb7bb2dc43bb7d9e8830f774716"
@@ -2324,7 +2335,16 @@ html-entities@^1.2.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-1.2.1.tgz#0df29351f0721163515dfb9e5543e5f6eed5162f"
 
-htmlparser2@^3.8.2, htmlparser2@^3.9.0, htmlparser2@^3.9.2:
+html-to-text@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/html-to-text/-/html-to-text-4.0.0.tgz#c1f4e100d74e9feab5b152d7b6b3be3c1c6412b0"
+  dependencies:
+    he "^1.0.0"
+    htmlparser2 "^3.9.2"
+    lodash "^4.17.4"
+    optimist "^0.6.1"
+
+htmlparser2@^3.9.0, htmlparser2@^3.9.2:
   version "3.9.2"
   resolved "https://registry.yarnpkg.com/htmlparser2/-/htmlparser2-3.9.2.tgz#1bdf87acca0f3f9e53fa4fcceb0f4b4cbb00b338"
   dependencies:
@@ -3066,6 +3086,10 @@ libbase64@0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/libbase64/-/libbase64-0.1.0.tgz#62351a839563ac5ff5bd26f12f60e9830bb751e6"
 
+libbase64@1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/libbase64/-/libbase64-1.0.3.tgz#de3023234abeefeb9d49378804c8a94404f5c98c"
+
 libmime@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/libmime/-/libmime-3.0.0.tgz#51a1a9e7448ecbd32cda54421675bb21bc093da6"
@@ -3074,9 +3098,23 @@ libmime@3.0.0:
     libbase64 "0.1.0"
     libqp "1.1.0"
 
+libmime@4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/libmime/-/libmime-4.0.1.tgz#dc71a19bfa6a97f8249d7205251d862d6fc599fb"
+  dependencies:
+    iconv-lite "0.4.23"
+    libbase64 "1.0.3"
+    libqp "1.1.0"
+
 libqp@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/libqp/-/libqp-1.1.0.tgz#f5e6e06ad74b794fb5b5b66988bf728ef1dedbe8"
+
+linkify-it@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-2.0.3.tgz#d94a4648f9b1c179d64fa97291268bdb6ce9434f"
+  dependencies:
+    uc.micro "^1.0.1"
 
 load-json-file@^2.0.0:
   version "2.0.0"
@@ -3344,6 +3382,27 @@ mailcomposer@4.0.1:
   dependencies:
     buildmail "4.0.1"
     libmime "3.0.0"
+
+mailparser@^2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/mailparser/-/mailparser-2.3.2.tgz#4e79411f1bb885becbbb16ccdcf07dcfd0137d1b"
+  dependencies:
+    he "1.1.1"
+    html-to-text "4.0.0"
+    iconv-lite "0.4.23"
+    libmime "4.0.1"
+    linkify-it "2.0.3"
+    mailsplit "4.2.3"
+    nodemailer "4.6.7"
+    tlds "1.203.1"
+
+mailsplit@4.2.3:
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/mailsplit/-/mailsplit-4.2.3.tgz#4c8ba5c69322a39625ef424df7c715a51c6271a7"
+  dependencies:
+    libbase64 "1.0.3"
+    libmime "4.0.1"
+    libqp "1.1.0"
 
 make-dir@^1.0.0:
   version "1.3.0"
@@ -3773,6 +3832,10 @@ nodemailer-wellknown@0.1.10:
 nodemailer@4.6.5, nodemailer@^4.1.2:
   version "4.6.5"
   resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-4.6.5.tgz#306ce18c4543f3f06e5f76665d3cb6277f872f53"
+
+nodemailer@4.6.7:
+  version "4.6.7"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-4.6.7.tgz#b68de7f36d65618bdeeeb76234e3547d51266373"
 
 nodemailer@^2.5.0:
   version "2.7.2"
@@ -5417,6 +5480,10 @@ timers-browserify@^2.0.4:
   dependencies:
     setimmediate "^1.0.4"
 
+tlds@1.203.1:
+  version "1.203.1"
+  resolved "https://registry.yarnpkg.com/tlds/-/tlds-1.203.1.tgz#4dc9b02f53de3315bc98b80665e13de3edfc1dfc"
+
 tmp@0.0.33, tmp@^0.0.33:
   version "0.0.33"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.33.tgz#6d34335889768d21b2bcda0aa277ced3b1bfadf9"
@@ -5529,6 +5596,10 @@ type-is@~1.6.15, type-is@~1.6.16:
 typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
+
+uc.micro@^1.0.1:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/uc.micro/-/uc.micro-1.0.5.tgz#0c65f15f815aa08b560a61ce8b4db7ffc3f45376"
 
 uglify-js@^2.6, uglify-js@^2.8.29:
   version "2.8.29"

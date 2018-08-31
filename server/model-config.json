@@ -36,5 +36,9 @@
   "rss": {
     "dataSource": "db",
     "public": false
+  },
+  "bounce": {
+    "dataSource": "db",
+    "public": true
   }
 }

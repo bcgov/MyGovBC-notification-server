@@ -2,3 +2,4 @@ instrumentation:
   excludes:
     - 'spec/**'
     - 'server/server.js'
+    - 'server/config.local.js'

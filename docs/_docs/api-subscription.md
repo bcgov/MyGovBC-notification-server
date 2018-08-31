@@ -5,8 +5,8 @@ permalink: /docs/api-subscription/
 ---
 The subscription API encapsulates the backend workflow of user subscription and un-subscription of push notification service. Depending on whether a API call comes from user browser as a user request or from an authorized server as an admin request, *NotifyBC* applies different validation rules. For user requests, the notification channel entered by user is unconfirmed. A confirmation code will be associated with this request. The confirmation code  can be created in one of two ways:
 
- * by *NotifyBC* based on channel dependent *subscription.confirmationRequest.\<channel\>.confirmationCodeRegex* [config](../configuration/#confirmation-request-message).
- * by a trusted third party. This trusted third party encrypts the confirmation code using the public RSA key of the *NotifyBC* instance (see more about [RSA Key Config](../configuration/#rsa-keys)) and pass the encrypted confirmation code to *NotifyBC* via user browser in the same subscription request. *NotifyBC* then decrypts to obtain the confirmation code. This method allows user subscribe to multiple notification services provided by *NotifyBC* instances in different trust domains (i.e. service providers) and only have to confirm the subscription channel once during one browser session. In such case only one *NotifyBC* instance should be chosen to deliver confirmation request to user.
+ * by *NotifyBC* based on channel dependent *subscription.confirmationRequest.\<channel\>.confirmationCodeRegex* [config](../config-subscription/#confirmation-request-message).
+ * by a trusted third party. This trusted third party encrypts the confirmation code using the public RSA key of the *NotifyBC* instance (see more about [RSA Key Config](../config-rsaKeys/)) and pass the encrypted confirmation code to *NotifyBC* via user browser in the same subscription request. *NotifyBC* then decrypts to obtain the confirmation code. This method allows user subscribe to multiple notification services provided by *NotifyBC* instances in different trust domains (i.e. service providers) and only have to confirm the subscription channel once during one browser session. In such case only one *NotifyBC* instance should be chosen to deliver confirmation request to user.
  
 Equipped with the confirmation code and a message template, *NotifyBC* can now send out confirmation request to unconfirmed subscription channel. At a minimum this confirmation request should contain the confirmation code. When user receives the message, he/she echos the confirmation code back to a *NotifyBC* provided API to verify against saved record. If match, the state of the subscription request is changed to confirmed.
 
@@ -195,7 +195,7 @@ The API operates on following subscription data model fields:
           <li>calling jmespath's <a href="http://jmespath.org/specification.html#built-in-functions">built-in functions</a> <br/> 
             <i>contains(province,'B')</i>
           </li>
-          <li>calling <a href="../configuration/#broadcast-push-notification-custom-filter-functions">custom filter functions</a><br/> 
+          <li>calling <a href="../config-notification/#broadcast-push-notification-custom-filter-functions">custom filter functions</a><br/> 
             <i>contains_ci(province,'b')</i>
           </li>
           <li>compound <br/> 
@@ -399,7 +399,7 @@ GET /subscriptions/{id}/verify
   3. input parameter *confirmationCode* is checked against *confirmationRequest.confirmationCode*. If not match, error is returned; otherwise
   4. *state* is set to *confirmed*
   5. the subscription is saved back to database
-  6. displays acknowledgement message according to [configuration](../configuration#confirmation-verification-acknowledgement-messages)
+  6. displays acknowledgement message according to [configuration](../config-subscription#confirmation-verification-acknowledgement-messages)
       
 ## Update a Subscription
 ```
@@ -504,7 +504,7 @@ This API allows an anonymous subscriber to undo an unsubscription.
     * if the subscription state is not *deleted*, request is rejected
   3. the field *state* is set to *confirmed* for the subscription identified by *id* as well as additional subscriptions identified in field *unsubscribedAdditionalServices*, if populated
   4. field *unsubscribedAdditionalServices* is removed if populated
-  5. returns either the message or redirect as configured in *[anonymousUndoUnsubscription](../configuration/#anonymousUndoUnsubscription)*
+  5. returns either the message or redirect as configured in *[anonymousUndoUnsubscription](../config-subscription/#anonymousUndoUnsubscription)*
 * example 
 
   To allow an anonymous subscriber to undo unsubscription, provide link token *{unsubscription_reversion_url}* in unsubscription acknowledgement notification, which is by default set. When sending notification, [mail merge](../overview/#mail-merge) is performed on this token resolving to the API url and parameters.

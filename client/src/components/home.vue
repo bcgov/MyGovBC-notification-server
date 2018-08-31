@@ -7,6 +7,7 @@
         <li><router-link to="/notifications">Notifications</router-link></li>
         <li><router-link to="/configurations">Configurations</router-link></li>
         <li><router-link to="/administrators">Administrators</router-link></li>
+        <li><router-link to="/bounces">Bounces</router-link></li>
       </ul>
     </p>
     <p>

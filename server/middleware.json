@@ -57,7 +57,9 @@
   },
   "files:after": {
     "loopback#static": {
-      "paths": ["/*"],
+      "paths": [
+        "/*"
+      ],
       "params": "$!../client/dist/"
     }
   },

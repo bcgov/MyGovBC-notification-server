@@ -34,6 +34,7 @@ permalink: /docs/overview/
 * send acknowledgement message after un-subscription for anonymous subscribers
 * bulk unsubscription
 * [list-unsubscribe](http://www.list-unsubscribe.com/) by email
+* track bounces and unsubscribe the recipient from all subscriptions when hard bounce count exceeds threshold 
 
 ### mail merge
 

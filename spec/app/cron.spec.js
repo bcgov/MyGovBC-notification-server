@@ -18,8 +18,7 @@ describe('CRON purgeData', function () {
     parallel(
       [
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'email',
               isBroadcast: true,
               message: {
@@ -36,8 +35,7 @@ describe('CRON purgeData', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'email',
               isBroadcast: true,
               message: {
@@ -54,8 +52,7 @@ describe('CRON purgeData', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'inApp',
               isBroadcast: true,
               message: {
@@ -72,8 +69,7 @@ describe('CRON purgeData', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'inApp',
               isBroadcast: true,
               message: {
@@ -90,8 +86,7 @@ describe('CRON purgeData', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'inApp',
               userId: 'foo',
               message: {
@@ -107,8 +102,7 @@ describe('CRON purgeData', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'unconfirmedService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -142,8 +136,12 @@ describe('CRON purgeData', function () {
       parallel(
         [
           function (cb) {
-            app.models.Notification.find(
-              { where: { serviceName: 'futureService', channel: 'email' } },
+            app.models.Notification.find({
+                where: {
+                  serviceName: 'futureService',
+                  channel: 'email'
+                }
+              },
               function (err, data) {
                 expect(data.length).toBe(1)
                 cb(err, data)
@@ -151,8 +149,12 @@ describe('CRON purgeData', function () {
             )
           },
           function (cb) {
-            app.models.Notification.find(
-              { where: { serviceName: 'pastService', channel: 'email' } },
+            app.models.Notification.find({
+                where: {
+                  serviceName: 'pastService',
+                  channel: 'email'
+                }
+              },
               function (err, data) {
                 expect(data.length).toBe(0)
                 cb(err, data)
@@ -174,8 +176,7 @@ describe('CRON purgeData', function () {
       parallel(
         [
           function (cb) {
-            app.models.Notification.find(
-              {
+            app.models.Notification.find({
                 where: {
                   serviceName: 'nonexpiredService',
                   channel: 'inApp'
@@ -188,8 +189,7 @@ describe('CRON purgeData', function () {
             )
           },
           function (cb) {
-            app.models.Notification.find(
-              {
+            app.models.Notification.find({
                 where: {
                   serviceName: 'expiredService',
                   channel: 'inApp'
@@ -216,8 +216,7 @@ describe('CRON purgeData', function () {
       parallel(
         [
           function (cb) {
-            app.models.Notification.find(
-              {
+            app.models.Notification.find({
                 where: {
                   serviceName: 'deletedService',
                   channel: 'inApp'
@@ -244,8 +243,7 @@ describe('CRON purgeData', function () {
       parallel(
         [
           function (cb) {
-            app.models.Subscription.find(
-              {
+            app.models.Subscription.find({
                 where: {
                   serviceName: 'unconfirmedService',
                   channel: 'email'
@@ -272,8 +270,7 @@ describe('CRON dispatchLiveNotifications', function () {
     parallel(
       [
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'email',
               message: {
                 from: 'admin@foo.com',
@@ -293,8 +290,7 @@ describe('CRON dispatchLiveNotifications', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'email',
               message: {
                 from: 'admin@foo.com',
@@ -313,8 +309,7 @@ describe('CRON dispatchLiveNotifications', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -338,8 +333,7 @@ describe('CRON dispatchLiveNotifications', function () {
     cronTasks.dispatchLiveNotifications(app, function (err, results) {
       expect(err).toBeNull()
       expect(results.length).toBe(1)
-      expect(app.models.Notification.sendEmail).toHaveBeenCalledWith(
-        {
+      expect(app.models.Notification.sendEmail).toHaveBeenCalledWith(jasmine.objectContaining({
           from: 'admin@foo.com',
           to: 'bar@foo.com',
           subject: 'test',
@@ -354,15 +348,14 @@ describe('CRON dispatchLiveNotifications', function () {
               ]
             ]
           }
-        },
+        }),
         jasmine.any(Function)
       )
       expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
       parallel(
         [
           function (cb) {
-            app.models.Notification.find(
-              {
+            app.models.Notification.find({
                 where: {
                   serviceName: 'myService',
                   channel: 'email',
@@ -390,7 +383,9 @@ describe('CRON checkRssConfigUpdates', function () {
     spyOn(cronTasks, 'request').and.callFake(function () {
       var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
       setTimeout(function () {
-        output.emit('response', { statusCode: 200 })
+        output.emit('response', {
+          statusCode: 200
+        })
       }, 0)
       return output
     })
@@ -398,8 +393,7 @@ describe('CRON checkRssConfigUpdates', function () {
     parallel(
       [
         function (cb) {
-          app.models.Configuration.create(
-            {
+          app.models.Configuration.create({
               name: 'notification',
               serviceName: 'myService',
               value: {
@@ -427,8 +421,7 @@ describe('CRON checkRssConfigUpdates', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userChannelId: 'bar@foo.com',
@@ -458,7 +451,9 @@ describe('CRON checkRssConfigUpdates', function () {
       let joc = jasmine.objectContaining
       expect(cronTasks.request.post).toHaveBeenCalledWith(
         joc({
-          json: joc({ httpHost: 'http://foo' })
+          json: joc({
+            httpHost: 'http://foo'
+          })
         })
       )
       app.models.Rss.find((err, results) => {
@@ -469,11 +464,9 @@ describe('CRON checkRssConfigUpdates', function () {
   })
 
   it('should avoid sending notification for unchanged items', function (done) {
-    app.models.Rss.create(
-      {
+    app.models.Rss.create({
         serviceName: 'myService',
-        items: [
-          {
+        items: [{
             title: 'Item 2',
             description: 'lorem ipsum',
             summary: 'lorem ipsum',
@@ -520,20 +513,17 @@ describe('CRON checkRssConfigUpdates', function () {
           })
         },
         function (cb) {
-          app.models.Rss.create(
-            {
+          app.models.Rss.create({
               serviceName: 'myService',
-              items: [
-                {
-                  title: 'Item',
-                  description: 'lorem ipsum',
-                  pubDate: '1970-01-01T00:00:00.000Z',
-                  link: 'http://myservice/1',
-                  guid: '1',
-                  author: 'foo',
-                  _notifyBCLastPoll: '1970-01-01T00:00:00.000Z'
-                }
-              ],
+              items: [{
+                title: 'Item',
+                description: 'lorem ipsum',
+                pubDate: '1970-01-01T00:00:00.000Z',
+                link: 'http://myservice/1',
+                guid: '1',
+                author: 'foo',
+                _notifyBCLastPoll: '1970-01-01T00:00:00.000Z'
+              }],
               lastPoll: '1970-01-01T00:00:00.000Z'
             },
             cb
@@ -553,7 +543,9 @@ describe('CRON checkRssConfigUpdates', function () {
     cronTasks.request = jasmine.createSpy().and.callFake(function () {
       var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
       setTimeout(function () {
-        output.emit('response', { statusCode: 300 })
+        output.emit('response', {
+          statusCode: 300
+        })
       }, 0)
       return output
     })
@@ -561,6 +553,49 @@ describe('CRON checkRssConfigUpdates', function () {
     cronTasks.checkRssConfigUpdates(app, function (err, rssTasks) {
       expect(err).not.toBeNull()
       expect(rssTasks['1']).not.toBeNull()
+      done()
+    })
+  })
+})
+
+describe('CRON deleteBounces', function () {
+  it('should delete bounce records in which no messages since latestNotificationStarted', async function (done) {
+    await app.models.Bounce.create({
+      "channel": "email",
+      "userChannelId": "foo@invalid.local",
+      "count": 6,
+      "state": "active",
+      "latestNotificationStarted": "2018-09-30T17:27:44.501Z",
+      "latestNotificationEnded": "2018-07-30T17:27:45.261Z",
+      "bounceMessages": [{
+        "date": "2018-08-30T17:27:45.784Z",
+        "message": "blah"
+      }]
+    })
+    cronTasks.deleteBounces(app, async function (err, results) {
+      expect(err).toBeNull()
+      let item = await app.models.Bounce.findById(1)
+      expect(item.state).toBe('deleted')
+      done()
+    })
+  })
+  it('should not delete bounce records in which there are messages since latestNotificationStarted', async function (done) {
+    await app.models.Bounce.create({
+      "channel": "email",
+      "userChannelId": "foo@invalid.local",
+      "count": 6,
+      "state": "active",
+      "latestNotificationStarted": "2018-07-30T17:27:44.501Z",
+      "latestNotificationEnded": "2018-07-30T17:27:45.261Z",
+      "bounceMessages": [{
+        "date": "2018-08-30T17:27:45.784Z",
+        "message": "blah"
+      }]
+    })
+    cronTasks.deleteBounces(app, async function (err, results) {
+      expect(err).toBeNull()
+      let item = await app.models.Bounce.findById(1)
+      expect(item.state).toBe('active')
       done()
     })
   })

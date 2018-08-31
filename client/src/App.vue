@@ -42,6 +42,14 @@
             <v-list-tile-title>Administrators</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
+        <v-list-tile to="/bounces/">
+          <v-list-tile-action>
+            <v-icon>report</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Bounces</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
         <v-list-tile to="/api-explorer/">
           <v-list-tile-action>
             <v-icon>code</v-icon>
@@ -83,6 +91,6 @@ export default {
 
 <style scoped lang='less'>
 .white--text a {
-  color: white !important
+  color: white !important;
 }
 </style>

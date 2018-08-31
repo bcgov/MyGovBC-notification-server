@@ -4,8 +4,27 @@
   - overview
   - quickstart
   - installation
-  - configuration
   - usage
+
+- title: Configuration
+  docs:
+  - config-overview
+  - config-adminIpList
+  - config-reverseProxyIpLists
+  - config-httpHost
+  - config-smtp
+  - config-sms
+  - config-subscription
+  - config-notification
+  - config-database
+  - config-nodeRoles
+  - config-cronJobs
+  - config-rsaKeys
+  - config-internalHttpHost
+  - config-inboundSmtpServer
+  - config-listUnsubscribeByEmail
+  - config-notificationBounce
+  - config-workerProcessCount
 
 - title: API
   docs:
@@ -14,6 +33,7 @@
   - api-notification
   - api-config
   - api-administrator
+  - api-bounce
 
 
 - title: Miscellaneous

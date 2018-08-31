@@ -150,7 +150,7 @@ If using Jenkins, all the software are pre-installed on OpenShift provided Jenki
    ```
    MongoDB cluster created by this template uses stateful sets. As of OpenShift 1.5, stateful set is in technology preview phase so use the feature with precaution.
 2. create OpenShift apps by clicking *Add to Project* in web console of respective projects, select JavaScript in languages catalog, and click either *notify-bc-build* or *notify-bc* template. Adjust parameters as you see fit.
-3. (optional) create instance-specific [configuration](../configuration) files by modifying configMap *notify-bc*. To do so, in web console of a runtime environment project, click *Resources > Config Maps > notify-bc > Actions > Edit*. Each config file corresponds to an item in configMap with key being the file name. For example, to create config file *config.local.json*, create an item with key *config.local.json*. 
+3. (optional) create instance-specific [configuration](../config-overview/) files by modifying configMap *notify-bc*. To do so, in web console of a runtime environment project, click *Resources > Config Maps > notify-bc > Actions > Edit*. Each config file corresponds to an item in configMap with key being the file name. For example, to create config file *config.local.json*, create an item with key *config.local.json*. 
 
 <div class="note">
   <h5>ProTips™ backup config files</h5>

@@ -236,8 +236,8 @@ module.exports = function (Notification) {
   }
 
   function sendPushNotification(ctx, data, cb) {
-    let unsubscriptionEmailDomain = Notification.app.get('subscription')
-      .unsubscriptionEmailDomain
+    let inboundSmtpServerDomain = Notification.app.get('inboundSmtpServer')
+      .domain || Notification.app.get('subscription').unsubscriptionEmailDomain
     switch (data.isBroadcast) {
       case false:
         {
@@ -265,13 +265,13 @@ module.exports = function (Notification) {
                   ctx
                 )
                 let listUnsub = unsubscriptUrl
-                if (unsubscriptionEmailDomain) {
+                if (Notification.app.get('notification').handleListUnsubscribeByEmail && inboundSmtpServerDomain) {
                   let unsubEmail =
                     Notification.mailMerge(
                       'un-{subscription_id}-{unsubscription_code}@',
                       tokenData,
                       ctx
-                    ) + unsubscriptionEmailDomain
+                    ) + inboundSmtpServerDomain
                   listUnsub = [
                     [unsubEmail, unsubscriptUrl]
                   ]
@@ -285,6 +285,18 @@ module.exports = function (Notification) {
                   list: {
                     id: data.httpHost + '/' + encodeURIComponent(data.serviceName),
                     unsubscribe: listUnsub
+                  }
+                }
+                if (Notification.app.get('notification').handleBounce && inboundSmtpServerDomain) {
+                  let bounceEmail =
+                    Notification.mailMerge(
+                      `bn-{subscription_id}-{unsubscription_code}@${inboundSmtpServerDomain}`,
+                      tokenData,
+                      ctx
+                    )
+                  mailOptions.envelope = {
+                    from: bounceEmail,
+                    to: data.userChannelId,
                   }
                 }
                 Notification.sendEmail(mailOptions, cb)
@@ -389,13 +401,13 @@ module.exports = function (Notification) {
                             ctx
                           )
                           let listUnsub = unsubscriptUrl
-                          if (unsubscriptionEmailDomain) {
+                          if (Notification.app.get('notification').handleListUnsubscribeByEmail && inboundSmtpServerDomain) {
                             let unsubEmail =
                               Notification.mailMerge(
                                 'un-{subscription_id}-{unsubscription_code}@',
                                 tokenData,
                                 ctx
-                              ) + unsubscriptionEmailDomain
+                              ) + inboundSmtpServerDomain
                             listUnsub = [
                               [unsubEmail, unsubscriptUrl]
                             ]
@@ -411,6 +423,18 @@ module.exports = function (Notification) {
                               unsubscribe: listUnsub
                             }
                           }
+                          if (Notification.app.get('notification').handleBounce && inboundSmtpServerDomain) {
+                            let bounceEmail =
+                              Notification.mailMerge(
+                                `bn-{subscription_id}-{unsubscription_code}@${inboundSmtpServerDomain}`,
+                                tokenData,
+                                ctx
+                              )
+                            mailOptions.envelope = {
+                              from: bounceEmail,
+                              to: e.userChannelId,
+                            }
+                          }
                           Notification.sendEmail(mailOptions, notificationMsgCB)
                         }
                     }
@@ -424,34 +448,42 @@ module.exports = function (Notification) {
             )
           }
           if (typeof startIdx !== 'number') {
-            let unSubscribeInvaidUsers = function (unSubscribeInvaidUsersCB) {
-              // unsub invalid users
-              let unsubTasks = (data.errorWhenSendingToUsers || []).reduce((a, e, i) => {
-                // todo: response code 550 is an unreliable criteria so skip auto unsub for now
-                if (false && data.channel === 'email' && e.error && e.subscriptionId && e.error.responseCode === 550) {
-                  a.push(function (cb) {
-                    Notification.app.models.Subscription.updateAll({
-                      id: e.subscriptionId
-                    }, {
-                      state: "deleted"
-                    }, {
-                      eventSrc: {
-                        notification: {
-                          id: data.id
-                        }
-                      }
-                    }, (err, res) => {
-                      return cb(null, null)
-                    })
-                  })
+            let updateBounces = function (updateBouncesCB) {
+              Notification.app.models.Subscription.find({
+                fields: {
+                  userChannelId: true
+                },
+                where: {
+                  serviceName: data.serviceName,
+                  state: 'confirmed',
+                  channel: data.channel
                 }
-                return a
-              }, [])
-              parallel(unsubTasks, function (err, res) {
-                unSubscribeInvaidUsersCB(err, res)
+              }, (err, res) => {
+                let userChannelIds = res.map(e => e.userChannelId && e.userChannelId.toLowerCase())
+                const errUserChannelIds = (data.errorWhenSendingToUsers || []).map(e => e.userChannelId && e.userChannelId.toLowerCase())
+                _.pullAll(userChannelIds, errUserChannelIds)
+                Notification.app.models.Bounce.updateAll({
+                  state: 'active',
+                  channel: data.channel,
+                  userChannelId: {
+                    inq: userChannelIds
+                  },
+                  or: [{
+                      latestNotificationStarted: undefined
+                    },
+                    {
+                      latestNotificationStarted: {
+                        lt: data.updated
+                      }
+                    },
+                  ]
+                }, {
+                  latestNotificationStarted: data.updated,
+                  latestNotificationEnded: Date.now()
+                }, updateBouncesCB)
               })
             }
-            let unSubscribeInvaidUsersCB = function (err, res) {
+            let updateBouncesCB = function (err, res) {
               if (!data.asyncBroadcastPushNotification) {
                 cb()
               } else {
@@ -485,7 +517,7 @@ module.exports = function (Notification) {
                 if (count <= broadcastSubscriberChunkSize) {
                   startIdx = 0
                   broadcastToChunkSubscribers((err, res) => {
-                    unSubscribeInvaidUsers(unSubscribeInvaidUsersCB)
+                    updateBounces(updateBouncesCB)
                   })
                 } else {
                   // call broadcastToChunkSubscribers, coordinate output
@@ -531,7 +563,7 @@ module.exports = function (Notification) {
                     })
                   }, broadcastSubRequestBatchSize)
                   q.drain = function () {
-                    unSubscribeInvaidUsers(unSubscribeInvaidUsersCB)
+                    updateBounces(updateBouncesCB)
                   }
                   let queuedTasks = [],
                     i = 0

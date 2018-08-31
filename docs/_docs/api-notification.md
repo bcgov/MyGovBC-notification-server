@@ -378,7 +378,7 @@ POST /notifications
   6. if it's an async broadcast push notification, then response is sent back to user but steps 7-11 below is processed separately 
   7. for unicast push notification, the message is sent to targeted user; for broadcast push notification, following actions are performed:
       1. number of confirmed subscriptions is retrieved
-      2. the subscriptions are partitioned and processed concurrently as described in config section [Broadcast Push Notification Task Concurrency](../configuration/#broadcast-push-notification-task-concurrency)
+      2. the subscriptions are partitioned and processed concurrently as described in config section [Broadcast Push Notification Task Concurrency](../config-notification/#broadcast-push-notification-task-concurrency)
       3. when processing an individual subscription, if the subscription has filter rule defined in field *broadcastPushNotificationFilter* and notification contains field *data*, then the data is matched against the filter rule. Notification message is only sent if there is a match.
 
       In both cases, mail merge is performed on messages.

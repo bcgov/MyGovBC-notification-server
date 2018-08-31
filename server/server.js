@@ -42,6 +42,16 @@ module.exports = function (cb) {
         },
         start: true
       })
+      // start deleteBounces cron
+      let deleteBounces =
+        cronConfig.deleteBounces || {}
+      new CronJob({
+        cronTime: deleteBounces.timeSpec,
+        onTick: function () {
+          cronTasks.deleteBounces(app)
+        },
+        start: true
+      })
     }
 
     app.set('trust proxy', app.get('trustedReverseProxyIps'))
@@ -92,9 +102,10 @@ if (require.main === module) {
     // Fork workers.
     for (let i = 0; i < numWorkers; i++) {
       if (i > 0) {
-        cluster.fork({ NOTIFYBC_NODE_ROLE: 'slave' })
-      }
-      else {
+        cluster.fork({
+          NOTIFYBC_NODE_ROLE: 'slave'
+        })
+      } else {
         masterWorker = cluster.fork()
       }
     }
@@ -104,9 +115,10 @@ if (require.main === module) {
       if (worker === masterWorker) {
         console.log(`worker ${worker.process.pid} is the master worker`);
         masterWorker = cluster.fork()
-      }
-      else {
-        cluster.fork({ NOTIFYBC_NODE_ROLE: 'slave' })
+      } else {
+        cluster.fork({
+          NOTIFYBC_NODE_ROLE: 'slave'
+        })
       }
     })
   } else {
