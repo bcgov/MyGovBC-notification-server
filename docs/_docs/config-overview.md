@@ -5,7 +5,7 @@ permalink: /docs/config-overview/
 ---
 There are two types of configurations - static and dynamic. Static configurations are defined in files or environment variables, requiring restarting app server to take effect, whereas dynamic configurations are defined in databases and updates take effect immediately. 
 
-Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json docs](http://loopback.io/doc/en/lb3/config.json.html). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.js*. *Js* file is preferred over *json* because only *js* file supports custom functions, which are demanaded by some advanced configs below. Code snippets hereafter assumes custom config file is *js*.
+Most static configurations are specified in file */server/config.json* conforming to Loopback [config.json](http://loopback.io/doc/en/lb3/config.json.html). *NotifyBC* added some additional configurations. If you need to change, instead of updating */server/config.json* file, create [environment-specific file](http://loopback.io/doc/en/lb2/config.json.html#environment-specific-settings) such as */server/config.local.js*. *Js* file is preferred over *json* because only *js* file supports custom functions, which are needed by some advanced configs below. Code snippets hereafter assumes custom config file is *js*.
 
 Dynamic configs are managed using REST [configuration api](../api-config/). 
 
