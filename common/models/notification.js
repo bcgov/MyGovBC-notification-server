@@ -459,8 +459,8 @@ module.exports = function (Notification) {
                   channel: data.channel
                 }
               }, (err, res) => {
-                let userChannelIds = res.map(e => e.userChannelId && e.userChannelId.toLowerCase())
-                const errUserChannelIds = (data.errorWhenSendingToUsers || []).map(e => e.userChannelId && e.userChannelId.toLowerCase())
+                let userChannelIds = res.map(e => e.userChannelId)
+                const errUserChannelIds = (data.errorWhenSendingToUsers || []).map(e => e.userChannelId)
                 _.pullAll(userChannelIds, errUserChannelIds)
                 Notification.app.models.Bounce.updateAll({
                   state: 'active',

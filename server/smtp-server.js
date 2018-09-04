@@ -236,7 +236,7 @@ module.exports.app = function () {
                 }
                 let userChannelId = body[0] && body[0].userChannelId
                 if (incrementBounctCnt && bouncedUserChannelId &&
-                  userChannelId.toLowerCase() !== bouncedUserChannelId.toLowerCase()) {
+                  userChannelId !== bouncedUserChannelId) {
                   console.info(`userChannelId ${userChannelId} mismatches bouncedUserChannelId ${bouncedUserChannelId}`)
                   incrementBounctCnt = false
                 }
@@ -244,7 +244,7 @@ module.exports.app = function () {
                   where: {
                     channel: 'email',
                     state: 'active',
-                    userChannelId: userChannelId.toLowerCase()
+                    userChannelId: userChannelId
                   }
                 }
                 try {
@@ -279,7 +279,7 @@ module.exports.app = function () {
                 } else {
                   let res = await exports.request.post(urlPrefix + '/bounces', {
                     channel: "email",
-                    userChannelId: userChannelId.toLowerCase(),
+                    userChannelId: userChannelId,
                     count: bncCnt,
                     bounceMessages: bounceMessages
                   })
