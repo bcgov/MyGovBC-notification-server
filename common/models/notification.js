@@ -236,8 +236,40 @@ module.exports = function (Notification) {
   }
 
   function sendPushNotification(ctx, data, cb) {
-    let inboundSmtpServerDomain = Notification.app.get('inboundSmtpServer')
+    const inboundSmtpServerDomain = Notification.app.get('inboundSmtpServer')
       .domain || Notification.app.get('subscription').unsubscriptionEmailDomain
+    const handleBounce = Notification.app.get('notification').handleBounce
+    const handleListUnsubscribeByEmail = Notification.app.get('notification').handleListUnsubscribeByEmail
+
+    function updateBounces(userChannelIds, data, cb) {
+      if (!handleBounce) {
+        return cb()
+      }
+      let userChannelIdQry = userChannelIds
+      if (userChannelIds instanceof Array) {
+        userChannelIdQry = {
+          inq: userChannelIds
+        }
+      }
+      Notification.app.models.Bounce.updateAll({
+        state: 'active',
+        channel: data.channel,
+        userChannelId: userChannelIdQry,
+        or: [{
+            latestNotificationStarted: undefined
+          },
+          {
+            latestNotificationStarted: {
+              lt: data.updated
+            }
+          },
+        ]
+      }, {
+        latestNotificationStarted: data.updated,
+        latestNotificationEnded: Date.now()
+      }, cb)
+    }
+
     switch (data.isBroadcast) {
       case false:
         {
@@ -265,7 +297,7 @@ module.exports = function (Notification) {
                   ctx
                 )
                 let listUnsub = unsubscriptUrl
-                if (Notification.app.get('notification').handleListUnsubscribeByEmail && inboundSmtpServerDomain) {
+                if (handleListUnsubscribeByEmail && inboundSmtpServerDomain) {
                   let unsubEmail =
                     Notification.mailMerge(
                       'un-{subscription_id}-{unsubscription_code}@',
@@ -287,7 +319,7 @@ module.exports = function (Notification) {
                     unsubscribe: listUnsub
                   }
                 }
-                if (Notification.app.get('notification').handleBounce && inboundSmtpServerDomain) {
+                if (handleBounce && inboundSmtpServerDomain) {
                   let bounceEmail =
                     Notification.mailMerge(
                       `bn-{subscription_id}-{unsubscription_code}@${inboundSmtpServerDomain}`,
@@ -299,7 +331,12 @@ module.exports = function (Notification) {
                     to: data.userChannelId,
                   }
                 }
-                Notification.sendEmail(mailOptions, cb)
+                Notification.sendEmail(mailOptions, err => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  updateBounces(data.userChannelId, data, cb)
+                })
               }
               break
           }
@@ -307,10 +344,11 @@ module.exports = function (Notification) {
         }
       case true:
         {
-          let broadcastSubscriberChunkSize = Notification.app.get('notification')
+          const broadcastSubscriberChunkSize = Notification.app.get('notification')
             .broadcastSubscriberChunkSize
-          let broadcastSubRequestBatchSize = Notification.app.get('notification')
+          const broadcastSubRequestBatchSize = Notification.app.get('notification')
             .broadcastSubRequestBatchSize
+          const logSuccessfulBroadcastDispatches = Notification.app.get('notification').logSuccessfulBroadcastDispatches
           let startIdx = ctx.args.start
           let broadcastToChunkSubscribers = (broadcastToChunkSubscribersCB) => {
             Notification.app.models.Subscription.find({
@@ -325,11 +363,10 @@ module.exports = function (Notification) {
               },
               function (err, subscribers) {
                 let jmespathSearchOpts = {}
-                try {
-                  jmespathSearchOpts.functionTable = Notification.app.get(
-                    'notification'
-                  ).broadcastCustomFilterFunctions
-                } catch (ex) {}
+                const ft = Notification.app.get('notification').broadcastCustomFilterFunctions
+                if (ft) {
+                  jmespathSearchOpts.functionTable = ft
+                }
                 var tasks = subscribers.reduce(function (a, e, i) {
                   if (e.broadcastPushNotificationFilter && data.data) {
                     let match
@@ -346,20 +383,17 @@ module.exports = function (Notification) {
                   }
                   a.push(function (cb) {
                     var notificationMsgCB = function (err) {
-                      let errData = null
+                      let res = {}
                       if (err) {
-                        errData = {
+                        res.fail = {
                           subscriptionId: e.id,
                           userChannelId: e.userChannelId,
                           error: err
                         }
-                        data.errorWhenSendingToUsers =
-                          data.errorWhenSendingToUsers || []
-                        try {
-                          data.errorWhenSendingToUsers.push(errData)
-                        } catch (ex) {}
+                      } else if (logSuccessfulBroadcastDispatches || handleBounce) {
+                        res.success = e.id
                       }
-                      return cb(null, errData)
+                      return cb(null, res)
                     }
                     let tokenData = _.assignIn({}, e, {
                       data: data.data
@@ -401,7 +435,7 @@ module.exports = function (Notification) {
                             ctx
                           )
                           let listUnsub = unsubscriptUrl
-                          if (Notification.app.get('notification').handleListUnsubscribeByEmail && inboundSmtpServerDomain) {
+                          if (handleListUnsubscribeByEmail && inboundSmtpServerDomain) {
                             let unsubEmail =
                               Notification.mailMerge(
                                 'un-{subscription_id}-{unsubscription_code}@',
@@ -423,7 +457,7 @@ module.exports = function (Notification) {
                               unsubscribe: listUnsub
                             }
                           }
-                          if (Notification.app.get('notification').handleBounce && inboundSmtpServerDomain) {
+                          if (handleBounce && inboundSmtpServerDomain) {
                             let bounceEmail =
                               Notification.mailMerge(
                                 `bn-{subscription_id}-{unsubscription_code}@${inboundSmtpServerDomain}`,
@@ -441,49 +475,45 @@ module.exports = function (Notification) {
                   })
                   return a
                 }, [])
-                parallel(tasks, function (err, res) {
-                  return (broadcastToChunkSubscribersCB || cb)(err, _.compact(res))
+                parallel(tasks, function (err, resArr) {
+                  let ret = {
+                    fail: [],
+                    success: []
+                  }
+                  for (res of resArr) {
+                    if (res.fail) {
+                      ret.fail.push(res.fail)
+                    } else if (res.success) {
+                      ret.success.push(res.success)
+                    }
+                  }
+                  return (broadcastToChunkSubscribersCB || cb)(err, ret)
                 })
               }
             )
           }
           if (typeof startIdx !== 'number') {
-            let updateBounces = function (updateBouncesCB) {
+            let postBroadcastProcessing = function (postBroadcastProcessingCb) {
               Notification.app.models.Subscription.find({
                 fields: {
                   userChannelId: true
                 },
                 where: {
-                  serviceName: data.serviceName,
-                  state: 'confirmed',
-                  channel: data.channel
+                  id: {
+                    inq: data.successfulDispatches
+                  }
                 }
               }, (err, res) => {
                 let userChannelIds = res.map(e => e.userChannelId)
-                const errUserChannelIds = (data.errorWhenSendingToUsers || []).map(e => e.userChannelId)
+                const errUserChannelIds = (data.failedDispatches || []).map(e => e.userChannelId)
                 _.pullAll(userChannelIds, errUserChannelIds)
-                Notification.app.models.Bounce.updateAll({
-                  state: 'active',
-                  channel: data.channel,
-                  userChannelId: {
-                    inq: userChannelIds
-                  },
-                  or: [{
-                      latestNotificationStarted: undefined
-                    },
-                    {
-                      latestNotificationStarted: {
-                        lt: data.updated
-                      }
-                    },
-                  ]
-                }, {
-                  latestNotificationStarted: data.updated,
-                  latestNotificationEnded: Date.now()
-                }, updateBouncesCB)
+                updateBounces(userChannelIds, data, postBroadcastProcessingCb)
               })
             }
-            let updateBouncesCB = function (err, res) {
+            let postBroadcastProcessingCb = function (err, res) {
+              if (!logSuccessfulBroadcastDispatches) {
+                delete data.successfulDispatches
+              }
               if (!data.asyncBroadcastPushNotification) {
                 cb()
               } else {
@@ -517,20 +547,26 @@ module.exports = function (Notification) {
                 if (count <= broadcastSubscriberChunkSize) {
                   startIdx = 0
                   broadcastToChunkSubscribers((err, res) => {
-                    updateBounces(updateBouncesCB)
+                    if (res.fail) {
+                      data.failedDispatches = res.fail
+                    }
+                    if (res.success) {
+                      data.successfulDispatches = res.success
+                    }
+                    postBroadcastProcessing(postBroadcastProcessingCb)
                   })
                 } else {
                   // call broadcastToChunkSubscribers, coordinate output
                   let chunks = Math.ceil(count / broadcastSubscriberChunkSize)
                   let httpHost = Notification.app.get('internalHttpHost')
+                  const restApiRoot = Notification.app.get('restApiRoot')
                   if (!httpHost) {
                     httpHost = data.httpHost || (ctx.req.protocol + '://' + ctx.req.get('host'))
                   }
 
                   let q = queue(function (task, cb) {
                     let uri =
-                      httpHost +
-                      Notification.app.get('restApiRoot') +
+                      httpHost + restApiRoot +
                       '/notifications/' +
                       data.id +
                       '/broadcastToChunkSubscribers?start=' +
@@ -563,7 +599,7 @@ module.exports = function (Notification) {
                     })
                   }, broadcastSubRequestBatchSize)
                   q.drain = function () {
-                    updateBounces(updateBouncesCB)
+                    postBroadcastProcessing(postBroadcastProcessingCb)
                   }
                   let queuedTasks = [],
                     i = 0
@@ -573,15 +609,16 @@ module.exports = function (Notification) {
                     })
                     i++
                   }
-                  q.push(queuedTasks, function (errorWhenSendingToUsers) {
-                    if (!errorWhenSendingToUsers) {
-                      return
+                  q.push(queuedTasks, function (res) {
+                    if (res.success && res.success.length > 0) {
+                      data.successfulDispatches = (data.successfulDispatches || []).concat(res.success)
                     }
-                    if (errorWhenSendingToUsers instanceof Array) {
-                      if (errorWhenSendingToUsers.length <= 0) {
+                    let failedDispatches = res.fail || res || []
+                    if (failedDispatches instanceof Array) {
+                      if (failedDispatches.length <= 0) {
                         return
                       }
-                      data.errorWhenSendingToUsers = (data.errorWhenSendingToUsers || []).concat(errorWhenSendingToUsers)
+                      data.failedDispatches = (data.failedDispatches || []).concat(failedDispatches)
                     } else {
                       data.state = 'error'
                     }

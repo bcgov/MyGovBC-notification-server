@@ -88,7 +88,8 @@
     "handleListUnsubscribeByEmail": true,
     "handleBounce": true,
     "broadcastSubscriberChunkSize": 1000,
-    "broadcastSubRequestBatchSize": 10
+    "broadcastSubRequestBatchSize": 10,
+    "logSuccessfulBroadcastDispatches": false
   },
   "cron": {
     "purgeData": {

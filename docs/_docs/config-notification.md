@@ -89,6 +89,7 @@ To support rule-based notification event filtering, *NotifyBC* uses a [modified 
 ```js
 var _ = require('lodash')
 module.exports = {
+  ...
   notification: {
     broadcastCustomFilterFunctions: {
       contains_ci: {
@@ -120,3 +121,20 @@ Consult jmespath.js source code on the [functionTable syntax](https://github.com
   <p>You can add npm modules to package.json but the file maybe overwritten when upgrading <i>NotifyBC</i>. To avoid, add by running command <i><a href="https://docs.npmjs.com/cli/install">npm install &lt;your_package&gt;</a></i> during build.</p>
 </div>
 
+## Log Successful Broadcast Dispatches
+To optimize performance, by default only failed broadcast notification dispatches 
+are logged in the notification record. If you want to log successful dispatches too, set config *logSuccessfulBroadcastDispatches* to *true* in file */server/config.local.js*
+
+```js
+module.exports = {
+  ...
+  notification: {
+    ...
+    logSuccessfulBroadcastDispatches: true,
+  }
+}
+```
+
+The *successfulDispatches* field of the notification record will then contain an array of subscription *id*s of the successful dispatches.
+
+A successful dispatch only means the sending is successful. It doesn't guarantee the recipient can receive the notification. [Bounce](../config-notificationBounce/) may occur for a successful dispatch.

@@ -783,8 +783,8 @@ describe('POST /notifications', function () {
                   expect(
                     app.models.Notification.sendEmail
                   ).toHaveBeenCalledTimes(2)
-                  expect(data[0].errorWhenSendingToUsers.length).toBe(1)
-                  expect(data[0].errorWhenSendingToUsers[0]).toEqual(
+                  expect(data[0].failedDispatches.length).toBe(1)
+                  expect(data[0].failedDispatches[0]).toEqual(
                     jasmine.objectContaining({
                       userChannelId: 'bar2@invalid', error: 'bar2@invalid'
                     })
@@ -922,8 +922,8 @@ describe('POST /notifications', function () {
             expect(
               app.models.Notification.sendEmail
             ).toHaveBeenCalledTimes(1)
-            expect(data[0].errorWhenSendingToUsers.length).toBe(1)
-            expect(data[0].errorWhenSendingToUsers[0]).toEqual(
+            expect(data[0].failedDispatches.length).toBe(1)
+            expect(data[0].failedDispatches[0]).toEqual(
               jasmine.objectContaining({
                 userChannelId: 'bar@invalid.local', error: { responseCode: 550 }
               })

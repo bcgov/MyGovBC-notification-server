@@ -282,6 +282,7 @@ The API operates on following notification data model fields:
     <td>
       <table>
         <tr><td>type</td><td>array</td></tr>
+        <tr><td>required</td><td>false</td></tr>
         <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
@@ -294,18 +295,33 @@ The API operates on following notification data model fields:
     <td>
       <table>
         <tr><td>type</td><td>array</td></tr>
+        <tr><td>required</td><td>false</td></tr>
         <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
   </tr>
   <tr>
     <td>
-      <p class="name">errorWhenSendingToUsers</p>
-      <p class="description">this is an internal field to track the list of <i>userChannelId</i>s a broadcast push notification failed to deliver to. It is returned to notification creation API caller.</p>
+      <p class="name">failedDispatches</p>
+      <p class="description">this is an internal field to track the list of <i>subscriptions</i> a broadcast push notification failed to dispatch to. It is returned to notification creation API caller.</p>
     </td>
     <td>
       <table>
         <tr><td>type</td><td>array</td></tr>
+        <tr><td>required</td><td>false</td></tr>
+        <tr><td>auto-generated</td><td>true</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <p class="name">successfulDispatches</p>
+      <p class="description">this is an internal field to track the list of <i>subscriptions</i> a broadcast push notification successfully dispatched to. It is returned to notification creation API caller.</p>
+    </td>
+    <td>
+      <table>
+        <tr><td>type</td><td>array</td></tr>
+        <tr><td>required</td><td>false</td></tr>
         <tr><td>auto-generated</td><td>true</td></tr>
       </table>
     </td>
@@ -374,19 +390,20 @@ POST /notifications
   2. inputs are validated. If validation fails, error is returned. In particular, for unicast push notification, the recipient as identified by either *userChannelId* or *userId* must have a confirmed subscription if field *skipSubscriptionConfirmationCheck* is not set to true. If *skipSubscriptionConfirmationCheck* is set to true, then the subscription check is skipped, but in such case the request must contain *userChannelId*, not *userId* as subscription data is not queried to obtain *userChannelId* from *userId*.   
   3. for push notification, if field *httpHost* is empty, it is populated based on request's http protocol and host.
   4. the notification request is saved to database
-  5. if the notification is future-dated, then all subsequent request processing is skipped and response is sent back to user. Steps 7-10 below will be carried out later on by the cron job when the notification becomes current. 
-  6. if it's an async broadcast push notification, then response is sent back to user but steps 7-11 below is processed separately 
+  5. if the notification is future-dated, then all subsequent request processing is skipped and response is sent back to user. Steps 7-11 below will be carried out later on by the cron job when the notification becomes current. 
+  6. if it's an async broadcast push notification, then response is sent back to user but steps 7-12 below is processed separately 
   7. for unicast push notification, the message is sent to targeted user; for broadcast push notification, following actions are performed:
       1. number of confirmed subscriptions is retrieved
       2. the subscriptions are partitioned and processed concurrently as described in config section [Broadcast Push Notification Task Concurrency](../config-notification/#broadcast-push-notification-task-concurrency)
       3. when processing an individual subscription, if the subscription has filter rule defined in field *broadcastPushNotificationFilter* and notification contains field *data*, then the data is matched against the filter rule. Notification message is only sent if there is a match.
 
       In both cases, mail merge is performed on messages.
-  8. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *errorWhenSendingToUsers* contains a list of objects of {userChannelId, subscriptionId, error} the message failed to deliver to, but the state will still be set to *sent*.
-  9. For broadcast push notifications, if delivery failure to a user is caused by mailbox unavailable (smtp response code 550), then the user is unsubscribed automatically. No unsubscription acknowledgement is sent.
-  10. the updated notification is saved back to database
-  11. if it's an async broadcast push notification with a callback url, then the url is called with POST verb containing the notification with updated status as the request body
-  12. for synchronous notification, the saved record is returned unless there is an error saving to database, in which case error is returned
+  8. the state of push notification is updated to *sent* or *error* depending on sending status. For broadcast push notification, the delivery could be failed only for a subset of users. In such case, the field *failedDispatches* contains a list of objects of {userChannelId, subscriptionId, error} the message failed to deliver to, but the state will still be set to *sent*.
+  9. For broadcast push notifications, if *logSuccessfulBroadcastDispatches* is *true*, then field *successfulDispatches* is populated with a list of *subscriptionId* of the successful dispatches.
+  10. For push notifications, the bounce records of successful dispatches are updated
+  11. the updated notification is saved back to database
+  12. if it's an async broadcast push notification with a callback url, then the url is called with POST verb containing the notification with updated status as the request body
+  13. for synchronous notification, the saved record is returned unless there is an error saving to database, in which case error is returned
 
 * example
 

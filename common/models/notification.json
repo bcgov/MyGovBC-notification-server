@@ -90,7 +90,7 @@
         }
       ],
       "returns": [{
-        "arg": "failedDeliveries",
+        "arg": "failedDispatches",
         "type": "array",
         "root": true,
         "description": "failed deliveries"
