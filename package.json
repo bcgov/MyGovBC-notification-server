@@ -1,6 +1,6 @@
 {
   "name": "notification",
-  "version": "1.4.1",
+  "version": "1.10.0",
   "dbSchemaVersion": "0.6.0",
   "main": "server/server.js",
   "scripts": {
@@ -9,10 +9,9 @@
     "postinstall": "cd client && yarn install && yarn run build && cd ..",
     "test": "cross-env NODE_ENV=test istanbul cover node_modules/jasmine/bin/jasmine.js",
     "pretest": "eslint .",
-    "posttest": "nsp check",
+    "posttest": "npm run snyk-protect",
     "snyk-protect": "snyk protect",
-    "prepublishOnly": "npm run snyk-protect",
-    "prepare": "npm run snyk-protect"
+    "prepublishOnly": "npm run snyk-protect"
   },
   "dependencies": {
     "async": "^2.0.1",
@@ -59,7 +58,6 @@
     "eslint-plugin-standard": "^3.1.0",
     "istanbul": "^1.0.0-alpha.1",
     "jasmine": "^2.6.0",
-    "nsp": "^2.1.0",
     "smtp-connection": "^4.0.2",
     "supertest": "^3.0.0",
     "webpack": "^3.8.1",

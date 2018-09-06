@@ -40,7 +40,7 @@ The API operates on following data model fields:
   </tr>
   <tr>
     <td>
-      <p class="name">count</p>
+      <p class="name">hardBounceCount</p>
       <p class="description">number of hard bounces recorded so far</p>
     </td>
     <td>

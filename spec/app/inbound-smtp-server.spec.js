@@ -214,7 +214,7 @@ describe('bounce', function () {
           }
           if (data) {
             data.data = data.body
-            expect(data.body.count).toBe(1)
+            expect(data.body.hardBounceCount).toBe(1)
             resolve(data)
           }
         })
@@ -284,7 +284,7 @@ describe('bounce', function () {
           }
           if (data) {
             data.data = data.body
-            expect(data.body.count).toBe(2)
+            expect(data.body.hardBounceCount).toBe(2)
             resolve(data)
           }
         })
@@ -294,7 +294,7 @@ describe('bounce', function () {
     let data = await app.models.Bounce.create({
       "channel": "email",
       "userChannelId": "bar@foo.com",
-      "count": 1,
+      "hardBounceCount": 1,
       "state": "active"
     })
     connection.connect(() => {
@@ -360,7 +360,7 @@ describe('bounce', function () {
           }
           if (data) {
             data.data = data.body
-            expect(data.body.count).toBe(1)
+            expect(data.body.hardBounceCount).toBe(1)
             resolve(data)
           }
         })
@@ -370,7 +370,7 @@ describe('bounce', function () {
     let data = await app.models.Bounce.create({
       "channel": "email",
       "userChannelId": "bar@foo.com",
-      "count": 1,
+      "hardBounceCount": 1,
       "state": "active"
     })
     connection.connect(() => {
@@ -436,7 +436,7 @@ describe('bounce', function () {
           }
           if (data) {
             data.data = data.body
-            expect(data.body.count).toBe(1)
+            expect(data.body.hardBounceCount).toBe(1)
             resolve(data)
           }
         })
@@ -446,7 +446,7 @@ describe('bounce', function () {
     let data = await app.models.Bounce.create({
       "channel": "email",
       "userChannelId": "bar@foo.com",
-      "count": 1,
+      "hardBounceCount": 1,
       "state": "active"
     })
     connection.connect(() => {
@@ -512,7 +512,7 @@ describe('bounce', function () {
           }
           if (data) {
             data.data = data.body
-            expect(data.body.count).toBe(1)
+            expect(data.body.hardBounceCount).toBe(1)
             resolve(data)
           }
         })
@@ -522,7 +522,7 @@ describe('bounce', function () {
     let data = await app.models.Bounce.create({
       "channel": "email",
       "userChannelId": "bar@foo.com",
-      "count": 1,
+      "hardBounceCount": 1,
       "state": "active"
     })
     connection.connect(() => {
@@ -588,7 +588,7 @@ describe('bounce', function () {
           }
           if (data) {
             data.data = data.body
-            expect(data.body.count).toBe(2)
+            expect(data.body.hardBounceCount).toBe(2)
             resolve(data)
           }
         })
@@ -598,7 +598,7 @@ describe('bounce', function () {
     let data = await app.models.Bounce.create({
       "channel": "email",
       "userChannelId": "bar@foo.com",
-      "count": 1,
+      "hardBounceCount": 1,
       "state": "active"
     })
     connection.connect(() => {
@@ -618,7 +618,7 @@ describe('bounce', function () {
     })
   })
 
-  it('should unsubscribe and delete bounce record when count exceeds threshold',
+  it('should unsubscribe and delete bounce record when hardBounceCount exceeds threshold',
     async function (done) {
       spyOn(app.models.Subscription, 'isAdminReq').and.callFake(function () {
         return true
@@ -682,7 +682,7 @@ describe('bounce', function () {
       let data = await app.models.Bounce.create({
         "channel": "email",
         "userChannelId": "bar@foo.com",
-        "count": 2,
+        "hardBounceCount": 2,
         "state": "active"
       })
       connection.connect(() => {

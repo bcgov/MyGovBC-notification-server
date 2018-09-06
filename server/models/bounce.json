@@ -31,7 +31,7 @@
       "type": "string",
       "required": true
     },
-    "count": {
+    "hardBounceCount": {
       "type": "number",
       "default": 0,
       "required": true

@@ -3,7 +3,7 @@
     <template slot-scope='props'>
       <tr>
         <td>{{ props.props.item.userChannelId }}</td>
-        <td class='text-xs-right'>{{ props.props.item.count }}</td>
+        <td class='text-xs-right'>{{ props.props.item.hardBounceCount }}</td>
         <td>{{ props.props.item.state }}</td>
         <td class='text-xs-right'>{{ props.props.item.updated }}</td>
         <td>
@@ -37,9 +37,9 @@ export default {
           value: 'userChannelId'
         },
         {
-          text: 'count',
+          text: 'hardBounceCount',
           align: 'right',
-          value: 'count'
+          value: 'hardBounceCount'
         },
         {
           text: 'state',
@@ -75,7 +75,7 @@ export default {
             type: 'string',
             propertyOrder: 100
           },
-          count: {
+          hardBounceCount: {
             type: 'integer',
             propertyOrder: 150
           },

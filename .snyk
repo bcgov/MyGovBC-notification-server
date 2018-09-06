@@ -5,12 +5,32 @@ ignore:
   'npm:superagent:20170807':
     - '*':
         reason: None Given
-        expires: 2017-11-03T23:29:02.832Z
+  'npm:underscore.string:20170908':
+    - '*':
+        reason: not exposed
+  'npm:mem:20180117':
+    - '*':
+        reason: not exposed
+  'npm:mailparser:20180625':
+    - '*':
+        reason: not exposed
+  'npm:swagger-ui:20171031':
+    - '*':
+        reason: not exposed
+  'npm:hoek:20180212':
+    - '*':
+        reason: None Given
+  'npm:https-proxy-agent:20180402':
+    - '*':
+        reason: None Given
+  'npm:extend:20180424':
+    - '*':
+        reason: None Given
+  'npm:lodash:20180130':
+    - '*':
+        reason: None Given
 # patches apply the minimum changes required to fix a vulnerability
 patch:
   'npm:moment:20170905':
     - twilio > moment:
         patched: '2017-11-30T22:05:26.179Z'
-  'npm:lodash:20180130':
-    - loopback-component-explorer > lodash:
-        patched: '2018-08-31T23:25:37.926Z'

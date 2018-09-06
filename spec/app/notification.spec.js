@@ -15,8 +15,7 @@ describe('GET /notifications', function () {
     parallel(
       [
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'inApp',
               isBroadcast: true,
               message: {
@@ -31,8 +30,7 @@ describe('GET /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'inApp',
               isBroadcast: true,
               message: {
@@ -47,8 +45,7 @@ describe('GET /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'inApp',
               isBroadcast: true,
               message: {
@@ -63,8 +60,7 @@ describe('GET /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'inApp',
               isBroadcast: true,
               message: {
@@ -79,8 +75,7 @@ describe('GET /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Notification.create(
-            {
+          app.models.Notification.create({
               channel: 'email',
               isBroadcast: true,
               message: {
@@ -131,8 +126,7 @@ describe('POST /notifications', function () {
     parallel(
       [
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'email',
               userId: 'bar',
@@ -152,8 +146,7 @@ describe('POST /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myService',
               channel: 'sms',
               userChannelId: '12345',
@@ -163,8 +156,7 @@ describe('POST /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myChunkedBroadcastService',
               channel: 'email',
               userChannelId: 'bar1@foo.com',
@@ -174,8 +166,7 @@ describe('POST /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myChunkedBroadcastService',
               channel: 'email',
               userChannelId: 'bar2@invalid',
@@ -185,8 +176,7 @@ describe('POST /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myFilterableBroadcastService',
               channel: 'email',
               userChannelId: 'bar2@invalid',
@@ -197,8 +187,7 @@ describe('POST /notifications', function () {
           )
         },
         function (cb) {
-          app.models.Subscription.create(
-            {
+          app.models.Subscription.create({
               serviceName: 'myInvalideEmailService',
               channel: 'email',
               userChannelId: 'bar@invalid.local',
@@ -215,9 +204,7 @@ describe('POST /notifications', function () {
     )
   })
 
-  it('should send broadcast email notifications with proper mail merge', function (
-    done
-  ) {
+  it('should send broadcast email notifications with proper mail merge', function (done) {
     spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
@@ -228,10 +215,8 @@ describe('POST /notifications', function () {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody:
-            '{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}',
-          htmlBody:
-            '{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}'
+          textBody: '{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}',
+          htmlBody: '{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}'
         },
         data: {
           '1': 'foo',
@@ -326,12 +311,11 @@ describe('POST /notifications', function () {
         // test list-unsubscribe header
         expect(
           app.models.Notification.sendEmail.calls
-            .argsFor(0)[0]
-            .list.unsubscribe[0].indexOf('un-1-54321@invalid.local')
+          .argsFor(0)[0]
+          .list.unsubscribe[0].indexOf('un-1-54321@invalid.local')
         ).toBe(0)
 
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myService'
             }
@@ -355,10 +339,8 @@ describe('POST /notifications', function () {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
-          htmlBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+          textBody: 'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
+          htmlBody: 'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
         },
         channel: 'email',
         userId: 'bar',
@@ -368,8 +350,7 @@ describe('POST /notifications', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Notification.sendEmail).toHaveBeenCalled()
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myService'
             }
@@ -391,8 +372,7 @@ describe('POST /notifications', function () {
       .send({
         serviceName: 'myService',
         message: {
-          textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+          textBody: 'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
         },
         channel: 'sms',
         skipSubscriptionConfirmationCheck: true,
@@ -402,8 +382,7 @@ describe('POST /notifications', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Notification.sendSMS).toHaveBeenCalled()
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myService'
             }
@@ -425,8 +404,7 @@ describe('POST /notifications', function () {
       .send({
         serviceName: 'myService',
         message: {
-          textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+          textBody: 'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
         },
         channel: 'sms',
         isBroadcast: true
@@ -435,8 +413,7 @@ describe('POST /notifications', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Notification.sendSMS).toHaveBeenCalled()
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myService'
             }
@@ -460,8 +437,7 @@ describe('POST /notifications', function () {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+          textBody: 'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
         },
         channel: 'email',
         userId: 'bar',
@@ -471,8 +447,7 @@ describe('POST /notifications', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Notification.sendEmail).not.toHaveBeenCalled()
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myService'
             }
@@ -498,8 +473,7 @@ describe('POST /notifications', function () {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+          textBody: 'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
         },
         channel: 'email',
         userId: 'bar',
@@ -508,8 +482,7 @@ describe('POST /notifications', function () {
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(403)
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myService'
             }
@@ -535,16 +508,14 @@ describe('POST /notifications', function () {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+          textBody: 'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
         },
         channel: 'email'
       })
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(403)
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myService'
             }
@@ -621,8 +592,7 @@ describe('POST /notifications', function () {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+          textBody: 'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
         },
         channel: 'email',
         isBroadcast: true,
@@ -631,8 +601,7 @@ describe('POST /notifications', function () {
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myService'
             }
@@ -641,8 +610,7 @@ describe('POST /notifications', function () {
             expect(data.length).toBe(1)
             expect(data[0].state).toBe('new')
             setTimeout(function () {
-              app.models.Notification.find(
-                {
+              app.models.Notification.find({
                   where: {
                     serviceName: 'myService'
                   }
@@ -692,8 +660,7 @@ describe('POST /notifications', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myChunkedBroadcastService'
             }
@@ -760,8 +727,7 @@ describe('POST /notifications', function () {
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myChunkedBroadcastService'
             }
@@ -770,8 +736,7 @@ describe('POST /notifications', function () {
             expect(data.length).toBe(1)
             expect(data[0].state).toBe('new')
             setTimeout(function () {
-              app.models.Notification.find(
-                {
+              app.models.Notification.find({
                   where: {
                     serviceName: 'myChunkedBroadcastService'
                   }
@@ -786,7 +751,8 @@ describe('POST /notifications', function () {
                   expect(data[0].failedDispatches.length).toBe(1)
                   expect(data[0].failedDispatches[0]).toEqual(
                     jasmine.objectContaining({
-                      userChannelId: 'bar2@invalid', error: 'bar2@invalid'
+                      userChannelId: 'bar2@invalid',
+                      error: 'bar2@invalid'
                     })
                   )
                   done()
@@ -823,8 +789,7 @@ describe('POST /notifications', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myFilterableBroadcastService'
             }
@@ -862,8 +827,7 @@ describe('POST /notifications', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(0)
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myFilterableBroadcastService'
             }
@@ -910,8 +874,7 @@ describe('POST /notifications', function () {
       .set('Accept', 'application/json')
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
-        app.models.Notification.find(
-          {
+        app.models.Notification.find({
             where: {
               serviceName: 'myInvalideEmailService'
             }
@@ -925,11 +888,13 @@ describe('POST /notifications', function () {
             expect(data[0].failedDispatches.length).toBe(1)
             expect(data[0].failedDispatches[0]).toEqual(
               jasmine.objectContaining({
-                userChannelId: 'bar@invalid.local', error: { responseCode: 550 }
+                userChannelId: 'bar@invalid.local',
+                error: {
+                  responseCode: 550
+                }
               })
             )
-            app.models.Subscription.find(
-              {
+            app.models.Subscription.find({
                 where: {
                   serviceName: 'myInvalideEmailService'
                 }
@@ -992,8 +957,7 @@ describe('POST /notifications', function () {
       .end(function (err, res) {
         expect(res.statusCode).toBe(200)
         setTimeout(function () {
-          app.models.Subscription.find(
-            {
+          app.models.Subscription.find({
               where: {
                 serviceName: 'myInvalideEmailService'
               }
@@ -1010,11 +974,215 @@ describe('POST /notifications', function () {
         }, 3000)
       })
   })
+
+  it('should update bounce record after sending unicast email notification', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    await app.models.Bounce.create({
+      channel: "email",
+      userChannelId: "bar@foo.com",
+      hardBounceCount: 1,
+      state: "active"
+    })
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myService',
+        message: {
+          from: 'no_reply@bar.com',
+          subject: 'test',
+          textBody: 'test',
+        },
+        channel: 'email',
+        userId: 'bar',
+        userChannelId: 'bar@foo.COM'
+      })
+      .set('Accept', 'application/json')
+    let data = await app.models.Bounce.findById(1)
+    expect(data.latestNotificationStarted).toBeDefined()
+    expect(data.latestNotificationEnded).toBeDefined()
+    expect(data.latestNotificationEnded).toBeGreaterThanOrEqual(data.latestNotificationStarted)
+  })
+
+  it('should update bounce record after sending broadcast email notification', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    await app.models.Bounce.create({
+      channel: "email",
+      userChannelId: "bar@foo.com",
+      hardBounceCount: 1,
+      state: "active",
+    })
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        message: {
+          from: 'no_reply@local.invalid',
+          subject: 'test',
+          textBody: 'test',
+        },
+        isBroadcast: true,
+      })
+      .set('Accept', 'application/json')
+    let data = await app.models.Bounce.findById(1)
+    expect(data.latestNotificationStarted).toBeDefined()
+    expect(data.latestNotificationEnded).toBeDefined()
+    expect(data.latestNotificationEnded).toBeGreaterThanOrEqual(data.latestNotificationStarted)
+  })
+
+  it('should log successful dispatches after sending broadcast email notification if configured so', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    const realGet = app.models.Notification.app.get
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
+      if (param === 'notification') {
+        let val = Object.create(realGet.call(app, param))
+        val.logSuccessfulBroadcastDispatches = true
+        return val
+      } else {
+        return realGet.call(app, param)
+      }
+    })
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        message: {
+          from: 'no_reply@local.invalid',
+          subject: 'test',
+          textBody: 'test',
+        },
+        isBroadcast: true,
+      })
+      .set('Accept', 'application/json')
+    expect(res.statusCode).toBe(200)
+    expect(res.body.successfulDispatches[0]).toEqual(1)
+  })
+
+  it('should not log successful dispatches after sending broadcast email notification if configured so', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        message: {
+          from: 'no_reply@local.invalid',
+          subject: 'test',
+          textBody: 'test',
+        },
+        isBroadcast: true,
+      })
+      .set('Accept', 'application/json')
+    expect(res.statusCode).toBe(200)
+    expect(res.body.successfulDispatches).toBeUndefined()
+  })
+
+  it('should set envelope address when bounce is enabled and inboundSmtpServer.domain is defined', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        message: {
+          from: 'no_reply@local.invalid',
+          subject: 'test',
+          textBody: 'test',
+        },
+        isBroadcast: true,
+      })
+      .set('Accept', 'application/json')
+    expect(res.statusCode).toBe(200)
+    expect(
+      app.models.Notification.sendEmail.calls
+      .argsFor(0)[0]
+      .envelope.from).toBe('bn-1-54321@invalid.local')
+  })
+
+  it('should not set envelope address when bounce is disabled', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    const realGet = app.models.Notification.app.get
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
+      if (param === 'notification') {
+        let val = Object.create(realGet.call(app, param))
+        val.handleBounce = false
+        return val
+      } else {
+        return realGet.call(app, param)
+      }
+    })
+
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        message: {
+          from: 'no_reply@local.invalid',
+          subject: 'test',
+          textBody: 'test',
+        },
+        isBroadcast: true,
+      })
+      .set('Accept', 'application/json')
+    expect(res.statusCode).toBe(200)
+    expect(
+      app.models.Notification.sendEmail.calls
+      .argsFor(0)[0]
+      .envelope).toBeUndefined()
+  })
+
+  it('should not set envelope address when inboundSmtpServer.domain is undefined', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    const realGet = app.models.Notification.app.get
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
+      if (param === 'inboundSmtpServer') {
+        let val = Object.create(realGet.call(app, param))
+        val.domain = undefined
+        return val
+      } else {
+        return realGet.call(app, param)
+      }
+    })
+
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myService',
+        channel: 'email',
+        message: {
+          from: 'no_reply@local.invalid',
+          subject: 'test',
+          textBody: 'test',
+        },
+        isBroadcast: true,
+      })
+      .set('Accept', 'application/json')
+    expect(res.statusCode).toBe(200)
+    expect(
+      app.models.Notification.sendEmail.calls
+      .argsFor(0)[0]
+      .envelope).toBeUndefined()
+  })  
 })
 describe('PATCH /notifications/{id}', function () {
   beforeEach(function (done) {
-    app.models.Notification.create(
-      {
+    app.models.Notification.create({
         channel: 'inApp',
         isBroadcast: true,
         message: {
@@ -1086,8 +1254,7 @@ describe('PATCH /notifications/{id}', function () {
 })
 describe('DELETE /notifications/{id}', function () {
   beforeEach(function (done) {
-    app.models.Notification.create(
-      {
+    app.models.Notification.create({
         channel: 'inApp',
         isBroadcast: true,
         message: {

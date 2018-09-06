@@ -257,7 +257,7 @@ module.exports.app = function () {
                 } catch (err) {
                   return console.error(err)
                 }
-                let bncCnt = (body && body[0] && body[0].count) || 0,
+                let bncCnt = (body && body[0] && body[0].hardBounceCount) || 0,
                   bncId = body && body[0] && body[0].id,
                   bounceMessages = (body && body[0] && body[0].bounceMessages) || []
                 if (incrementBounctCnt) {
@@ -272,7 +272,7 @@ module.exports.app = function () {
                   await exports.request.patch(
                     urlPrefix +
                     '/bounces/' + bncId, {
-                      count: bncCnt,
+                      hardBounceCount: bncCnt,
                       bounceMessages: bounceMessages
                     }
                   )
@@ -280,7 +280,7 @@ module.exports.app = function () {
                   let res = await exports.request.post(urlPrefix + '/bounces', {
                     channel: "email",
                     userChannelId: userChannelId,
-                    count: bncCnt,
+                    hardBounceCount: bncCnt,
                     bounceMessages: bounceMessages
                   })
                   bncId = res.data.id
