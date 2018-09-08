@@ -1,11 +1,11 @@
-var queue = require('async/queue')
-var parallel = require('async/parallel')
-var disableAllMethods = require('../helpers.js').disableAllMethods
-var _ = require('lodash')
-var request = require('request')
-var jmespath = require('jmespath')
+const queue = require('async/queue')
+const parallel = require('async/parallel')
+const disableAllMethods = require('../helpers.js').disableAllMethods
+const _ = require('lodash')
+const jmespath = require('jmespath')
 
 module.exports = function (Notification) {
+  Notification.request = require('request')
   disableAllMethods(Notification, [
     'find',
     'create',
@@ -533,7 +533,7 @@ module.exports = function (Notification) {
                       },
                       json: data
                     }
-                    request.post(options)
+                    Notification.request.post(options)
                   }
                 })
               }
@@ -575,7 +575,7 @@ module.exports = function (Notification) {
                       json: true,
                       uri: uri
                     }
-                    request.get(options, function (error, response, body) {
+                    Notification.request.get(options, function (error, response, body) {
                       if (!error && response.statusCode === 200) {
                         return cb && cb(body)
                       }
@@ -586,7 +586,7 @@ module.exports = function (Notification) {
                             channel: data.channel
                           },
                           order: 'created ASC',
-                          skip: startIdx,
+                          skip: task.startIdx,
                           limit: broadcastSubscriberChunkSize,
                           fields: {
                             userChannelId: true

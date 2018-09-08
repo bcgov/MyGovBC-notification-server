@@ -1178,7 +1178,46 @@ describe('POST /notifications', function () {
       app.models.Notification.sendEmail.calls
       .argsFor(0)[0]
       .envelope).toBeUndefined()
-  })  
+  })
+
+  it('should handle batch broadcast request error', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    const realGet = app.models.Notification.app.get
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
+      if (param === 'notification') {
+        let val = Object.create(realGet.call(app, param))
+        val.broadcastSubscriberChunkSize = 1
+        val.broadcastSubRequestBatchSize = 2
+        return val
+      } else {
+        return realGet.call(app, param)
+      }
+    })
+
+    spyOn(app.models.Notification.request, 'get').and.callFake(function () {
+      let cb = arguments[arguments.length - 1]
+      return cb("error")
+    })
+
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'myChunkedBroadcastService',
+        message: {
+          from: 'no_reply@bar.com',
+          subject: 'test',
+          textBody: 'test'
+        },
+        channel: 'email',
+        isBroadcast: true
+      })
+      .set('Accept', 'application/json')
+    expect(res.statusCode).toBe(200)
+    expect(res.body.failedDispatches.indexOf('bar1@foo.com')).toBeGreaterThanOrEqual(0)
+    expect(res.body.failedDispatches.indexOf('bar2@invalid')).toBeGreaterThanOrEqual(0)
+  })
 })
 describe('PATCH /notifications/{id}', function () {
   beforeEach(function (done) {
