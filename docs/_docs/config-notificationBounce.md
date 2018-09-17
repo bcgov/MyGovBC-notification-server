@@ -8,7 +8,7 @@ Bounces, or Non-Delivery Reports (NDRs), are system-generated emails informing s
 
 Although *NotifyBC* records all bounce emails, not all of them should count towards unsubscription threshold, but rather only the hard bounces - those which indicate permanent unrecoverable errors such as destination address no longer exists. In principle this can be distinguished using smtp response code.  In practice, however, there are some challenges to make the distinction 
 
-* the smtp response code is not fully standarized and may vary by recepient's smtp server so it's unreliable
+* the smtp response code is not fully standarized and may vary by recipient's smtp server so it's unreliable
 * there is no standard smtp header in bounce email to contain smtp response code. Often the response code is embedded in bounce email body.
 * the bounce email template varies by sender's smtp server
 
@@ -19,11 +19,11 @@ To mitigate, *NotifyBC* defines several customizable string pattern filters in t
   <p>Send non-existing emails to several external email systems. Inspect the bounce messages for common string patterns. After gone live, review bounce records in web console from time to time to identifty new bounce types and decide whether the bounce types qualify as hard bounce. To avoid false positives resulting in premature unsubscription, it is advisable to start with a high unsubscription threhold.</p>
 </div>
 
-Bounce handling involes four actions
+Bounce handling involves four actions
 
 * during notification dispatching, envelop address is set to a [VERP](https://en.wikipedia.org/wiki/Variable_envelope_return_path) in the form *bn-{subscriptionId}-{unsubscriptionCode}@{inboundSmtpServerDomain}* routed to *NotifyBC* [inbound smtp server](../config-inboundSmtpServer/). 
-* when a notification finshed dispatching, the dispatching start and end time is recorded to all bounce records matching afftects recepient addresses
-* when inbound smtp server receives a bounce message, it updates the bounce record by saving the message and incrementing the hard bounce count when the message matches the filter criteria. The filter criteria are regular expressions matched against bounce email subject and body, as well as regular expression to extract recepient's email address from bounce email body. It also unsubscribes the user from all subscriptions when the hard bounce count exceeds a predefined threshold.
+* when a notification finshed dispatching, the dispatching start and end time is recorded to all bounce records matching afftects recipient addresses
+* when inbound smtp server receives a bounce message, it updates the bounce record by saving the message and incrementing the hard bounce count when the message matches the filter criteria. The filter criteria are regular expressions matched against bounce email subject and body, as well as regular expression to extract recipient's email address from bounce email body. It also unsubscribes the user from all subscriptions when the hard bounce count exceeds a predefined threshold.
 * A cron job runs periodically to delete bounce records if the latest notification is deemed delivered successfully. 
 
 To setup bounce handling
