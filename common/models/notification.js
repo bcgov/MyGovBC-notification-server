@@ -361,27 +361,28 @@ module.exports = function (Notification) {
                 skip: startIdx,
                 limit: broadcastSubscriberChunkSize
               },
-              function (err, subscribers) {
+              async function (err, subscribers) {
                 let jmespathSearchOpts = {}
                 const ft = Notification.app.get('notification').broadcastCustomFilterFunctions
                 if (ft) {
                   jmespathSearchOpts.functionTable = ft
                 }
-                var tasks = subscribers.reduce(function (a, e, i) {
+                let tasks = []
+                await Promise.all(subscribers.map(async e => {
                   if (e.broadcastPushNotificationFilter && data.data) {
                     let match
                     try {
-                      match = jmespath.search(
+                      match = await jmespath.search(
                         [data.data],
                         '[?' + e.broadcastPushNotificationFilter + ']',
                         jmespathSearchOpts
                       )
                     } catch (ex) {}
                     if (!match || match.length === 0) {
-                      return a
+                      return
                     }
                   }
-                  a.push(function (cb) {
+                  tasks.push(function (cb) {
                     var notificationMsgCB = function (err) {
                       let res = {}
                       if (err) {
@@ -473,8 +474,7 @@ module.exports = function (Notification) {
                         }
                     }
                   })
-                  return a
-                }, [])
+                }))
                 parallel(tasks, function (err, resArr) {
                   let ret = {
                     fail: [],

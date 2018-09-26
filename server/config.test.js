@@ -1,3 +1,4 @@
+const _ = require('lodash')
 module.exports = {
   restApiRoot: "/api",
   httpHost: "",
@@ -8,6 +9,28 @@ module.exports = {
   notification: {
     handleBounce: true,
     logSuccessfulBroadcastDispatches: false,
+    broadcastCustomFilterFunctions: {
+      /*jshint camelcase: false */
+      contains_ci: {
+        _func: async function (resolvedArgs) {
+            if (!resolvedArgs[0] || !resolvedArgs[1]) {
+              return false
+            }
+            return new Promise(resolve => {
+              setTimeout(() => {
+                resolve(_.toLower(resolvedArgs[0]).indexOf(_.toLower(resolvedArgs[1])) >= 0)
+              }, 1000)
+            })
+          },
+          _signature: [{
+              types: [2]
+            },
+            {
+              types: [2]
+            }
+          ]
+      }
+    },
   },
   inboundSmtpServer: {
     enabled: true,

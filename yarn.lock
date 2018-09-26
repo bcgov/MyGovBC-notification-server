@@ -2867,9 +2867,9 @@ jayson@^2.0.5:
     lodash "^4.17.4"
     uuid "^3.2.1"
 
-"jmespath@f-w/jmespath.js#semver:^0.16":
-  version "0.15.0"
-  resolved "https://codeload.github.com/f-w/jmespath.js/tar.gz/186eb0990facf4072a6791fef4b1cc6fb8403dca"
+"jmespath@f-w/jmespath.js#semver:^1.0":
+  version "1.0.0"
+  resolved "https://codeload.github.com/f-w/jmespath.js/tar.gz/8782ba3794272d278704c9945126fd6f9b61022d"
 
 "js-tokens@^3.0.0 || ^4.0.0":
   version "4.0.0"

@@ -1218,6 +1218,44 @@ describe('POST /notifications', function () {
     expect(res.body.failedDispatches.indexOf('bar1@foo.com')).toBeGreaterThanOrEqual(0)
     expect(res.body.failedDispatches.indexOf('bar2@invalid')).toBeGreaterThanOrEqual(0)
   })
+
+  it('should handle async broadcastCustomFilterFunctions', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
+      return true
+    })
+    await app.models.Subscription.create({
+      serviceName: 'broadcastCustomFilterFunctionsTest',
+      channel: 'email',
+      userChannelId: 'bar2@invalid',
+      state: 'confirmed',
+      broadcastPushNotificationFilter: "contains_ci(name,'FOO')"
+    })
+
+    let res = await request(app)
+      .post('/api/notifications')
+      .send({
+        serviceName: 'broadcastCustomFilterFunctionsTest',
+        message: {
+          from: 'no_reply@bar.com',
+          subject: 'test',
+          textBody: 'test'
+        },
+        data: {
+          name: 'foo'
+        },
+        channel: 'email',
+        isBroadcast: true
+      })
+      .set('Accept', 'application/json')
+    expect(res.statusCode).toBe(200)
+    expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
+    let data = await app.models.Notification.find({
+      where: {
+        serviceName: 'broadcastCustomFilterFunctionsTest'
+      }
+    })
+    expect(data[0].state).toBe('sent')
+  })
 })
 describe('PATCH /notifications/{id}', function () {
   beforeEach(function (done) {
