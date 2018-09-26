@@ -112,11 +112,13 @@ module.exports = {
   }
 }
 ```
-Consult jmespath.js source code on the [functionTable syntax](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L1127) and [type constants](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L132) used by above code. Note the function can use any external libraries (*[lodash](https://lodash.com/)* in this case) referenced in [package.json](https://github.com/bcgov/MyGovBC-notification-server/blob/master/package.json). 
+Consult jmespath.js source code on the [functionTable syntax](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L1127) and [type constants](https://github.com/f-w/jmespath.js/blob/master/jmespath.js#L132) used by above code. Note the function can use any NodeJS modules (*[lodash](https://lodash.com/)* in this case).
 
 <div class="note">
-  <h5>ProTips™ reference additional libraries modules</h5>
-  <p>You can add npm modules to package.json but the file maybe overwritten when upgrading <i>NotifyBC</i>. To avoid, add by running command <i><a href="https://docs.npmjs.com/cli/install">npm install &lt;your_package&gt;</a></i> during build.</p>
+  <h5>ProTips™ install additional NodeJS modules</h5>
+  <p>The recommended way to install additional NodeJS modules is by running command <i><a href="https://docs.npmjs.com/cli/install">npm install &lt;your_module&gt;</a></i> from the directory one level above <i>NotifyBC</i> root. For example, if 
+  <i>NotifyBC</i> is installed on <i>/data/notifyBC</i>, then run the command from directory <i>/data</i>. The command will then install the module to <i>/data/node_modules/&lt;your_module&gt;</i>.
+  </p>
 </div>
 
 ## Log Successful Broadcast Dispatches
