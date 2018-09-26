@@ -25,7 +25,7 @@
     "feedparser": "^2.2.0",
     "helmet": "^3.8.0",
     "ip-range-check": "0.0.2",
-    "jmespath": "f-w/jmespath.js",
+    "jmespath": "f-w/jmespath.js#semver:^0.16",
     "lodash": "^4.17.2",
     "loopback": "^3.0.0",
     "loopback-boot": "^2.6.5",
