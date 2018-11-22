@@ -4,12 +4,19 @@ var Service = require('node-windows').Service;
 var svc = new Service({
   name: process.argv[2] || 'notifyBC',
   description: 'notifyBC Windows Service',
-  script: 'server\\server.js'
+  script: 'server\\server.js',
+  nodeOptions: [
+    '--inspect=0'
+  ],
+  env: [{
+    name: "NODE_ENV",
+    value: "production"
+  }]
 });
 
 // Listen for the "install" event, which indicates the
 // process is available as a service.
-svc.on('install',function(){
+svc.on('install', function () {
   svc.start();
 });
 
