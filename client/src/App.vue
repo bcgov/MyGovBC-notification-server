@@ -63,6 +63,11 @@
     <v-toolbar color="indigo" dark app>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>NotifyBC Web Console - {{ this.$router.currentRoute.name }}</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-toolbar-items class="center-text">
+        <div class="mr-1">Access Token</div>
+        <v-text-field dark single-line hide-details v-model="accessToken"></v-text-field>
+      </v-toolbar-items>
     </v-toolbar>
     <main>
       <v-content>
@@ -72,7 +77,13 @@
       </v-content>
     </main>
     <v-footer color="indigo" app>
-      <span class="white--text">&copy; 2017-present under the terms of <a href='https://github.com/bcgov/MyGovBC-notification-server/blob/master/LICENSE' target='_'>Apache License, Version 2.0</a></span>
+      <span class="white--text">
+        &copy; 2017-present under the terms of
+        <a
+          href="https://github.com/bcgov/MyGovBC-notification-server/blob/master/LICENSE"
+          target="_"
+        >Apache License, Version 2.0</a>
+      </span>
     </v-footer>
   </v-app>
 </template>
@@ -85,6 +96,16 @@ export default {
   }),
   props: {
     source: String
+  },
+  computed: {
+    accessToken: {
+      get() {
+        return this.$store.state.accessToken
+      },
+      set(value) {
+        this.$store.commit('setAccessToken', value)
+      }
+    }
   }
 }
 </script>
@@ -92,5 +113,8 @@ export default {
 <style scoped lang='less'>
 .white--text a {
   color: white !important;
+}
+.center-text {
+  align-items: center;
 }
 </style>

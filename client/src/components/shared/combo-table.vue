@@ -41,6 +41,11 @@ export default {
   },
   props: ['model', 'headers', 'schema'],
   computed: {
+    accessToken:{
+      get(){
+        return this.$store.state.accessToken
+      }
+    },
     search: {
       get() {
         return this.$store.state[this.model].search
@@ -151,6 +156,9 @@ export default {
     },
     newPanelExpanded: function(newVal) {
       newVal && this.$emit('inputFormExpanded')
+    },
+    accessToken: async function(newVal){
+      await this.fetchItems(this.$store.state[this.model].filter)
     }
   },
   data: function() {
