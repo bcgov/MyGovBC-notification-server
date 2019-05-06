@@ -36,7 +36,8 @@ export default new Vuex.Store({
       filter: undefined,
       totalCount: undefined,
       search: undefined
-    }
+    },
+    accessToken: localStorage.getItem('swagger_accessToken')
   },
   mutations: {
     setLocalItems(state, payload) {
@@ -50,10 +51,19 @@ export default new Vuex.Store({
     },
     setItemSearch(state, payload) {
       state[payload.model].search = payload.value
+    },
+    setAccessToken(state, payload) {
+      if (payload && payload.length > 0) {
+        localStorage.setItem('swagger_accessToken', payload)
+      } else {
+        localStorage.removeItem('swagger_accessToken')
+        payload = undefined
+      }
+      state['accessToken'] = payload
     }
   },
   actions: {
-    async setItem({ commit, dispatch }, payload) {
+    async setItem({ state }, payload) {
       let id,
         method = 'post',
         item = payload.item
@@ -64,17 +74,31 @@ export default new Vuex.Store({
         delete item.updated
         delete item.created
       }
-      await axios({
+      let req = {
         method: method,
         url: ApiUrlPrefix + '/' + payload.model + (id ? '/' + id : ''),
         data: item
-      })
+      }
+      let accessToken = state['accessToken']
+      if (accessToken) {
+        req.headers = {
+          Authorization: accessToken
+        }
+      }
+      await axios(req)
     },
-    async deleteItem(context, payload) {
-      await axios({
+    async deleteItem({ state }, payload) {
+      let req = {
         method: 'delete',
         url: ApiUrlPrefix + '/' + payload.model + '/' + payload.item.id
-      })
+      }
+      let accessToken = state['accessToken']
+      if (accessToken) {
+        req.headers = {
+          Authorization: accessToken
+        }
+      }
+      await axios(req)
     },
     async fetchItems({ commit, state }, payload) {
       let filter = payload.filter
@@ -91,13 +115,37 @@ export default new Vuex.Store({
       if (filter) {
         url += '?filter=' + encodeURIComponent(JSON.stringify(filter))
       }
-      let items = await axios.get(url)
+      let req = {
+        url: url
+      }
+      let accessToken = state['accessToken']
+      if (accessToken) {
+        req.headers = {
+          Authorization: accessToken
+        }
+      }
+      let items
+      try {
+        items = await axios(req)
+      } catch (ex) {
+        commit('setLocalItems', { model: payload.model, items: [] })
+        commit('setTotalItemCount', { model: payload.model, cnt: undefined })
+        throw ex
+      }
       commit('setLocalItems', { model: payload.model, items: items.data })
       url = ApiUrlPrefix + '/' + payload.model + '/count'
       if (filter && filter.where) {
         url += '?where=' + encodeURIComponent(JSON.stringify(filter.where))
       }
-      let response = await axios.get(url)
+      req = {
+        url: url
+      }
+      if (accessToken) {
+        req.headers = {
+          Authorization: accessToken
+        }
+      }
+      let response = await axios(req)
       commit('setTotalItemCount', {
         model: payload.model,
         cnt: response.data.count
@@ -105,7 +153,16 @@ export default new Vuex.Store({
     },
     async getSubscribedServiceNames() {
       let url = ApiUrlPrefix + '/subscriptions/services'
-      let res = await axios.get(url)
+      let req = {
+        url: url
+      }
+      let accessToken = state['accessToken']
+      if (accessToken) {
+        req.headers = {
+          Authorization: accessToken
+        }
+      }
+      let res = await axios(req)
       return res.data
     }
   },
