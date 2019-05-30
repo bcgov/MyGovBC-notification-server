@@ -19,12 +19,8 @@
     "cors": false
   },
   "legacyExplorer": false,
-  "defaultAdminIps": [
-    "127.0.0.1"
-  ],
-  "defaultSiteMinderReverseProxyIps": [
-    "127.0.0.1"
-  ],
+  "defaultAdminIps": ["127.0.0.1"],
+  "defaultSiteMinderReverseProxyIps": ["127.0.0.1"],
   "defaultSmtp": {
     "direct": true,
     "name": "localhost"
@@ -74,7 +70,8 @@
           "email": {
             "from": "no_reply@invalid.local",
             "subject": "Un-subscription acknowledgement",
-            "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for {unsubscription_service_names}. If you did not authorize this change or if you changed your mind, click {unsubscription_reversion_url} to revert."
+            "textBody": "This is to acknowledge you have been un-subscribed from receiving notification for {unsubscription_service_names}. If you did not authorize this change or if you changed your mind, open {unsubscription_reversion_url} to revert.",
+            "htmlBody": "This is to acknowledge you have been un-subscribed from receiving notification for {unsubscription_service_names}. If you did not authorize this change or if you changed your mind, click <a href=\"{unsubscription_reversion_url}\">here</a> to revert."
           }
         }
       }
