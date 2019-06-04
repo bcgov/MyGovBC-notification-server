@@ -989,6 +989,26 @@ describe('GET /subscriptions/{id}/unsubscribe', function() {
   })
 
   it('should allow bulk unsubscribing all services', function(done) {
+    spyOn(app.models.Subscription, 'getMergedConfig').and.callFake(
+      async function() {
+        return {
+          anonymousUnsubscription: {
+            acknowledgements: {
+              onScreen: { successMessage: '' },
+              notification: {
+                email: {
+                  from: 'no_reply@invalid.local',
+                  subject: '',
+                  textBody: '{unsubscription_service_names}',
+                  htmlBody: '{unsubscription_service_names}'
+                }
+              }
+            }
+          }
+        }
+      }
+    )
+
     request(app)
       .get(
         '/api/subscriptions/' +
