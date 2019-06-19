@@ -3,7 +3,8 @@
   // Hover to view descriptions of existing attributes.
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
-  "configurations": [{
+  "configurations": [
+    {
       "type": "node",
       "request": "launch",
       "name": "notifyBC",
@@ -12,8 +13,9 @@
       "env": {
         "NODE_ENV": "dev",
         "NOTIFYBC_WORKER_PROCESS_COUNT": "1"
-      },
-      "autoAttachChildProcesses": true
+      }
+      // uncomment following line if env NOTIFYBC_WORKER_PROCESS_COUNT > 1
+      //      "autoAttachChildProcesses": true
     },
     {
       "type": "node",
@@ -31,8 +33,8 @@
       "program": "${workspaceFolder}/server/smtp-server.js",
       "args": ["-p", "25", "-b", "true"],
       "env": {
-        "NODE_ENV": "dev",
-      },
-    },
+        "NODE_ENV": "dev"
+      }
+    }
   ]
 }

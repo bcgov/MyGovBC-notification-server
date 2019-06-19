@@ -351,54 +351,173 @@ module.exports = function(Subscription) {
     options,
     unsubscriptionCode,
     additionalServices,
-    userChannelId,
-    cb
+    userChannelId
   ) {
-    let forbidden = false
-    let error
-    if (!Subscription.isAdminReq(options.httpContext)) {
-      var userId = Subscription.getCurrentUser(options.httpContext)
-      if (userId) {
-        if (userId !== this.userId) {
-          forbidden = true
-        }
-      } else {
-        if (
-          this.unsubscriptionCode &&
-          unsubscriptionCode !== this.unsubscriptionCode
-        ) {
-          forbidden = true
-        }
-        try {
+    let mergedSubscriptionConfig = await Subscription.getMergedConfig(
+      'subscription',
+      this.serviceName
+    )
+    let anonymousUnsubscription =
+      mergedSubscriptionConfig.anonymousUnsubscription
+    try {
+      let forbidden = false
+      if (!Subscription.isAdminReq(options.httpContext)) {
+        var userId = Subscription.getCurrentUser(options.httpContext)
+        if (userId) {
+          if (userId !== this.userId) {
+            forbidden = true
+          }
+        } else {
           if (
-            userChannelId &&
-            this.userChannelId.toLowerCase() !== userChannelId.toLowerCase()
+            this.unsubscriptionCode &&
+            unsubscriptionCode !== this.unsubscriptionCode
           ) {
             forbidden = true
           }
-        } catch (ex) {}
+          try {
+            if (
+              userChannelId &&
+              this.userChannelId.toLowerCase() !== userChannelId.toLowerCase()
+            ) {
+              forbidden = true
+            }
+          } catch (ex) {}
+        }
       }
-    }
-    if (this.state !== 'confirmed') {
-      forbidden = true
-    }
-    let mergedSubscriptionConfig
-    try {
-      mergedSubscriptionConfig = await Subscription.getMergedConfig(
-        'subscription',
-        this.serviceName
+      if (this.state !== 'confirmed') {
+        forbidden = true
+      }
+      if (forbidden) {
+        error = new Error('Forbidden')
+        error.status = 403
+        throw error
+      }
+      let unsubscribeItems = async (query, additionalServices) => {
+        await Subscription.updateAll(
+          query,
+          {
+            state: 'deleted'
+          },
+          options
+        )
+        let handleUnsubscriptionResponse = async () => {
+          // send acknowledgement notification
+          try {
+            switch (this.channel) {
+              case 'email': {
+                var msg =
+                  anonymousUnsubscription.acknowledgements.notification[
+                    this.channel
+                  ]
+                var subject = Subscription.mailMerge(
+                  msg.subject,
+                  this,
+                  options.httpContext
+                )
+                var textBody = Subscription.mailMerge(
+                  msg.textBody,
+                  this,
+                  options.httpContext
+                )
+                var htmlBody = Subscription.mailMerge(
+                  msg.htmlBody,
+                  this,
+                  options.httpContext
+                )
+                let mailOptions = {
+                  from: msg.from,
+                  to: this.userChannelId,
+                  subject: subject,
+                  text: textBody,
+                  html: htmlBody
+                }
+                Subscription.sendEmail(mailOptions)
+                break
+              }
+            }
+          } catch (ex) {}
+          if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
+            var redirectUrl =
+              anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
+            return await options.httpContext.res.redirect(redirectUrl)
+          } else {
+            options.httpContext.res.setHeader('Content-Type', 'text/plain')
+            return await options.httpContext.res.end(
+              anonymousUnsubscription.acknowledgements.onScreen.successMessage
+            )
+          }
+        }
+        if (!additionalServices) {
+          return await handleUnsubscriptionResponse()
+        }
+        await this.updateAttribute(
+          'unsubscribedAdditionalServices',
+          additionalServices
+        )
+        await handleUnsubscriptionResponse()
+      }
+      if (!additionalServices) {
+        return await unsubscribeItems({
+          id: this.id
+        })
+      }
+      let getAdditionalServiceIds = async () => {
+        if (additionalServices instanceof Array) {
+          let res = await Subscription.find({
+            fields: ['id', 'serviceName'],
+            where: {
+              serviceName: {
+                inq: additionalServices
+              },
+              channel: this.channel,
+              userChannelId: this.userChannelId
+            }
+          })
+          return {
+            names: res.map(e => e.serviceName),
+            ids: res.map(e => e.id)
+          }
+        }
+        if (typeof additionalServices === 'string') {
+          if (additionalServices !== '_all') {
+            let res = await Subscription.find({
+              fields: ['id', 'serviceName'],
+              where: {
+                serviceName: additionalServices,
+                channel: this.channel,
+                userChannelId: this.userChannelId
+              }
+            })
+            return {
+              names: res.map(e => e.serviceName),
+              ids: res.map(e => e.id)
+            }
+          }
+          // get all subscribed services
+          let res = await Subscription.find({
+            fields: ['id', 'serviceName'],
+            where: {
+              userChannelId: this.userChannelId,
+              channel: this.channel,
+              state: 'confirmed'
+            }
+          })
+          return {
+            names: res.map(e => e.serviceName),
+            ids: res.map(e => e.id)
+          }
+        }
+      }
+      let data = await getAdditionalServiceIds()
+      await unsubscribeItems(
+        {
+          id: {
+            inq: [].concat(this.id, data.ids)
+          }
+        },
+        data
       )
-    } catch (ex) {
-      error = ex
-    }
-    if (forbidden) {
-      error = new Error('Forbidden')
-      error.status = 403
-    }
-    let anonymousUnsubscription =
-      mergedSubscriptionConfig &&
-      mergedSubscriptionConfig.anonymousUnsubscription
-    if (error) {
+    } catch (error) {
       if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
         var redirectUrl =
           anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
@@ -412,283 +531,121 @@ module.exports = function(Subscription) {
             anonymousUnsubscription.acknowledgements.onScreen.failureMessage
           )
         } else {
-          return cb(error)
+          throw error
         }
       }
     }
-    let unsubscribeItems = async (query, additionalServices) => {
-      let writeErr
-      try {
-        await Subscription.updateAll(
+  }
+
+  Subscription.prototype.verify = async function(options, confirmationCode) {
+    let mergedSubscriptionConfig = await Subscription.getMergedConfig(
+      'subscription',
+      this.serviceName
+    )
+
+    async function handleConfirmationAcknowledgement(err, message) {
+      if (!mergedSubscriptionConfig.confirmationAcknowledgements) {
+        if (err) {
+          throw err
+        }
+        return await options.httpContext.res.end(message)
+      }
+      var redirectUrl =
+        mergedSubscriptionConfig.confirmationAcknowledgements.redirectUrl
+      if (redirectUrl) {
+        if (err) {
+          redirectUrl += '?err=' + encodeURIComponent(err.toString())
+        }
+        return await options.httpContext.res.redirect(redirectUrl)
+      } else {
+        options.httpContext.res.setHeader('Content-Type', 'text/plain')
+        if (err) {
+          if (err.status) {
+            options.httpContext.res.status(err.status)
+          }
+          return await options.httpContext.res.end(
+            mergedSubscriptionConfig.confirmationAcknowledgements.failureMessage
+          )
+        }
+        return await options.httpContext.res.end(
+          mergedSubscriptionConfig.confirmationAcknowledgements.successMessage
+        )
+      }
+    }
+
+    if (
+      this.state !== 'unconfirmed' ||
+      confirmationCode !== this.confirmationRequest.confirmationCode
+    ) {
+      var error = new Error('Forbidden')
+      error.status = 403
+      return await handleConfirmationAcknowledgement(error)
+    }
+    this.state = 'confirmed'
+    try {
+      await Subscription.replaceById(this.id, this, options)
+    } catch (err) {
+      return await handleConfirmationAcknowledgement(err)
+    }
+    return await handleConfirmationAcknowledgement(null, 'OK')
+  }
+
+  Subscription.prototype.unDeleteItemById = async function(
+    options,
+    unsubscriptionCode
+  ) {
+    let mergedSubscriptionConfig = await Subscription.getMergedConfig(
+      'subscription',
+      this.serviceName
+    )
+    let anonymousUndoUnsubscription =
+      mergedSubscriptionConfig.anonymousUndoUnsubscription
+    try {
+      if (!Subscription.isAdminReq(options.httpContext)) {
+        if (
+          this.unsubscriptionCode &&
+          unsubscriptionCode !== this.unsubscriptionCode
+        ) {
+          let error = new Error('Forbidden')
+          error.status = 403
+          throw error
+        }
+        if (
+          Subscription.getCurrentUser(options.httpContext) ||
+          this.state !== 'deleted'
+        ) {
+          let error = new Error('Forbidden')
+          error.status = 403
+          throw error
+        }
+      }
+      let revertItems = async query => {
+        let res = await Subscription.updateAll(
           query,
           {
-            state: 'deleted'
+            state: 'confirmed'
           },
           options
         )
-      } catch (ex) {
-        writeErr = ex
-      }
-      let handleUnsubscriptionResponse = async writeErr => {
-        var err = writeErr
-        try {
-          if (!err) {
-            // send acknowledgement notification
-            try {
-              switch (this.channel) {
-                case 'email': {
-                  var msg =
-                    anonymousUnsubscription.acknowledgements.notification[
-                      this.channel
-                    ]
-                  var subject = Subscription.mailMerge(
-                    msg.subject,
-                    this,
-                    options.httpContext
-                  )
-                  var textBody = Subscription.mailMerge(
-                    msg.textBody,
-                    this,
-                    options.httpContext
-                  )
-                  var htmlBody = Subscription.mailMerge(
-                    msg.htmlBody,
-                    this,
-                    options.httpContext
-                  )
-                  let mailOptions = {
-                    from: msg.from,
-                    to: this.userChannelId,
-                    subject: subject,
-                    text: textBody,
-                    html: htmlBody
-                  }
-                  Subscription.sendEmail(mailOptions)
-                  break
-                }
-              }
-            } catch (ex) {}
-          }
-          if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
-            var redirectUrl =
-              anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
-            if (err) {
-              redirectUrl += '?err=' + encodeURIComponent(err)
-            }
-            return await options.httpContext.res.redirect(redirectUrl)
-          } else {
-            options.httpContext.res.setHeader('Content-Type', 'text/plain')
-            if (err) {
-              return await options.httpContext.res.end(
-                anonymousUnsubscription.acknowledgements.onScreen.failureMessage
-              )
-            }
-            return await options.httpContext.res.end(
-              anonymousUnsubscription.acknowledgements.onScreen.successMessage
-            )
-          }
-        } catch (ex) {}
-        return cb(err, 1)
-      }
-      if (writeErr || !additionalServices) {
-        return await handleUnsubscriptionResponse(writeErr)
-      }
-      try {
-        await this.updateAttribute(
-          'unsubscribedAdditionalServices',
-          additionalServices
-        )
-      } catch (ex) {
-        writeErr = ex
-      }
-      await handleUnsubscriptionResponse(writeErr)
-    }
-    if (!additionalServices) {
-      return await unsubscribeItems({
-        id: this.id
-      })
-    }
-    let getAdditionalServiceIds = async () => {
-      if (additionalServices instanceof Array) {
-        let res = await Subscription.find({
-          fields: ['id', 'serviceName'],
-          where: {
-            serviceName: {
-              inq: additionalServices
-            },
-            channel: this.channel,
-            userChannelId: this.userChannelId
-          }
-        })
-        return {
-          names: res.map(e => e.serviceName),
-          ids: res.map(e => e.id)
-        }
-      }
-      if (typeof additionalServices === 'string') {
-        if (additionalServices !== '_all') {
-          let res = await Subscription.find({
-            fields: ['id', 'serviceName'],
-            where: {
-              serviceName: additionalServices,
-              channel: this.channel,
-              userChannelId: this.userChannelId
-            }
-          })
-          return {
-            names: res.map(e => e.serviceName),
-            ids: res.map(e => e.id)
-          }
-        }
-        // get all subscribed services
-        let res = await Subscription.find({
-          fields: ['id', 'serviceName'],
-          where: {
-            userChannelId: this.userChannelId,
-            channel: this.channel,
-            state: 'confirmed'
-          }
-        })
-        return {
-          names: res.map(e => e.serviceName),
-          ids: res.map(e => e.id)
-        }
-      }
-    }
-    let data = await getAdditionalServiceIds()
-    await unsubscribeItems(
-      {
-        id: {
-          inq: [].concat(this.id, data.ids)
-        }
-      },
-      data
-    )
-  }
-
-  Subscription.prototype.verify = function(options, confirmationCode, cb) {
-    Subscription.getMergedConfig(
-      'subscription',
-      this.serviceName,
-      (configErr, mergedSubscriptionConfig) => {
-        if (configErr) {
-          return cb(configErr)
-        }
-
-        function handleConfirmationAcknowledgement(err, message) {
-          if (!mergedSubscriptionConfig.confirmationAcknowledgements) {
-            return cb(err, message)
-          }
-          var redirectUrl =
-            mergedSubscriptionConfig.confirmationAcknowledgements.redirectUrl
-          if (redirectUrl) {
-            if (err) {
-              redirectUrl += '?err=' + encodeURIComponent(err.toString())
-            }
-            return options.httpContext.res.redirect(redirectUrl)
-          } else {
-            options.httpContext.res.setHeader('Content-Type', 'text/plain')
-            if (err) {
-              if (err.status) {
-                options.httpContext.res.status(err.status)
-              }
-              return options.httpContext.res.end(
-                mergedSubscriptionConfig.confirmationAcknowledgements
-                  .failureMessage
-              )
-            }
-            return options.httpContext.res.end(
-              mergedSubscriptionConfig.confirmationAcknowledgements
-                .successMessage
-            )
-          }
-        }
-
-        if (
-          this.state !== 'unconfirmed' ||
-          confirmationCode !== this.confirmationRequest.confirmationCode
-        ) {
-          var error = new Error('Forbidden')
-          error.status = 403
-          return handleConfirmationAcknowledgement(error)
-        }
-        this.state = 'confirmed'
-        Subscription.replaceById(this.id, this, options, function(err, res) {
-          return handleConfirmationAcknowledgement(err, 'OK')
-        })
-      }
-    )
-  }
-
-  Subscription.prototype.unDeleteItemById = function(
-    options,
-    unsubscriptionCode,
-    cb
-  ) {
-    if (!Subscription.isAdminReq(options.httpContext)) {
-      if (
-        this.unsubscriptionCode &&
-        unsubscriptionCode !== this.unsubscriptionCode
-      ) {
-        let error = new Error('Forbidden')
-        error.status = 403
-        return cb(error)
-      }
-      if (
-        Subscription.getCurrentUser(options.httpContext) ||
-        this.state !== 'deleted'
-      ) {
-        let error = new Error('Forbidden')
-        error.status = 403
-        return cb(error)
-      }
-    }
-    let revertItems = query => {
-      Subscription.updateAll(
-        query,
-        {
-          state: 'confirmed'
-        },
-        options,
-        function(writeErr, res) {
-          Subscription.getMergedConfig(
-            'subscription',
-            res.serviceName,
-            (configErr, mergedSubscriptionConfig) => {
-              var err = writeErr || configErr
-              var anonymousUndoUnsubscription =
-                mergedSubscriptionConfig.anonymousUndoUnsubscription
-              if (anonymousUndoUnsubscription.redirectUrl) {
-                var redirectUrl = anonymousUndoUnsubscription.redirectUrl
-                if (err) {
-                  redirectUrl += '?err=' + encodeURIComponent(err)
-                }
-                return options.httpContext.res.redirect(redirectUrl)
-              } else {
-                options.httpContext.res.setHeader('Content-Type', 'text/plain')
-                if (err) {
-                  return options.httpContext.res.end(
-                    anonymousUndoUnsubscription.failureMessage
-                  )
-                }
-                return options.httpContext.res.end(
-                  anonymousUndoUnsubscription.successMessage
-                )
-              }
-            }
+        if (anonymousUndoUnsubscription.redirectUrl) {
+          var redirectUrl = anonymousUndoUnsubscription.redirectUrl
+          return await options.httpContext.res.redirect(redirectUrl)
+        } else {
+          options.httpContext.res.setHeader('Content-Type', 'text/plain')
+          return await options.httpContext.res.end(
+            anonymousUndoUnsubscription.successMessage
           )
         }
-      )
-    }
-    if (!this.unsubscribedAdditionalServices) {
-      return revertItems({
-        id: this.id
-      })
-    }
-    let unsubscribedAdditionalServicesIds = this.unsubscribedAdditionalServices.ids.slice()
-    this.unsetAttribute('unsubscribedAdditionalServices')
-    Subscription.replaceById(this.id, this, options, (err, res) => {
-      return revertItems({
+      }
+      if (!this.unsubscribedAdditionalServices) {
+        return await revertItems({
+          id: this.id
+        })
+      }
+      let unsubscribedAdditionalServicesIds = this.unsubscribedAdditionalServices.ids.slice()
+      this.unsetAttribute('unsubscribedAdditionalServices')
+      await Subscription.replaceById(this.id, this, options)
+      await revertItems({
         or: [
           {
             id: {
@@ -700,7 +657,19 @@ module.exports = function(Subscription) {
           }
         ]
       })
-    })
+    } catch (err) {
+      if (anonymousUndoUnsubscription.redirectUrl) {
+        var redirectUrl = anonymousUndoUnsubscription.redirectUrl
+        redirectUrl += '?err=' + encodeURIComponent(err.message || err)
+        return await options.httpContext.res.redirect(redirectUrl)
+      } else {
+        options.httpContext.res.setHeader('Content-Type', 'text/plain')
+        options.httpContext.res.status(err.status || 500)
+        return await options.httpContext.res.end(
+          anonymousUndoUnsubscription.failureMessage
+        )
+      }
+    }
   }
 
   Subscription.getSubscribedServiceNames = function(options, cb) {

@@ -598,9 +598,9 @@ module.exports = function (Notification) {
                       )
                     })
                   }, broadcastSubRequestBatchSize)
-                  q.drain = function () {
+                  q.drain(function () {
                     postBroadcastProcessing(postBroadcastProcessingCb)
-                  }
+                  })
                   let queuedTasks = [],
                     i = 0
                   while (i < chunks) {

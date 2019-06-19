@@ -1,15 +1,15 @@
-module.exports = function (Model, options) {
+module.exports = function(Model, options) {
   var ipRangeCheck = require('ip-range-check')
   var _ = require('lodash')
   var toSentence = require('underscore.string/toSentence')
   var pluralize = require('pluralize')
-  Model.createOptionsFromRemotingContext = function (ctx) {
+  Model.createOptionsFromRemotingContext = function(ctx) {
     var base = this.base.createOptionsFromRemotingContext(ctx)
     base.httpContext = ctx
     return base
   }
 
-  Model.isAdminReq = function (httpCtx, ignoreAccessToken, ignoreSurrogate) {
+  Model.isAdminReq = function(httpCtx, ignoreAccessToken, ignoreSurrogate) {
     // internal requests
     if (!httpCtx || !httpCtx.req) {
       return true
@@ -35,14 +35,14 @@ module.exports = function (Model, options) {
 
     var adminIps = Model.app.get('adminIps') || Model.app.get('defaultAdminIps')
     if (adminIps) {
-      return adminIps.some(function (e, i) {
+      return adminIps.some(function(e, i) {
         return ipRangeCheck(httpCtx.req.ip, e)
       })
     }
     return false
   }
 
-  Model.getCurrentUser = function (httpCtx) {
+  Model.getCurrentUser = function(httpCtx) {
     // internal requests
     if (!httpCtx) return null
 
@@ -64,7 +64,7 @@ module.exports = function (Model, options) {
     }
     // rely on express 'trust proxy' settings to obtain real ip
     var realIp = httpCtx.req.ip
-    var isFromSM = siteMinderReverseProxyIps.some(function (e) {
+    var isFromSM = siteMinderReverseProxyIps.some(function(e) {
       return ipRangeCheck(realIp, e)
     })
     return isFromSM ? currUser : null
@@ -72,53 +72,64 @@ module.exports = function (Model, options) {
 
   let smsClient
   const Twillio = require('twilio')
-  Model.sendSMS = function (to, textBody, cb) {
+  Model.sendSMS = function(to, textBody, cb) {
     var smsServiceProvider = Model.app.get('smsServiceProvider')
     switch (smsServiceProvider) {
       default:
         // Twilio Credentials
         var smsConfig = Model.app.get('sms')[smsServiceProvider]
-      var accountSid = smsConfig.accountSid
-      var authToken = smsConfig.authToken
+        var accountSid = smsConfig.accountSid
+        var authToken = smsConfig.authToken
 
-      //require the Twilio module and create a REST client
-      smsClient = smsClient || new Twillio(accountSid, authToken)
+        //require the Twilio module and create a REST client
+        smsClient = smsClient || new Twillio(accountSid, authToken)
 
-      smsClient.messages.create({
-          to: to,
-          from: smsConfig.fromNumber,
-          body: textBody
-        },
-        function (err, message) {
-          cb(err, message)
-        }
-      )
+        smsClient.messages.create(
+          {
+            to: to,
+            from: smsConfig.fromNumber,
+            body: textBody
+          },
+          function(err, message) {
+            cb(err, message)
+          }
+        )
     }
   }
 
   let nodemailer = require('nodemailer')
   const directTransport = require('nodemailer-direct-transport')
   let transporter
-  Model.sendEmail = function (mailOptions, cb) {
-    if (!transporter) {
-      let smtpCfg = Model.app.get('smtp') || Model.app.get('defaultSmtp')
-      if (smtpCfg.direct) {
-        transporter = nodemailer.createTransport(directTransport(smtpCfg))
-      } else {
-        transporter = nodemailer.createTransport(smtpCfg)
-      }
-    }
-    transporter.sendMail(mailOptions, function (error, info) {
-      try {
-        if (!error && info.accepted.length < 1) {
-          error = new Error('delivery failed')
+  Model.sendEmail = function(mailOptions, cb) {
+    return new Promise((resolve, reject) => {
+      if (!transporter) {
+        let smtpCfg = Model.app.get('smtp') || Model.app.get('defaultSmtp')
+        if (smtpCfg.direct) {
+          transporter = nodemailer.createTransport(directTransport(smtpCfg))
+        } else {
+          transporter = nodemailer.createTransport(smtpCfg)
         }
-      } catch (ex) {}
-      cb && cb(error, info)
+      }
+      transporter.sendMail(mailOptions, function(error, info) {
+        try {
+          if (!error && info.accepted.length < 1) {
+            error = new Error('delivery failed')
+          }
+        } catch (ex) {}
+        if (cb) {
+          return cb(error, info)
+        } else {
+          if (error) {
+            return reject(error)
+          } else {
+            return resolve(info)
+          }
+        }
+      })
     })
   }
 
-  Model.mailMerge = function (srcTxt, data, httpCtx) {
+  Model.mailMerge = function(srcTxt, data, httpCtx) {
     let output = srcTxt
     try {
       output = output.replace(
@@ -133,15 +144,15 @@ module.exports = function (Model, options) {
       if (output.match(/\{unsubscription_service_names\}/i)) {
         let serviceNames = _.union(
           [data.serviceName],
-          data.unsubscribedAdditionalServices ?
-          data.unsubscribedAdditionalServices.names :
-          []
+          data.unsubscribedAdditionalServices
+            ? data.unsubscribedAdditionalServices.names
+            : []
         )
         output = output.replace(
           /\{unsubscription_service_names\}/gi,
           pluralize('service', serviceNames.length) +
-          ' ' +
-          toSentence(serviceNames)
+            ' ' +
+            toSentence(serviceNames)
         )
       }
     } catch (ex) {}
@@ -179,45 +190,45 @@ module.exports = function (Model, options) {
       output = output.replace(
         /\{unsubscription_url\}/gi,
         httpHost +
-        Model.app.get('restApiRoot') +
-        '/subscriptions/' +
-        data.id +
-        '/unsubscribe?unsubscriptionCode=' +
-        data.unsubscriptionCode
+          Model.app.get('restApiRoot') +
+          '/subscriptions/' +
+          data.id +
+          '/unsubscribe?unsubscriptionCode=' +
+          data.unsubscriptionCode
       )
     } catch (ex) {}
     try {
       output = output.replace(
         /\{unsubscription_all_url\}/gi,
         httpHost +
-        Model.app.get('restApiRoot') +
-        '/subscriptions/' +
-        data.id +
-        '/unsubscribe?unsubscriptionCode=' +
-        data.unsubscriptionCode +
-        '&additionalServices=_all'
+          Model.app.get('restApiRoot') +
+          '/subscriptions/' +
+          data.id +
+          '/unsubscribe?unsubscriptionCode=' +
+          data.unsubscriptionCode +
+          '&additionalServices=_all'
       )
     } catch (ex) {}
     try {
       output = output.replace(
         /\{subscription_confirmation_url\}/gi,
         httpHost +
-        Model.app.get('restApiRoot') +
-        '/subscriptions/' +
-        data.id +
-        '/verify?confirmationCode=' +
-        data.confirmationRequest.confirmationCode
+          Model.app.get('restApiRoot') +
+          '/subscriptions/' +
+          data.id +
+          '/verify?confirmationCode=' +
+          data.confirmationRequest.confirmationCode
       )
     } catch (ex) {}
     try {
       output = output.replace(
         /\{unsubscription_reversion_url\}/gi,
         httpHost +
-        Model.app.get('restApiRoot') +
-        '/subscriptions/' +
-        data.id +
-        '/unsubscribe/undo?unsubscriptionCode=' +
-        data.unsubscriptionCode
+          Model.app.get('restApiRoot') +
+          '/subscriptions/' +
+          data.id +
+          '/unsubscribe/undo?unsubscriptionCode=' +
+          data.unsubscriptionCode
       )
     } catch (ex) {}
 
@@ -248,7 +259,7 @@ module.exports = function (Model, options) {
         // substitute all other tokens with matching data.data properties
         let matches = output.match(/{.+?}/g)
         if (matches) {
-          matches.forEach(function (e) {
+          matches.forEach(function(e) {
             try {
               let token = e.match(/{(.+)}/)[1]
               let val = _.get(data.data, token)
@@ -263,10 +274,12 @@ module.exports = function (Model, options) {
     return output
   }
 
-  Model.updateTimestamp = function (ctx, next) {
+  Model.updateTimestamp = function(ctx, next) {
     let token
     try {
-      token = ctx.options.httpContext.args.options && ctx.options.httpContext.args.options.accessToken
+      token =
+        ctx.options.httpContext.args.options &&
+        ctx.options.httpContext.args.options.accessToken
     } catch (ex) {}
     try {
       if (ctx.instance) {
@@ -312,7 +325,7 @@ module.exports = function (Model, options) {
     Model.updateTimestamp(ctx, next)
   })
 
-  Model.getMergedConfig = async function (configName, serviceName, next) {
+  Model.getMergedConfig = async function(configName, serviceName, next) {
     let data
     try {
       data = await Model.app.models.Configuration.findOne({
@@ -322,10 +335,9 @@ module.exports = function (Model, options) {
         }
       })
     } catch (ex) {
-      if(next){
+      if (next) {
         return next(ex, null)
-      }
-      else{
+      } else {
         throw ex
       }
     }
