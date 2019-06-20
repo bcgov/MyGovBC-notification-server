@@ -386,19 +386,19 @@ async@1.x, async@^1.4.0, async@^1.5.2, async@~1.5:
   resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
   integrity sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=
 
-async@^2.0.1, async@^2.1.2, async@^2.1.4:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/async/-/async-2.6.1.tgz#b245a23ca71930044ec53fa46aa00a3e87c6a610"
-  integrity sha512-fNEiL2+AZt6AlAw/29Cr0UDe4sRAHCpEHh54WMz+Bb7QfNcFw4h3loofyJpLeQs4Yx7yuqu/2dLgM5hKOs6HlQ==
-  dependencies:
-    lodash "^4.17.10"
-
-async@^2.1.5, async@^2.4.1, async@^2.6.0, async@^2.6.1:
+async@^2.0.1, async@^2.1.4, async@^2.1.5, async@^2.4.1, async@^2.6.0, async@^2.6.1:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.2.tgz#18330ea7e6e313887f5d2f2a904bac6fe4dd5381"
   integrity sha512-H1qVYh1MYhEEFLsP97cVKqCGo7KfCyTt6uEWqsTBr9SO84oK9Uwbyd/yCW+6rKJLHksBNUVWZDAjfS+Ccx0Bbg==
   dependencies:
     lodash "^4.17.11"
+
+async@^2.1.2:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/async/-/async-2.6.1.tgz#b245a23ca71930044ec53fa46aa00a3e87c6a610"
+  integrity sha512-fNEiL2+AZt6AlAw/29Cr0UDe4sRAHCpEHh54WMz+Bb7QfNcFw4h3loofyJpLeQs4Yx7yuqu/2dLgM5hKOs6HlQ==
+  dependencies:
+    lodash "^4.17.10"
 
 async@^3.0.1:
   version "3.0.1"
@@ -1169,10 +1169,18 @@ core-util-is@1.0.2, core-util-is@~1.0.0:
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
 
-cors@^2.5.2, cors@^2.7.1:
+cors@^2.5.2:
   version "2.8.4"
   resolved "https://registry.yarnpkg.com/cors/-/cors-2.8.4.tgz#2bd381f2eb201020105cd50ea59da63090694686"
   integrity sha1-K9OB8usgECAQXNUOpZ2mMJBpRoY=
+  dependencies:
+    object-assign "^4"
+    vary "^1"
+
+cors@^2.7.1:
+  version "2.8.5"
+  resolved "https://registry.yarnpkg.com/cors/-/cors-2.8.5.tgz#eac11da51592dd86b9f06f6e7ac293b3df875d29"
+  integrity sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==
   dependencies:
     object-assign "^4"
     vary "^1"
@@ -1315,7 +1323,7 @@ date-now@^0.1.4:
   resolved "https://registry.yarnpkg.com/date-now/-/date-now-0.1.4.tgz#eaf439fd4d4848ad74e5cc7dbef200672b9e345b"
   integrity sha1-6vQ5/U1ISK105cx9vvIAZyueNFs=
 
-debug@2, debug@2.6.9, debug@^2.0.0, debug@^2.1.2, debug@^2.2.0, debug@^2.3.3, debug@^2.4.5, debug@^2.6.8, debug@^2.6.9:
+debug@2, debug@2.6.9, debug@^2.0.0, debug@^2.1.2, debug@^2.2.0, debug@^2.3.3, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
   integrity sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==
@@ -1573,10 +1581,15 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
-ejs@^2.3.1, ejs@^2.4.2, ejs@^2.5.5, ejs@^2.5.7, ejs@^2.6.1:
+ejs@^2.3.1, ejs@^2.4.2, ejs@^2.5.7, ejs@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.6.1.tgz#498ec0d495655abc6f23cd61868d926464071aa0"
   integrity sha512-0xy4A/twfrRCnkhfk8ErDi5DqdAsAqeGxht4xkCUrsvhhbQNs7E+4jV0CN7+NKIY0aHE72+XvqtBIXzD31ZbXQ==
+
+ejs@^2.5.5:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.6.2.tgz#3a32c63d1cd16d11266cd4703b14fec4e74ab4f6"
+  integrity sha512-PcW2a0tyTuPHz3tWyYqtK6r1fZ3gp+3Sop8Ph+ZYN81Ob5rwmbHEzaqs10N3BEsaGTkh/ooniXK+WwszGlc2+Q==
 
 elliptic@^6.0.0:
   version "6.4.0"
@@ -2840,9 +2853,9 @@ ienoopen@1.0.0:
   integrity sha1-NGpCj0dKrI9QzzeE6i0PFvYr2ms=
 
 iframe-resizer@^3.5.15:
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/iframe-resizer/-/iframe-resizer-3.6.1.tgz#d0bc24009df6c94411382aafb040db36852d67d9"
-  integrity sha512-qMcNmJol8tJgr3wziuIUO2sy6h4sRoqdQd/X6XQWMEbpFmAJPEbuH/G+EOuCT2mPtRaLA9I/nWNPm9wJSvdtDw==
+  version "3.6.6"
+  resolved "https://registry.yarnpkg.com/iframe-resizer/-/iframe-resizer-3.6.6.tgz#ece6a0b7e879cfe3783a1003261408152ff9bd9b"
+  integrity sha512-WYprloB8s18Be9wbybQZmeEWueEczJH2is/5DxDn4jH8Bs2DuaSuaOeYICe6IvmF04SBy4mQ+pX4Xc+E9FEMSg==
 
 ignore-walk@^3.0.1:
   version "3.0.1"
@@ -2884,15 +2897,20 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@2.0.3, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.1, inherits@~2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
-  integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
+inherits@2, inherits@^2.0.1, inherits@^2.0.3:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
+  integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
 
 inherits@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.1.tgz#b17d08d326b4423e568eff719f91b0b1cbdf69f1"
   integrity sha1-sX0I0ya0Qj5Wjv9xn5GwscvfafE=
+
+inherits@2.0.3, inherits@~2.0.1, inherits@~2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
+  integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
 
 ini@^1.3.0, ini@~1.3.0:
   version "1.3.5"
@@ -3730,11 +3748,6 @@ lodash@4.17.10, lodash@^4.11.1, lodash@^4.15.0, lodash@^4.17.2, lodash@^4.17.3, 
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
   integrity sha512-UejweD1pDoXu+AD825lWwp4ZGtSwgnpZxb3JDViD7StjQz+Nb/6l093lx4OQ0foGWNRoc19mWy7BzL+UAK2iVg==
 
-lodash@^3.10.0:
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
-  integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
-
 lodash@^4.16.2, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.4, lodash@^4.3.0:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
@@ -3760,13 +3773,13 @@ loopback-boot@^2.6.5:
 
 loopback-component-explorer@f-w/loopback-component-explorer:
   version "5.2.0"
-  resolved "https://codeload.github.com/f-w/loopback-component-explorer/tar.gz/231807253e804d3fea28b40fdd194808e10f808f"
+  resolved "https://codeload.github.com/f-w/loopback-component-explorer/tar.gz/ac54dc554edde19c6db5d285890ef64d57b69e28"
   dependencies:
     cors "^2.7.1"
     debug "^2.2.0"
     depd "^1.1.0"
     iframe-resizer "^3.5.15"
-    lodash "^3.10.0"
+    lodash "^4.17.11"
     loopback-swagger "^5.0.0"
     strong-globalize "^3.1.0"
     swagger-ui "^2.2.5"
@@ -3856,15 +3869,15 @@ loopback-phase@^3.0.0, loopback-phase@^3.1.0:
     strong-globalize "^4.1.1"
 
 loopback-swagger@^5.0.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/loopback-swagger/-/loopback-swagger-5.5.0.tgz#1bbaea94ef1356fb455f4b8ac4bd231ee0a0fa3f"
-  integrity sha512-KSjZNl57+GfjpWBiPtilHJgOqu1HEHPzHQrLKnaa3hKf0qM6UuRrijwTIfu5YoXcZkSuZxGMlFgTikofPvQynQ==
+  version "5.7.3"
+  resolved "https://registry.yarnpkg.com/loopback-swagger/-/loopback-swagger-5.7.3.tgz#665b90796c3e1da27b4bc97e53624d3e1af54815"
+  integrity sha512-RKmmaaiYS6gkAybiY17Poh1NBPrOI5rYlEJY+cf5VlL5p0e1MK9ivfOVDFpfPaxXEnYt7NL/Cz/iZ9QuKyfA5g==
   dependencies:
     async "^2.1.4"
-    debug "^2.4.5"
+    debug "^3.1.0"
     ejs "^2.5.5"
-    lodash "^4.17.2"
-    strong-globalize "^3.1.0"
+    lodash "^4.17.11"
+    strong-globalize "^4.1.1"
 
 loopback@^3.26.0:
   version "3.26.0"
@@ -4227,10 +4240,15 @@ ms@2.0.0:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
   integrity sha1-VgiurfwAvmwpAd9fmGF4jeDVl8g=
 
-ms@2.1.1, ms@^2.1.1:
+ms@2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
   integrity sha512-tgp+dl5cGk28utYktBsrFqA7HKgrhgPsg6Z/EfhWI4gl1Hwq8B/GmY/0oXZ6nF8hDVesS/FpnYaD/kOWhYQvyg==
+
+ms@^2.1.1:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
+  integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
 msgpack-js@0.3.0:
   version "0.3.0"
@@ -6325,9 +6343,9 @@ supports-color@^5.3.0:
     has-flag "^3.0.0"
 
 swagger-client@^3.8.3:
-  version "3.8.25"
-  resolved "https://registry.yarnpkg.com/swagger-client/-/swagger-client-3.8.25.tgz#89cb58b000c103ee5e23accc13a9db1e686035e6"
-  integrity sha512-7ZtSSPnempsUbCAOJCQ6PyGaNkRoCm6ghOpJlI62ChfMGbLWtlOm8dLlgYiTkP9OAWuNHoRoTzOW14+QmZY1HA==
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/swagger-client/-/swagger-client-3.9.0.tgz#b94ea65baa0194f4cb3fad2f8bd552c531d57e03"
+  integrity sha512-uyCq2xoaAtmE0oIQ0fCfnsDoy/v97ANnAZywtyk4yumBP74xXp4NFlpZaqZJHN9K9dbPzgs3MH98VocZeM0ExQ==
   dependencies:
     "@kyleshockey/js-yaml" "^1.0.1"
     "@kyleshockey/object-assign-deep" "^0.4.0"
@@ -6343,6 +6361,7 @@ swagger-client@^3.8.3:
     lodash "^4.16.2"
     qs "^6.3.0"
     querystring-browser "^1.0.4"
+    traverse "^0.6.6"
     url "^0.11.0"
     utf8-bytes "0.0.1"
     utfstring "^2.0.0"
