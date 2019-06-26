@@ -1,3 +1,4 @@
+let axios = require('axios')
 module.exports = function(Model, options) {
   var ipRangeCheck = require('ip-range-check')
   var _ = require('lodash')
@@ -72,12 +73,33 @@ module.exports = function(Model, options) {
 
   let smsClient
   const Twillio = require('twilio')
-  Model.sendSMS = function(to, textBody, cb) {
-    var smsServiceProvider = Model.app.get('smsServiceProvider')
+  Model.sendSMS = async function(to, textBody, cb) {
+    let smsServiceProvider = Model.app.get('smsServiceProvider')
+    let smsConfig = Model.app.get('sms')[smsServiceProvider]
     switch (smsServiceProvider) {
+      case 'swift':
+        try {
+          let url = `${smsConfig['apiUrlPrefix']}${
+            smsConfig['accountKey']
+          }/${encodeURIComponent(to)}`
+          await axios.post(
+            url,
+            {
+              MessageBody: textBody
+            },
+            {
+              headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+              }
+            }
+          )
+        } catch (ex) {
+          return cb && cb(ex)
+        }
+        cb && cb()
+        break
       default:
         // Twilio Credentials
-        var smsConfig = Model.app.get('sms')[smsServiceProvider]
         var accountSid = smsConfig.accountSid
         var authToken = smsConfig.authToken
 
@@ -91,7 +113,7 @@ module.exports = function(Model, options) {
             body: textBody
           },
           function(err, message) {
-            cb(err, message)
+            cb && cb(err, message)
           }
         )
     }
@@ -352,3 +374,4 @@ module.exports = function(Model, options) {
     return res
   }
 }
+module.exports.axios = axios

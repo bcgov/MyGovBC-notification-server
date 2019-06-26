@@ -3,6 +3,12 @@ module.exports = {
   restApiRoot: '/api',
   httpHost: '',
   internalHttpHost: '',
+  smsServiceProvider: 'swift',
+  sms: {
+    swift: {
+      accountKey: '123'
+    },
+  },
   subscription: {
     detectDuplicatedSubscription: false
   },

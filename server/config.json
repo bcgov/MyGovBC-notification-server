@@ -26,6 +26,11 @@
     "name": "localhost"
   },
   "smsServiceProvider": "twilio",
+  "sms": {
+    "swift": {
+      "apiUrlPrefix": "https://secure.smsgateway.ca/services/message.svc/"
+    }
+  },
   "subscription": {
     "detectDuplicatedSubscription": false,
     "duplicatedSubscriptionNotification": {

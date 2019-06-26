@@ -238,7 +238,13 @@ describe('POST /subscriptions', function() {
     expect(data[0].confirmationRequest.confirmationCode).toBe('12345')
   })
 
-  it('should allow non-admin user create subscriptions', async function() {
+  it('should allow non-admin user create sms subscription using swift provider', async function() {
+    app.models.Subscription.sendSMS.and.stub().and.callThrough()
+    let common = require('../../common/mixins/common')
+    spyOn(common.axios, 'post').and.callFake(async () => {
+      return
+    })
+
     let res = await request(app)
       .post('/api/subscriptions')
       .send({
@@ -249,6 +255,12 @@ describe('POST /subscriptions', function() {
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Subscription.sendSMS).toHaveBeenCalledTimes(1)
+    expect(common.axios.post.calls.argsFor(0)[0]).toBe(
+      'https://secure.smsgateway.ca/services/message.svc/123/12345'
+    )
+    expect(common.axios.post.calls.argsFor(0)[1]['MessageBody']).toMatch(
+      /Enter \d{5} on screen/
+    )
     let data = await app.models.Subscription.find({
       where: {
         serviceName: 'myService',
