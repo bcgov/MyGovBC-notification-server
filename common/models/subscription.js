@@ -537,7 +537,11 @@ module.exports = function(Subscription) {
     }
   }
 
-  Subscription.prototype.verify = async function(options, confirmationCode) {
+  Subscription.prototype.verify = async function(
+    options,
+    confirmationCode,
+    replace
+  ) {
     let mergedSubscriptionConfig = await Subscription.getMergedConfig(
       'subscription',
       this.serviceName
@@ -581,8 +585,31 @@ module.exports = function(Subscription) {
       error.status = 403
       return await handleConfirmationAcknowledgement(error)
     }
-    this.state = 'confirmed'
     try {
+      if (replace && this.userChannelId) {
+        let whereClause = {
+          serviceName: this.serviceName,
+          state: 'confirmed',
+          channel: this.channel
+        }
+        // email address check should be case insensitive
+        let escapedUserChannelId = this.userChannelId.replace(
+          /[-[\]{}()*+?.,\\^$|#\s]/g,
+          '\\$&'
+        )
+        let escapedUserChannelIdRegExp = new RegExp(escapedUserChannelId, 'i')
+        whereClause.userChannelId = {
+          regexp: escapedUserChannelIdRegExp
+        }
+        await Subscription.updateAll(
+          whereClause,
+          {
+            state: 'deleted'
+          },
+          options
+        )
+      }
+      this.state = 'confirmed'
       await Subscription.replaceById(this.id, this, options)
     } catch (err) {
       return await handleConfirmationAcknowledgement(err)

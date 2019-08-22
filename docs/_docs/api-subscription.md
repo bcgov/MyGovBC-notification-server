@@ -390,6 +390,11 @@ GET /subscriptions/{id}/verify
     * required: true
     * parameter type: query
     * data type: string
+  * whether or not replacing existing subscriptions
+    * parameter name: replace
+    * required: false
+    * parameter type: query
+    * data type: boolean
 * outcome
 
   *NotifyBC* performs following actions in sequence
@@ -397,9 +402,10 @@ GET /subscriptions/{id}/verify
   1. the subscription identified by *id* is retrieved
   2. for user request, the *userId* of the subscription is checked against current request user, if not match, error is returned; otherwise
   3. input parameter *confirmationCode* is checked against *confirmationRequest.confirmationCode*. If not match, error is returned; otherwise
-  4. *state* is set to *confirmed*
-  5. the subscription is saved back to database
-  6. displays acknowledgement message according to [configuration](../config-subscription#confirmation-verification-acknowledgement-messages)
+  4. if input parameter *replace* is supplied and set to *true*, then  existing confirmed subscriptions from the same *serviceName*, *channel* and *userChannelId* are deleted. No unsubscription acknowledgement notification is sent
+  5. *state* is set to *confirmed*
+  6. the subscription is saved back to database
+  7. displays acknowledgement message according to [configuration](../config-subscription#confirmation-verification-acknowledgement-messages)
       
 ## Update a Subscription
 ```

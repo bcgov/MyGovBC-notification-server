@@ -96,7 +96,7 @@ If error happened during subscription confirmation, query string *?err=\<error\>
 
 ## Duplicated Subscription
 *NotifyBC* by default allows a user subscribe to a service through same channel multiple times. If this is undesirable, you can set config *subscription.detectDuplicatedSubscription* to true. In such case instead of sending user a confirmation request, *NotifyBC* sends user a duplicated subscription notification message. Unlike a confirmation request, duplicated subscription 
-notification message doesn't and shouldn't contain any information to allow user confirm the subscription. You can customize duplicated subscription notification message by setting config *subscription.duplicatedSubscriptionNotification* in either *config.local.js* or using configuration api for service-specific dynamic config. Following is the default settings defined in
+notification message either shouldn't contain any information to allow user confirm the subscription, or it should contain a link that allows user to replace existing confirmed subscription with this one. You can customize duplicated subscription notification message by setting config *subscription.duplicatedSubscriptionNotification* in either *config.local.js* or using configuration api for service-specific dynamic config. Following is the default settings defined in
 *config.json*
 
 ```json
@@ -118,6 +118,24 @@ notification message doesn't and shouldn't contain any information to allow user
   }
 }
 ```
+
+To allow user to replace existing confirmed subscription, set the message to something like 
+
+```json
+{
+  ...
+  "subscription": {
+    ...
+    "detectDuplicatedSubscription": false,
+    "duplicatedSubscriptionNotification": {
+      "email": {
+        "textBody": "A duplicated subscription was submitted. If the request is not submitted by you, please ignore this message. Otherwise if you want to replace existing subscription with this one, click {subscription_confirmation_url}&replace=true."
+      }
+    }
+  }
+}
+```
+The query parameter *&replace=true* following the token *{subscription_confirmation_url}* will cause existing subscription be replaced.
 
 ## Anonymous Unsubscription
 For anonymous subscription, *NotifyBC* supports one-click opt-out by allowing unsubscription URL provided in notifications. To thwart unauthorized unsubscription attempts, *NotifyBC* implemented and enabled by default two security measurements 

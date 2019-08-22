@@ -476,11 +476,6 @@ describe('GET /subscriptions/{id}/verify', function() {
             userChannelId: 'bar@foo.com',
             state: 'unconfirmed',
             confirmationRequest: {
-              confirmationCodeRegex: '\\d{5}',
-              sendRequest: true,
-              from: 'no_reply@invlid.local',
-              subject: 'Subscription confirmation',
-              textBody: 'enter {confirmation_code} in this email',
               confirmationCode: '37688'
             }
           },
@@ -497,14 +492,21 @@ describe('GET /subscriptions/{id}/verify', function() {
             userChannelId: 'bar@foo.com',
             state: 'unconfirmed',
             confirmationRequest: {
-              confirmationCodeRegex: '\\d{5}',
-              sendRequest: true,
-              from: 'no_reply@invlid.local',
-              subject: 'Subscription confirmation',
-              textBody: 'enter {confirmation_code} in this email',
               confirmationCode: '37689'
-            },
-            unsubscriptionCode: '50032'
+            }
+          },
+          function(err, res) {
+            cb(err, res)
+          }
+        )
+      },
+      function(cb) {
+        app.models.Subscription.create(
+          {
+            serviceName: 'myService',
+            channel: 'email',
+            userChannelId: 'bar@foo.com',
+            state: 'confirmed'
           },
           function(err, res) {
             cb(err, res)
@@ -527,23 +529,32 @@ describe('GET /subscriptions/{id}/verify', function() {
   })
 
   it('should verify confirmation code sent by anonymous user', async function() {
-    let res = await request(app)
-      .get(
-        '/api/subscriptions/' + data[1].id + '/verify?confirmationCode=37689'
-      )
-      .set('Accept', 'application/json')
+    let res = await request(app).get(
+      '/api/subscriptions/' + data[1].id + '/verify?confirmationCode=37689'
+    )
     expect(res.statusCode).toBe(200)
     res = await app.models.Subscription.findById(data[1].id)
     expect(res.state).toBe('confirmed')
   })
 
   it('should deny incorrect confirmation code', async function() {
-    let res = await request(app)
-      .get('/api/subscriptions/' + data[1].id + '/verify?confirmationCode=0000')
-      .set('Accept', 'application/json')
+    let res = await request(app).get(
+      '/api/subscriptions/' + data[1].id + '/verify?confirmationCode=0000'
+    )
     expect(res.statusCode).toBe(403)
     res = await app.models.Subscription.findById(data[1].id)
     expect(res.state).toBe('unconfirmed')
+  })
+
+  it('should unsubscribe existing subscriptions when replace paramter is supplied', async function() {
+    let res = await request(app).get(
+      '/api/subscriptions/' +
+        data[1].id +
+        '/verify?confirmationCode=37689&replace=true'
+    )
+    expect(res.statusCode).toBe(200)
+    res = await app.models.Subscription.findById(data[2].id)
+    expect(res.state).toBe('deleted')
   })
 })
 

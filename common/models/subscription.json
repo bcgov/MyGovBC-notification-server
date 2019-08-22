@@ -173,6 +173,15 @@
           "http": {
             "source": "query"
           }
+        },
+        {
+          "arg": "replace",
+          "type": "boolean",
+          "required": false,
+          "description": "whether or not replacing existing subscriptions",
+          "http": {
+            "source": "query"
+          }
         }
       ],
       "returns": [
@@ -202,9 +211,7 @@
       "returns": [
         {
           "arg": "result",
-          "type": [
-            "string"
-          ],
+          "type": ["string"],
           "root": true,
           "description": "operation outcome"
         }
