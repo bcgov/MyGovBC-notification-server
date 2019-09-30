@@ -23,7 +23,7 @@
     "csvtojson": "^1.1.7",
     "ejs": "^2.5.7",
     "feedparser": "^2.2.0",
-    "helmet": "^3.8.0",
+    "helmet": "^3.21.1",
     "ip-range-check": "0.0.2",
     "jmespath": "f-w/jmespath.js#semver:^1.0",
     "lodash": "^4.17.11",
