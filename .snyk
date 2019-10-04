@@ -40,3 +40,8 @@ patch:
   'npm:moment:20170905':
     - twilio > moment:
         patched: '2017-11-30T22:05:26.179Z'
+  SNYK-JS-HTTPSPROXYAGENT-469131:
+    - snyk > proxy-agent > https-proxy-agent:
+        patched: '2019-10-04T08:30:18.928Z'
+    - snyk > proxy-agent > pac-proxy-agent > https-proxy-agent:
+        patched: '2019-10-04T08:30:18.928Z'
