@@ -407,9 +407,15 @@ module.exports = function(Subscription) {
               anonymousUnsubscription.acknowledgements.notification[
                 this.channel
               ]
+            let textBody
             switch (this.channel) {
               case 'sms':
-                Subscription.sendSMS(this.userChannelId, msg.textBody)
+                textBody = Subscription.mailMerge(
+                  msg.textBody,
+                  this,
+                  options.httpContext
+                )
+                Subscription.sendSMS(this.userChannelId, textBody)
                 break
               case 'email': {
                 var subject = Subscription.mailMerge(
@@ -417,7 +423,7 @@ module.exports = function(Subscription) {
                   this,
                   options.httpContext
                 )
-                var textBody = Subscription.mailMerge(
+                textBody = Subscription.mailMerge(
                   msg.textBody,
                   this,
                   options.httpContext
