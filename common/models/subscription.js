@@ -403,12 +403,15 @@ module.exports = function(Subscription) {
         let handleUnsubscriptionResponse = async () => {
           // send acknowledgement notification
           try {
+            let msg =
+              anonymousUnsubscription.acknowledgements.notification[
+                this.channel
+              ]
             switch (this.channel) {
+              case 'sms':
+                Subscription.sendSMS(this.userChannelId, msg.textBody)
+                break
               case 'email': {
-                var msg =
-                  anonymousUnsubscription.acknowledgements.notification[
-                    this.channel
-                  ]
                 var subject = Subscription.mailMerge(
                   msg.subject,
                   this,
