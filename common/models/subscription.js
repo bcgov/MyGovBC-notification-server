@@ -587,7 +587,7 @@ module.exports = function(Subscription) {
     }
 
     if (
-      this.state !== 'unconfirmed' ||
+      (this.state !== 'unconfirmed' && this.state !== 'confirmed') ||
       confirmationCode !== this.confirmationRequest.confirmationCode
     ) {
       var error = new Error('Forbidden')
