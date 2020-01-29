@@ -740,7 +740,7 @@ describe('DELETE /subscriptions/{id}', function() {
       )
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(302)
-    expect(res.header.location).toBe('http://nowhere')
+    expect(res.header.location).toBe('http://nowhere?channel=email')
     res = await app.models.Subscription.findById(data[3].id)
     expect(res.state).toBe('deleted')
   })
@@ -768,7 +768,7 @@ describe('DELETE /subscriptions/{id}', function() {
       )
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(302)
-    expect(res.header.location).toBe('http://nowhere?err=Error%3A%20Forbidden')
+    expect(res.header.location).toBe('http://nowhere?channel=email&err=Error%3A%20Forbidden')
   })
 
   it('should display onScreen acknowledgements failureMessage', async function() {
@@ -1023,7 +1023,7 @@ describe('GET /subscriptions/{id}/unsubscribe/undo', function() {
         '/unsubscribe/undo?unsubscriptionCode=50032'
     )
     expect(res.statusCode).toBe(302)
-    expect(res.headers.location).toBe('http://nowhere')
+    expect(res.headers.location).toBe('http://nowhere?channel=email')
     res = await app.models.Subscription.findById(data[0].id)
     expect(res.state).toBe('confirmed')
   })

@@ -448,6 +448,7 @@ module.exports = function(Subscription) {
           if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
             var redirectUrl =
               anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
+            redirectUrl += `?channel=${this.channel}`
             return await options.httpContext.res.redirect(redirectUrl)
           } else {
             options.httpContext.res.setHeader('Content-Type', 'text/plain')
@@ -530,7 +531,8 @@ module.exports = function(Subscription) {
       if (anonymousUnsubscription.acknowledgements.onScreen.redirectUrl) {
         var redirectUrl =
           anonymousUnsubscription.acknowledgements.onScreen.redirectUrl
-        redirectUrl += '?err=' + encodeURIComponent(error)
+        redirectUrl += `?channel=${this.channel}`
+        redirectUrl += '&err=' + encodeURIComponent(error)
         return await options.httpContext.res.redirect(redirectUrl)
       } else {
         options.httpContext.res.setHeader('Content-Type', 'text/plain')
@@ -556,7 +558,7 @@ module.exports = function(Subscription) {
       this.serviceName
     )
 
-    async function handleConfirmationAcknowledgement(err, message) {
+    let handleConfirmationAcknowledgement = async (err, message) => {
       if (!mergedSubscriptionConfig.confirmationAcknowledgements) {
         if (err) {
           throw err
@@ -566,8 +568,9 @@ module.exports = function(Subscription) {
       var redirectUrl =
         mergedSubscriptionConfig.confirmationAcknowledgements.redirectUrl
       if (redirectUrl) {
+        redirectUrl += `?channel=${this.channel}`
         if (err) {
-          redirectUrl += '?err=' + encodeURIComponent(err.toString())
+          redirectUrl += '&err=' + encodeURIComponent(err.toString())
         }
         return await options.httpContext.res.redirect(redirectUrl)
       } else {
@@ -665,6 +668,7 @@ module.exports = function(Subscription) {
         )
         if (anonymousUndoUnsubscription.redirectUrl) {
           var redirectUrl = anonymousUndoUnsubscription.redirectUrl
+          redirectUrl += `?channel=${this.channel}`
           return await options.httpContext.res.redirect(redirectUrl)
         } else {
           options.httpContext.res.setHeader('Content-Type', 'text/plain')
@@ -696,7 +700,8 @@ module.exports = function(Subscription) {
     } catch (err) {
       if (anonymousUndoUnsubscription.redirectUrl) {
         var redirectUrl = anonymousUndoUnsubscription.redirectUrl
-        redirectUrl += '?err=' + encodeURIComponent(err.message || err)
+        redirectUrl += `?channel=${this.channel}`
+        redirectUrl += '&err=' + encodeURIComponent(err.message || err)
         return await options.httpContext.res.redirect(redirectUrl)
       } else {
         options.httpContext.res.setHeader('Content-Type', 'text/plain')
