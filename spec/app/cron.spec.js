@@ -31,7 +31,7 @@ describe('CRON purgeData', function () {
         body: 'this is a test'
       },
       serviceName: 'futureService',
-      created: '2020-01-01',
+      created: '3020-01-01',
       state: 'sent'
     })
     try {
