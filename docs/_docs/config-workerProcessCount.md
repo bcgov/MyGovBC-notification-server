@@ -1,8 +1,4 @@
----
-layout: docs
-title: Worker Process Count
-permalink: /docs/config-workerProcessCount/
----
+# Worker Process Count
 
 When *NotifyBC* runs on a host with multiple CPUs, by default it creates a cluster of worker processes of which the count matches CPU count. You can override the number with the environment variable *NOTIFYBC_WORKER_PROCESS_COUNT*.
 

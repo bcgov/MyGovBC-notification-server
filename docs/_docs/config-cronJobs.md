@@ -1,8 +1,4 @@
----
-layout: docs
-title: Cron Jobs
-permalink: /docs/config-cronJobs/
----
+# Cron Jobs
 
 *NotifyBC* runs several cron jobs described below. These jobs are controlled by sub-properties defined in config object *cron*. To change config, create the object and properties in file */server/config.local.js*.
 

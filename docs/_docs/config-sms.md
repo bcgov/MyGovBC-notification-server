@@ -1,8 +1,4 @@
----
-layout: docs
-title: SMS
-permalink: /docs/config-sms/
----
+# SMS
 
 *NotifyBC* depends on underlying SMS service providers to deliver SMS messages. The supported service providers are
 

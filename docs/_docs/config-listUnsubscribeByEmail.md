@@ -1,8 +1,4 @@
----
-layout: docs
-title: List-unsubscribe by Email
-permalink: /docs/config-listUnsubscribeByEmail/
----
+# List-unsubscribe by Email
 
 Some email clients provide a consistent UI to unsubscribe if an unsubscription email address is supplied. For example, newer iOS built-in email app will display following banner
 

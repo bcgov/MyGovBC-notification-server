@@ -1,8 +1,4 @@
----
-layout: docs
-title: Inbound SMTP Server
-permalink: /docs/config-inboundSmtpServer/
----
+# Inbound SMTP Server
 
 *NotifyBC* implemented a custom inbound SMTP server based on Nodemailer [SMTP Server](https://nodemailer.com/extras/smtp-server/) to handle
 

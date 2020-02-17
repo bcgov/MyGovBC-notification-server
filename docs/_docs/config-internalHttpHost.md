@@ -1,8 +1,4 @@
----
-layout: docs
-title: Internal HTTP Host
-permalink: /docs/config-internalHttpHost/
----
+# Internal HTTP Host
 
 By default, HTTP requests submitted by *NotifyBC* back to itself will be sent to *httpHost* if defined or the host of the incoming HTTP request that spawns such internal requests. But if config *internalHttpHost*, which has no default value, is defined, for example in file */server/config.local.js*
   

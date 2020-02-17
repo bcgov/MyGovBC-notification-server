@@ -1,8 +1,4 @@
----
-layout: docs
-title: Database
-permalink: /docs/config-database/
----
+# Database
 
 By default *NotifyBC* uses in-memory database backed up by file in */server/database/data.json* for local and docker deployment and MongoDB for OpenShift deployment. To use MongoDB for non-OpenShift deployment, add file */server/datasources.local.json* with MongoDB connection information such as following:
 

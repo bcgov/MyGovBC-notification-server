@@ -1,8 +1,4 @@
----
-layout: docs
-title: Subscription
-permalink: /docs/config-subscription/
----
+# Subscription
 
 Configs in this section customize behavior of subscription and unsubscription workflow. They are all sub-properties of config object *subscription*. This object can be defined as service-agnostic static config as well as service-specific dynamic config, which overrides the static one on a service-by-service basis. Default static config is defined in file */server/config.json*. There is no default dynamic config.
 

@@ -1,10 +1,4 @@
----
-layout: docs
-title: Welcome
-permalink: /docs/home/
-redirect_from: /docs/index.html
----
-
+# Welcome
 
 This site aims to be a comprehensive guide to *NotifyBC*. We’ll cover topics such
 as getting your instance up and running, interacting with browser or other server components, deployment, and give you some advice on participating in the future

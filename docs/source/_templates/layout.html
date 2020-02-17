@@ -1,0 +1,47 @@
+{% extends "!layout.html" %}
+{% block sidebartitle %}
+<div>
+  <a href="{{ pathto(master_doc) }}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="200" viewBox="0 0 150 55">
+      <defs>
+        <filter id="halo" x="0" y="0">
+          <feGaussianBlur result="blurOut" in="SourceGraphic" stdDeviation="3" />
+          <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+        </filter>
+      </defs>
+      <text filter="url(#halo)" y="40" font-family="Arial" font-size="32" fill="white" font-weight="bold">
+        &nbsp;NotifyBC
+      </text>
+    </svg>
+  </a>
+</div>
+{% if theme_display_version %}
+{%- set nav_version = version %}
+{% if READTHEDOCS and current_version %}
+{%- set nav_version = current_version %}
+{% endif %}
+{% if nav_version %}
+<div class="version">
+  {{ nav_version }}
+</div>
+{% endif %}
+{% endif %}
+{% include "searchbox.html" %}
+{% endblock %}
+
+{% block mobile_nav %}
+<i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+<a href="{{ pathto(master_doc) }}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="50%" viewBox="0 0 150 55">
+    <defs>
+      <filter id="halo" x="0" y="0">
+        <feGaussianBlur result="blurOut" in="SourceGraphic" stdDeviation="3" />
+        <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+      </filter>
+    </defs>
+    <text filter="url(#halo)" y="40" font-family="Arial" font-size="32" fill="white" font-weight="bold">
+      &nbsp;NotifyBC
+    </text>
+  </svg>
+</a>
+{% endblock %}

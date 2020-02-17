@@ -1,8 +1,4 @@
----
-layout: docs
-title: Notification Bounce
-permalink: /docs/config-notificationBounce/
----
+# Notification Bounce
 
 Bounces, or Non-Delivery Reports (NDRs), are system-generated emails informing sender of failed delivery. *NotifyBC* can be configured to receive bounces, record bounces, and automatically unsubscribe all subscriptions of a recipient if the number of recorded hard bounces against the recipient exceeds threshold. A deemed successful notification delivery deletes the bounce record.
 

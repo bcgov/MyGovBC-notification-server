@@ -1,8 +1,4 @@
----
-layout: docs
-title: SMTP
-permalink: /docs/config-smtp/
----
+# SMTP
 
 By default *NotifyBC* acts as the SMTP server itself and connects directly to recipient's SMTP server. To setup SMTP relay to a host, say *smtp.foo.com*, add following *smtp* config object to */server/config.local.js*
 

@@ -1,8 +1,4 @@
----
-layout: docs
-title: RSA Keys
-permalink: /docs/config-rsaKeys/
----
+# RSA Keys
 
 When *NotifyBC* starts up, it checks if an RSA key pair exists in database as dynamic config. If not it will generate the dynamic config and save it to database. This RSA key pair is used to exchange confidential information with third party server applications through user's browser. For an example of use case, see [Subscription API](../api-subscription/). To make it work, send the public key to the third party and have their server app encrypt the data using the public key. To obtain public key, call the REST [Configuration API](..api-config/#get-configurations) from an admin ip, for example, by running *cURL* command
 ```bash

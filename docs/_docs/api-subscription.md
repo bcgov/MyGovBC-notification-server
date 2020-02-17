@@ -1,12 +1,8 @@
----
-layout: docs
-title: Subscription
-permalink: /docs/api-subscription/
----
+# Subscription
 The subscription API encapsulates the backend workflow of user subscription and un-subscription of push notification service. Depending on whether a API call comes from user browser as a user request or from an authorized server as an admin request, *NotifyBC* applies different validation rules. For user requests, the notification channel entered by user is unconfirmed. A confirmation code will be associated with this request. The confirmation code  can be created in one of two ways:
 
  * by *NotifyBC* based on channel dependent *subscription.confirmationRequest.\<channel\>.confirmationCodeRegex* [config](../config-subscription/#confirmation-request-message).
- * by a trusted third party. This trusted third party encrypts the confirmation code using the public RSA key of the *NotifyBC* instance (see more about [RSA Key Config](../config-rsaKeys/)) and pass the encrypted confirmation code to *NotifyBC* via user browser in the same subscription request. *NotifyBC* then decrypts to obtain the confirmation code. This method allows user subscribe to multiple notification services provided by *NotifyBC* instances in different trust domains (i.e. service providers) and only have to confirm the subscription channel once during one browser session. In such case only one *NotifyBC* instance should be chosen to deliver confirmation request to user.
+ * by a trusted third party. This trusted third party encrypts the confirmation code using the public RSA key of the *NotifyBC* instance (see more about [RSA Key Config](../config-rsaKeys)) and pass the encrypted confirmation code to *NotifyBC* via user browser in the same subscription request. *NotifyBC* then decrypts to obtain the confirmation code. This method allows user subscribe to multiple notification services provided by *NotifyBC* instances in different trust domains (i.e. service providers) and only have to confirm the subscription channel once during one browser session. In such case only one *NotifyBC* instance should be chosen to deliver confirmation request to user.
  
 Equipped with the confirmation code and a message template, *NotifyBC* can now send out confirmation request to unconfirmed subscription channel. At a minimum this confirmation request should contain the confirmation code. When user receives the message, he/she echos the confirmation code back to a *NotifyBC* provided API to verify against saved record. If match, the state of the subscription request is changed to confirmed.
 

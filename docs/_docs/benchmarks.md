@@ -1,8 +1,4 @@
----
-layout: docs
-title: Benchmarks
-permalink: /docs/benchmarks/
----
+# Benchmarks
 
 <div class="note info">
   <h5>tl;dr</h5>

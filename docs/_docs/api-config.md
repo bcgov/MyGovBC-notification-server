@@ -1,8 +1,4 @@
----
-layout: docs
-title: Configuration
-permalink: /docs/api-config/
----
+# Configuration
 The configuration API, accessible by only super-admin requests, is used to define dynamic configurations. Dynamic configuration is needed in situations like
 
 * RSA key pair generated automatically at boot time if not present

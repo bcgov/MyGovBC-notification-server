@@ -1,8 +1,4 @@
----
-layout: docs
-title: Administrator
-permalink: /docs/api-administrator/
----
+# Administrator
 
 The administrator API provides knowledge factor based authentication mechanism to identify admin request, as opposed to possession factor based admin ip list. Because knowledge factor based authentication is vulnerable to brute-force attack, administrator API is less favourable than admin ip list. Administrator API should only be used in exceptional circumstances such as when obtaining the client's ip or ip range is infeasible.
 

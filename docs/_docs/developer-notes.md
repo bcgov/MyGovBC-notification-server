@@ -1,8 +1,4 @@
----
-title: Developer Notes
-layout: docs
-permalink: /docs/developer-notes/
----
+# Developer Notes
 
 ## Automated Testing
 Test framework is created with and follows [Jasmine 2.6](https://jasmine.github.io/2.6/node.html) convention. To launch test, run `npm test`. To debug test scripts in IDE such as WebStorm, create a Node.js run/debug config, set *cwd* to project root and script to */node_modules/jasmine/bin/jasmine.js*.

@@ -1,8 +1,4 @@
----
-layout: docs
-title: HTTP Host
-permalink: /docs/config-httpHost/
----
+# HTTP Host
 
 *httpHost* config sets the fallback http host used by
 

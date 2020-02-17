@@ -24,3 +24,5 @@ server/id_rsa*
 id_rsa
 id_rsa.pub
 dist
+/docs/build
+/.vscode/settings.json

@@ -1,8 +1,4 @@
----
-layout: docs
-title: Admin IP List
-permalink: /docs/config-adminIpList/
----
+# Admin IP List
 
 By [design](../overview/#architecture), *NotifyBC* classifies incoming requests into four types. For a request to be classified as super-admin, the request's source ip must be in admin ip list. By default, the list contains *localhost* only as defined by *defaultAdminIps* in */server/config.json* 
 

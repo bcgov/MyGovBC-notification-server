@@ -1,9 +1,5 @@
----
-layout: docs
-title: Installation
-permalink: /docs/installation/
----
-
+# Installation
+ 
 *NotifyBC* can be installed in 3 ways:
 
   1. deploying locally from source code

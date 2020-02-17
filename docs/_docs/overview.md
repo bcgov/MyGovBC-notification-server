@@ -1,8 +1,4 @@
----
-layout: docs
-title: Overview
-permalink: /docs/overview/
----
+# Overview
 
 *NotifyBC* is a general purpose API Server to manage subscriptions and dispatch notifications. It aims to implement some common backend processes of a notification service without imposing any constraints on the UI frontend, nor impeding other server components' functionality. This is achieved by interacting with user browser and other server components through RESTful API and other standard protocols in a loosely coupled way.
 

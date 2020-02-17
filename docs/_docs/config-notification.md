@@ -1,8 +1,4 @@
----
-layout: docs
-title: Notification
-permalink: /docs/config-notification/
----
+# Notification
 
 Configs in this section customize the handling of notification request or generating notifications from RSS feeds.  They are all sub-properties of config object *notification*. Service-agnostic  configs are static and service-dependent configs are dynamic. 
 

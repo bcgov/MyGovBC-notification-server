@@ -1,8 +1,4 @@
----
-layout: docs
-title: Notification
-permalink: /docs/api-notification/
----
+# Notification
 The notification API encapsulates the backend workflow of staging and dispatching a message to targeted user after receiving the message from event source. 
 
  Depending on whether an API call comes from user browser as a user request or from an authorized server application as an admin request, *NotifyBC* applies different permissions. Admin request allows full CRUD operations. An authenticated user request, on the other hand, are only allowed to get a list of in-app pull notifications targeted to the current user and changing the state of the notifications. An unauthenticated user request can not access any  API.

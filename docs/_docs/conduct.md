@@ -1,10 +1,4 @@
----
-title: Code of Conduct
-layout: docs
-permalink: "/docs/conduct/"
-redirect_from: "/conduct/index.html"
-editable: false
----
+# Code of Conduct
 
 As contributors and maintainers of this project, and in the interest of
 fostering an open and welcoming community, we pledge to respect all people who
