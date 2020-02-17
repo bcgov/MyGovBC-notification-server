@@ -9,7 +9,7 @@ Welcome to NotifyBC's documentation!
 .. toctree::
   :maxdepth: 2
 
-  gettingStarted
+  getting-started
   configuration
   api
   misc
