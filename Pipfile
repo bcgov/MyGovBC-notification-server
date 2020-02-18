@@ -9,6 +9,7 @@ verify_ssl = true
 recommonmark = "*"
 sphinx-rtd-theme = "*"
 sphinx = "*"
+sphinx-sass = {git = "https://github.com/mwibrow/sphinx-sass.git"}
 
 [requires]
 python_version = "3.7"

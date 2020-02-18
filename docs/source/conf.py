@@ -31,8 +31,9 @@ release = '1.13.6'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-  'sphinx_rtd_theme',
-  'recommonmark'
+    'sphinx_rtd_theme',
+    'recommonmark',
+    'sphinx_sass'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -60,4 +61,13 @@ master_doc = 'index'
 
 html_css_files = [
     'css/custom.css',
+]
+
+html_additional_pages = {'index': 'layout-home.html'}
+
+sass_configs = [
+    dict(
+        entry='scss/custom.scss',
+        output='css/custom.css'
+    )
 ]

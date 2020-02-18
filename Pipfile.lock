@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3fa25592848ef814e2b957544e9377506618e64d4234db55b52e0ba4177ab1f7"
+            "sha256": "56b60ea470020eecb5808affc31c1aca39fb0c1337693acb28ad3f22e69d618c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -197,6 +197,10 @@
             ],
             "index": "pypi",
             "version": "==0.4.3"
+        },
+        "sphinx-sass": {
+            "git": "https://github.com/mwibrow/sphinx-sass.git",
+            "ref": "c6cb6c90e9413d0e41568dbc73c79cca7b2f128b"
         },
         "sphinxcontrib-applehelp": {
             "hashes": [

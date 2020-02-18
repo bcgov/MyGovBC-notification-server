@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{%- block content %}
+{% if theme_style_external_links|tobool %}
+<div class="rst-content style-external-links">
+  {% else %}
+  <div class="rst-content">
+    {% endif %}
+    <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+      <div class="homepage-articleBody" itemprop="articleBody">
+        <div class="row">A versatile notification API server</div>
+        <div>
+          <h2>Versatile</h2>
+          <ul>
+            <li>Anonymous or CA SiteMinder authenticated subscriptions</li>
+            <li>Push and in-app pull notifications</li>
+            <li>Email and SMS push notification channels</li>
+            <li>Unicast and broadcast message types</li>
+            <li>User specifiable filter rules</li>
+            <li>Notification auto-gen from RSS</li>
+          </ul>
+          <p></p>
+        </div>
+        <div>
+          <h2>Non-intrusive</h2>
+          <p>
+          </p>
+          <ul>
+            <li>Handles common backend business logic only, allowing site developer implement user subscriptions or
+              display
+              in-app notifications using UI widgets native to the site.
+            </li>
+            <li>Loose coupling - interacts with user browser or other server components through RESTful API.
+            </li>
+          </ul>
+          <p></p>
+        </div>
+        <div>
+          <h2>Microservice</h2>
+          <p>
+            Containerized deployment to PAAS such as OpenShift. No need for complex enterprise-wide shared service.
+            Better
+            meet privacy mandates.
+          </p>
+          <a href="/MyGovBC-notification-server/docs/overview/">More about NotifyBC →</a><br>
+          <a href="/MyGovBC-notification-server/docs/usage/">How to Use →</a><br>
+          <a href="/MyGovBC-notification-server/docs/api-overview/">Explore the API →</a><br>
+          <a href="/MyGovBC-notification-server/docs/installation/"> Deployment Methods →</a>
+        </div>
+        <section class="quickstart row">
+          <div class="grid">
+            <div class="unit golden-small center-on-mobiles">
+              <h3>Get up and running <em>in&nbsp;minutes</em>.</h3>
+            </div>
+            <div class="unit golden-large code">
+              <p class="title">Quick-start Instructions</p>
+              <div class="shell">
+                <p class="line" style="white-space:nowrap">
+                  <span class="path">~</span>
+                  <span class="prompt">$</span>
+                  <span class="command" style="white-space:normal">git clone
+                    https://github.com/bcgov/MyGovBC-notification-server.git notifyBC</span>
+                </p>
+                <p class="line">
+                  <span class="path">~</span>
+                  <span class="prompt">$</span>
+                  <span class="command">cd notifyBC</span>
+                </p>
+                <p class="line">
+                  <span class="path">~/notifyBC</span>
+                  <span class="prompt">$</span>
+                  <span class="command">npm i -g yarn &amp;&amp; yarn install</span>
+                </p>
+                <p class="line">
+                  <span class="path">~/notifyBC</span>
+                  <span class="prompt">$</span>
+                  <span class="command">npm start</span>
+                </p>
+                <p class="line">
+                  <span class="output"># =&gt; Now browse to <a href="http://localhost:3000"
+                      target="_blank">http://localhost:3000</a></span>
+                </p>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+    {% include "footer.html" %}
+  </div>
+  {%- endblock %}
