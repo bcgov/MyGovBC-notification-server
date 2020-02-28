@@ -92,13 +92,20 @@ The test was performed in August 2017. Unless otherwise specified, the versions 
      }
    }
    ```
-2. create a number of subscriptions in bulk using script [bulk-post-subs.js](https://github.com/bcgov/MyGovBC-notification-server/blob/master/utils/load-testing/bulk-post-subs.js). To load test different email volumes, you can create bulk subscriptions in different services. For example, generate 10 subscriptions under service named *load10*; 1,000,000 subscriptions under serivce *load1000000* etc. *bulk-post-subs.js* takes *serviceName* and other optional parameters
+2. create a number of subscriptions in bulk using script [bulk-post-subs.js](https://github.com/bcgov/MyGovBC-notification-server/blob/master/utils/load-testing/bulk-post-subs.js). To load test different email volumes, you can create bulk subscriptions in different services. For example, generate 10 subscriptions under service named *load10*; 1,000,000 subscriptions under serivce *load1000000* etc. *bulk-post-subs.js* takes *userChannleId* and other optional parameters
 
-   ```
-   node utils/load-testing/bulk-post-subs.js <apiUrlPrefix> \
-   <userChannleId> <numberOfSubscriptions> <serviceName>
-   ```
-The generated subscriptions contain a filter, hence all load testing results below included time spent on filtering.
+    ```
+    $ node utils/load-testing/bulk-post-subs.js -h
+    Usage: node bulk-post-subs.js [Options] <userChannleId>
+    [Options]:
+    -a, --api-url-prefix=<string>                      api url prefix. default to http://localhost:3000/api
+    -c, --channel=<string>                             channel. default to email
+    -s, --service-name=<string>                        service name. default to load
+    -n, --number-of-subscribers=<int>                  number of subscribers. positive integer. default to 1000
+    -f, --broadcast-push-notification-filter=<string>  broadcast push notification filter. default to "contains_ci(title,'vancouver') || contains_ci(title,'victoria')"
+    -h, --help                                         display this help
+    ```
+    The generated subscriptions contain a filter, hence all load testing results below included time spent on filtering.
 3. launch load testing using script [curl-ntf.sh](https://github.com/bcgov/MyGovBC-notification-server/blob/master/utils/load-testing/curl-ntf.sh), which takes following optional parameters
 
    ```
