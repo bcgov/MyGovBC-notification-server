@@ -1,5 +1,5 @@
-let request = require('request')
-var parallelLimit = require('async/parallelLimit')
+let axios = require('axios')
+var queue = require('async/queue')
 let getOpt = require('node-getopt')
   .create([
     [
@@ -32,60 +32,55 @@ if (args.argv.length !== 1) {
   getOpt.showHelp()
   process.exit(1)
 }
-let tasks = []
-let i = 0
 const apiUrlPrefix =
   args.options['api-url-prefix'] || 'http://localhost:3000/api'
 const serviceName = args.options['service-name'] || 'load'
-const numberOfSubscribers = parseInt(args.options['number-of-subscribers']) || 1000
+const numberOfSubscribers =
+  parseInt(args.options['number-of-subscribers']) || 1000
 const channel = args.options['channel'] || 'email'
 const broadcastPushNotificationFilter =
   args.options['broadcast-push-notification-filter'] ||
   "contains_ci(title,'vancouver') || contains_ci(title,'victoria')"
 const userChannelId = args.argv[0]
-/*jshint loopfunc:true */
-while (i < numberOfSubscribers) {
-  let index = i
-  tasks.push(function(cb) {
-    let options = {
-      uri: apiUrlPrefix + '/subscriptions',
-      headers: {
-        'Content-Type': 'application/json'
+let successCnt = 0
+var q = queue(function(index, cb) {
+  let options = {
+    method: 'post',
+    url: apiUrlPrefix + '/subscriptions',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: {
+      serviceName: serviceName,
+      channel: channel,
+      state: 'confirmed',
+      index: index,
+      confirmationRequest: {
+        sendRequest: false
       },
-      json: {
-        serviceName: serviceName,
-        channel: channel,
-        state: 'confirmed',
-        index: index,
-        confirmationRequest: {
-          sendRequest: false
-        },
-        userChannelId: userChannelId,
-        broadcastPushNotificationFilter: broadcastPushNotificationFilter
-      }
+      userChannelId: userChannelId,
+      broadcastPushNotificationFilter: broadcastPushNotificationFilter
     }
-    request.post(options, (err, data) => {
-      if (!err && data.statusCode !== 200) {
-        err = data.statusCode
-      }
-      try {
-        if (err) {
-          console.error(err)
-        } else {
-          console.log(data.body.index)
-        }
-      } catch (ex) {}
+  }
+  axios
+    .request(options)
+    .then(data => {
+      console.log(data.data.index)
+      successCnt++
       cb()
     })
-  })
-  i++
+    .catch(function(error) {
+      console.error(error)
+      cb()
+    })
+}, 100)
+let i = 0
+/*jshint loopfunc:true */
+while (i < numberOfSubscribers) {
+  q.push(i++)
 }
 
-parallelLimit(tasks, 100, function(error, data) {
-  if (error) {
-    console.log(error)
-  } else if (data) {
-    console.log('total count ' + data.length)
-    process.exit(0)
-  }
+q.drain(function() {
+  console.log(`success count ${successCnt}`)
+  process.exit(0)
 })
