@@ -577,7 +577,7 @@ module.exports = function (Notification) {
                     }
                     Notification.request.get(options, function (error, response, body) {
                       if (!error && response.statusCode === 200) {
-                        return cb && cb(body)
+                        return cb && cb(null, body)
                       }
                       Notification.app.models.Subscription.find({
                           where: {
@@ -593,7 +593,7 @@ module.exports = function (Notification) {
                           }
                         },
                         function (err, subs) {
-                          return cb && cb(err || subs.map(e => e.userChannelId))
+                          return cb && cb(err, subs && subs.map(e => e.userChannelId))
                         }
                       )
                     })
@@ -609,7 +609,11 @@ module.exports = function (Notification) {
                     })
                     i++
                   }
-                  q.push(queuedTasks, function (res) {
+                  q.push(queuedTasks, function (err, res) {
+                    if(err){
+                      data.state = 'error'
+                      return
+                    }
                     if (res.success && res.success.length > 0) {
                       data.successfulDispatches = (data.successfulDispatches || []).concat(res.success)
                     }
