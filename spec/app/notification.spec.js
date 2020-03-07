@@ -1,7 +1,6 @@
 let app
 var request = require('supertest')
 var parallel = require('async/parallel')
-var nodeReq = require('request')
 
 async function wait(ms) {
   return new Promise(resolve => {
@@ -534,7 +533,7 @@ describe('POST /notifications', function() {
           return cb(null, null)
         }, 1000)
       })
-    spyOn(nodeReq, 'post')
+    spyOn(app.models.Notification.request, 'post')
 
     let res = await request(app)
       .post('/api/notifications')
@@ -567,7 +566,7 @@ describe('POST /notifications', function() {
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('sent')
-    expect(nodeReq.post).toHaveBeenCalledWith(jasmine.any(Object))
+    expect(app.models.Notification.request.post).toHaveBeenCalledWith(jasmine.any(Object))
   })
 
   it('should send chunked sync broadcast email notifications', async function() {
@@ -624,16 +623,15 @@ describe('POST /notifications', function() {
         return realGet.call(app, param)
       }
     })
-    spyOn(nodeReq, 'post')
-    spyOn(nodeReq, 'get').and.callFake(function(options, cb) {
-      let uri = options.uri.substring(options.uri.indexOf('/api/notifications'))
-      request(app)
+    spyOn(app.models.Notification.request, 'post')
+    spyOn(app.models.Notification.request, 'get').and.callFake(async function(url) {
+      let uri = url.substring(url.indexOf('/api/notifications'))
+      let response = await request(app)
         .get(uri)
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
-        .end(function(err, res) {
-          cb(err, res, res.body)
-        })
+      response.data = response.body
+      return response
     })
     app.models.Notification.sendEmail = jasmine
       .createSpy()
@@ -677,7 +675,7 @@ describe('POST /notifications', function() {
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('sent')
-    expect(nodeReq.post).toHaveBeenCalledWith(jasmine.any(Object))
+    expect(app.models.Notification.request.post).toHaveBeenCalledWith(jasmine.any(Object))
     expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
     expect(data[0].failedDispatches.length).toBe(1)
     expect(data[0].failedDispatches[0]).toEqual(
@@ -1084,10 +1082,11 @@ describe('POST /notifications', function() {
       }
     })
 
-    spyOn(app.models.Notification.request, 'get').and.callFake(function() {
-      let cb = arguments[arguments.length - 1]
-      return cb('error')
-    })
+    spyOn(app.models.Notification.request, 'get').and.callFake(
+      async function() {
+        throw 'error'
+      }
+    )
 
     let res = await request(app)
       .post('/api/notifications')

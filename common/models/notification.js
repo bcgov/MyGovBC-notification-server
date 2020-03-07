@@ -5,7 +5,7 @@ const _ = require('lodash')
 const jmespath = require('jmespath')
 
 module.exports = function(Notification) {
-  Notification.request = require('request')
+  Notification.request = require('axios')
   disableAllMethods(Notification, [
     'find',
     'create',
@@ -554,11 +554,11 @@ module.exports = function(Notification) {
                 function(errSave) {
                   if (typeof data.asyncBroadcastPushNotification === 'string') {
                     let options = {
-                      uri: data.asyncBroadcastPushNotification,
+                      url: data.asyncBroadcastPushNotification,
                       headers: {
                         'Content-Type': 'application/json'
                       },
-                      json: data
+                      data: data
                     }
                     Notification.request.post(options)
                   }
@@ -603,39 +603,38 @@ module.exports = function(Notification) {
                     data.id +
                     '/broadcastToChunkSubscribers?start=' +
                     task.startIdx
-                  let options = {
-                    json: true,
-                    uri: uri
-                  }
-                  Notification.request.get(options, function(
-                    error,
-                    response,
-                    body
-                  ) {
-                    if (!error && response.statusCode === 200) {
-                      return cb && cb(null, body)
-                    }
-                    Notification.app.models.Subscription.find(
-                      {
-                        where: {
-                          serviceName: data.serviceName,
-                          state: 'confirmed',
-                          channel: data.channel
-                        },
-                        order: 'created ASC',
-                        skip: task.startIdx,
-                        limit: broadcastSubscriberChunkSize,
-                        fields: {
-                          userChannelId: true
-                        }
-                      },
-                      function(err, subs) {
-                        return (
-                          cb && cb(err, subs && subs.map(e => e.userChannelId))
-                        )
+                  Notification.request
+                    .get(uri)
+                    .then(function(response) {
+                      const body = response.data
+                      if (response.statusCode === 200) {
+                        return cb && cb(null, body)
                       }
-                    )
-                  })
+                      throw new Error(statusCode)
+                    })
+                    .catch(function(error) {
+                      Notification.app.models.Subscription.find(
+                        {
+                          where: {
+                            serviceName: data.serviceName,
+                            state: 'confirmed',
+                            channel: data.channel
+                          },
+                          order: 'created ASC',
+                          skip: task.startIdx,
+                          limit: broadcastSubscriberChunkSize,
+                          fields: {
+                            userChannelId: true
+                          }
+                        },
+                        function(err, subs) {
+                          return (
+                            cb &&
+                            cb(err, subs && subs.map(e => e.userChannelId))
+                          )
+                        }
+                      )
+                    })
                 }, broadcastSubRequestBatchSize)
                 q.drain(function() {
                   postBroadcastProcessing(postBroadcastProcessingCb)
