@@ -1,14 +1,15 @@
-let request = require('request')
+let request = require('axios')
 if (process.argv.length < 2) {
   process.exit(1)
 }
 
 let options = {
-  uri: process.argv[2] + '/notifications',
+  method: 'post',
+  url: process.argv[2] + '/notifications',
   headers: {
     'Content-Type': 'application/json'
   },
-  json: {
+  data: {
     serviceName: process.argv[3] || 'load10',
     message: {
       from: process.argv[4] || 'no_reply@invlid.local',
@@ -29,11 +30,13 @@ let options = {
     }
   }
 }
-request.post(options, (err, response, body) => {
-  if (err) {
+request
+  .request(options)
+  .then(response => {
+    console.log('response.statusCode=' + response.statusCode)
+    console.log(response.data)
+    process.exit(0)
+  })
+  .catch(err => {
     console.error(err)
-  }
-  console.log('response.statusCode=' + response.statusCode)
-  console.log(body)
-  process.exit(0)
-})
+  })

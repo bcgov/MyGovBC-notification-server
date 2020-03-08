@@ -1,4 +1,4 @@
-const request = require('request')
+const request = require('axios')
 const csv = require('csvtojson')
 const queue = require('async/queue')
 let getOpt = require('node-getopt')
@@ -40,25 +40,28 @@ let done = false,
   successCnt = 0
 let q = queue(function(task, cb) {
   let options = {
-    uri:
+    method: 'post',
+    url:
       (args.options['api-url-prefix'] || 'http://localhost:3000/api') +
       '/subscriptions',
     headers: {
       'Content-Type': 'application/json'
     },
-    json: task.jsonObj
+    data: task.jsonObj
   }
-  request.post(options, (err, data) => {
-    if (!err && data.statusCode !== 200) {
-      err = data.statusCode
-    }
-    if (err) {
-      console.error('error for row #' + task.rowIdx + ': ' + err)
-    } else {
+  request
+    .request(options)
+    .then(data => {
+      if (data.statusCode !== 200) {
+        throw data.statusCode
+      }
       successCnt++
-    }
-    cb(err)
-  })
+      cb()
+    })
+    .catch(err => {
+      console.error('error for row #' + task.rowIdx + ': ' + err)
+      cb(err)
+    })
 }, parseInt(args.options.concurrency) || 10)
 q.drain = function() {
   if (done) {

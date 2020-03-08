@@ -36,7 +36,6 @@
     "nodemailer-direct-transport": "^3.3.2",
     "pluralize": "^7.0.0",
     "randexp": "^0.4.3",
-    "request": "^2.81.0",
     "semver": "^5.3.0",
     "serve-favicon": "^2.0.1",
     "smtp-server": "^3.1.0",
