@@ -9,6 +9,14 @@ metadata:
     tags: instant-app,nodejs,mongodb
   name: notify-bc
 objects:
+  - apiVersion: v1
+    kind: Secret
+    type: opaque
+    metadata:
+      name: mongodb
+    stringData:
+      password: ${DATABASE_PASSWORD}
+      adminPassword: ${DATABASE_ADMIN_PASSWORD}
   - apiVersion: image.openshift.io/v1
     kind: ImageStream
     metadata:
@@ -49,11 +57,17 @@ objects:
                 - name: MONGODB_USER
                   value: ${DATABASE_USER}
                 - name: MONGODB_PASSWORD
-                  value: ${DATABASE_PASSWORD}
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: mongodb
                 - name: MONGODB_DATABASE
                   value: ${DATABASE_NAME}
                 - name: MONGODB_ADMIN_PASSWORD
-                  value: ${DATABASE_ADMIN_PASSWORD}
+                  valueFrom:
+                    secretKeyRef:
+                      key: adminPassword
+                      name: mongodb
                 - name: NOTIFYBC_NODE_ROLE
                   value: slave
                 - name: NOTIFYBC_WORKER_PROCESS_COUNT
@@ -133,11 +147,17 @@ objects:
                 - name: MONGODB_USER
                   value: ${DATABASE_USER}
                 - name: MONGODB_PASSWORD
-                  value: ${DATABASE_PASSWORD}
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: mongodb
                 - name: MONGODB_DATABASE
                   value: ${DATABASE_NAME}
                 - name: MONGODB_ADMIN_PASSWORD
-                  value: ${DATABASE_ADMIN_PASSWORD}
+                  valueFrom:
+                    secretKeyRef:
+                      key: adminPassword
+                      name: mongodb
                 - name: NOTIFYBC_NODE_ROLE
                   value: master
                 - name: NOTIFYBC_WORKER_PROCESS_COUNT
@@ -206,11 +226,17 @@ objects:
                 - name: MONGODB_USER
                   value: ${DATABASE_USER}
                 - name: MONGODB_PASSWORD
-                  value: ${DATABASE_PASSWORD}
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: mongodb
                 - name: MONGODB_DATABASE
                   value: ${DATABASE_NAME}
                 - name: MONGODB_ADMIN_PASSWORD
-                  value: ${DATABASE_ADMIN_PASSWORD}
+                  valueFrom:
+                    secretKeyRef:
+                      key: adminPassword
+                      name: mongodb
               image: ' '
               livenessProbe:
                 initialDelaySeconds: 30
