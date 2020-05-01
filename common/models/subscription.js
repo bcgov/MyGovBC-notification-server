@@ -6,7 +6,7 @@ var disableAllMethods = require('../helpers.js').disableAllMethods
 var _ = require('lodash')
 var jmespath = require('jmespath')
 
-module.exports = function(Subscription) {
+module.exports = function (Subscription) {
   disableAllMethods(Subscription, [
     'find',
     'create',
@@ -15,7 +15,7 @@ module.exports = function(Subscription) {
     'deleteItemById',
     'verify',
     'count',
-    'getSubscribedServiceNames'
+    'getSubscribedServiceNames',
   ])
 
   function accessCheckForGetRequest() {
@@ -61,13 +61,13 @@ module.exports = function(Subscription) {
     }
   )
 
-  Subscription.observe('access', function(ctx, next) {
+  Subscription.observe('access', function (ctx, next) {
     var u = Subscription.getCurrentUser(ctx.options.httpContext)
     if (u) {
       ctx.query.where = ctx.query.where || {}
       ctx.query.where.userId = u
       ctx.query.where.state = {
-        neq: 'deleted'
+        neq: 'deleted',
       }
     }
     next()
@@ -76,7 +76,7 @@ module.exports = function(Subscription) {
   /**
    * hide confirmation request field, especially confirmation code
    */
-  Subscription.afterRemote('**', function() {
+  Subscription.afterRemote('**', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (arguments.length <= 2) {
@@ -88,7 +88,7 @@ module.exports = function(Subscription) {
     }
     if (!Subscription.isAdminReq(ctx)) {
       if (data instanceof Array) {
-        data.forEach(function(e) {
+        data.forEach(function (e) {
           e.confirmationRequest = undefined
           e.unsetAttribute('updatedBy')
           e.unsetAttribute('createdBy')
@@ -137,7 +137,7 @@ module.exports = function(Subscription) {
       let whereClause = {
         serviceName: data.serviceName,
         state: 'confirmed',
-        channel: data.channel
+        channel: data.channel,
       }
       if (data.userChannelId) {
         // email address check should be case insensitive
@@ -147,7 +147,7 @@ module.exports = function(Subscription) {
         )
         var escapedUserChannelIdRegExp = new RegExp(escapedUserChannelId, 'i')
         whereClause.userChannelId = {
-          regexp: escapedUserChannelIdRegExp
+          regexp: escapedUserChannelIdRegExp,
         }
       }
       let subCnt = await Subscription.count(whereClause)
@@ -197,7 +197,7 @@ module.exports = function(Subscription) {
           to: data.userChannelId,
           subject: mailSubject,
           text: textBody,
-          html: mailHtmlBody
+          html: mailHtmlBody,
         }
         Subscription.sendEmail(mailOptions, cb)
       }
@@ -273,7 +273,7 @@ module.exports = function(Subscription) {
     )
   }
 
-  Subscription.beforeRemote('create', function() {
+  Subscription.beforeRemote('create', function () {
     var ctx = arguments[0]
     if (!Subscription.isAdminReq(ctx)) {
       delete ctx.args.data.state
@@ -287,11 +287,11 @@ module.exports = function(Subscription) {
     delete ctx.args.data.id
     beforeUpsert.apply(null, arguments)
   })
-  Subscription.afterRemote('create', function(ctx, res, next) {
+  Subscription.afterRemote('create', function (ctx, res, next) {
     if (!ctx.args.data.confirmationRequest) {
       return next()
     }
-    handleConfirmationRequest(ctx, res, function(
+    handleConfirmationRequest(ctx, res, function (
       handleConfirmationRequestError,
       info
     ) {
@@ -299,7 +299,7 @@ module.exports = function(Subscription) {
     })
   })
 
-  Subscription.beforeRemote('replaceById', function() {
+  Subscription.beforeRemote('replaceById', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (Subscription.isAdminReq(ctx)) {
@@ -310,7 +310,7 @@ module.exports = function(Subscription) {
     return next(error)
   })
 
-  Subscription.beforeRemote('prototype.patchAttributes', function() {
+  Subscription.beforeRemote('prototype.patchAttributes', function () {
     var ctx = arguments[0]
     var next = arguments[arguments.length - 1]
     if (Subscription.isAdminReq(ctx)) {
@@ -331,7 +331,7 @@ module.exports = function(Subscription) {
     beforeUpsert.apply(null, arguments)
   })
 
-  Subscription.afterRemote('prototype.patchAttributes', function(
+  Subscription.afterRemote('prototype.patchAttributes', function (
     ctx,
     instance,
     next
@@ -339,7 +339,7 @@ module.exports = function(Subscription) {
     if (!ctx.args.data.confirmationRequest) {
       return next()
     }
-    handleConfirmationRequest(ctx, instance, function(
+    handleConfirmationRequest(ctx, instance, function (
       handleConfirmationRequestError,
       info
     ) {
@@ -347,7 +347,7 @@ module.exports = function(Subscription) {
     })
   })
 
-  Subscription.prototype.deleteItemById = async function(
+  Subscription.prototype.deleteItemById = async function (
     options,
     unsubscriptionCode,
     additionalServices,
@@ -396,7 +396,7 @@ module.exports = function(Subscription) {
         await Subscription.updateAll(
           query,
           {
-            state: 'deleted'
+            state: 'deleted',
           },
           options
         )
@@ -438,7 +438,7 @@ module.exports = function(Subscription) {
                   to: this.userChannelId,
                   subject: subject,
                   text: textBody,
-                  html: htmlBody
+                  html: htmlBody,
                 }
                 Subscription.sendEmail(mailOptions)
                 break
@@ -468,7 +468,7 @@ module.exports = function(Subscription) {
       }
       if (!additionalServices) {
         return await unsubscribeItems({
-          id: this.id
+          id: this.id,
         })
       }
       let getAdditionalServiceIds = async () => {
@@ -477,15 +477,15 @@ module.exports = function(Subscription) {
             fields: ['id', 'serviceName'],
             where: {
               serviceName: {
-                inq: additionalServices
+                inq: additionalServices,
               },
               channel: this.channel,
-              userChannelId: this.userChannelId
-            }
+              userChannelId: this.userChannelId,
+            },
           })
           return {
-            names: res.map(e => e.serviceName),
-            ids: res.map(e => e.id)
+            names: res.map((e) => e.serviceName),
+            ids: res.map((e) => e.id),
           }
         }
         if (typeof additionalServices === 'string') {
@@ -495,12 +495,12 @@ module.exports = function(Subscription) {
               where: {
                 serviceName: additionalServices,
                 channel: this.channel,
-                userChannelId: this.userChannelId
-              }
+                userChannelId: this.userChannelId,
+              },
             })
             return {
-              names: res.map(e => e.serviceName),
-              ids: res.map(e => e.id)
+              names: res.map((e) => e.serviceName),
+              ids: res.map((e) => e.id),
             }
           }
           // get all subscribed services
@@ -509,12 +509,12 @@ module.exports = function(Subscription) {
             where: {
               userChannelId: this.userChannelId,
               channel: this.channel,
-              state: 'confirmed'
-            }
+              state: 'confirmed',
+            },
           })
           return {
-            names: res.map(e => e.serviceName),
-            ids: res.map(e => e.id)
+            names: res.map((e) => e.serviceName),
+            ids: res.map((e) => e.id),
           }
         }
       }
@@ -522,8 +522,8 @@ module.exports = function(Subscription) {
       await unsubscribeItems(
         {
           id: {
-            inq: [].concat(this.id, data.ids)
-          }
+            inq: [].concat(this.id, data.ids),
+          },
         },
         data
       )
@@ -548,7 +548,7 @@ module.exports = function(Subscription) {
     }
   }
 
-  Subscription.prototype.verify = async function(
+  Subscription.prototype.verify = async function (
     options,
     confirmationCode,
     replace
@@ -602,7 +602,7 @@ module.exports = function(Subscription) {
         let whereClause = {
           serviceName: this.serviceName,
           state: 'confirmed',
-          channel: this.channel
+          channel: this.channel,
         }
         // email address check should be case insensitive
         let escapedUserChannelId = this.userChannelId.replace(
@@ -611,12 +611,12 @@ module.exports = function(Subscription) {
         )
         let escapedUserChannelIdRegExp = new RegExp(escapedUserChannelId, 'i')
         whereClause.userChannelId = {
-          regexp: escapedUserChannelIdRegExp
+          regexp: escapedUserChannelIdRegExp,
         }
         await Subscription.updateAll(
           whereClause,
           {
-            state: 'deleted'
+            state: 'deleted',
           },
           options
         )
@@ -629,7 +629,7 @@ module.exports = function(Subscription) {
     return await handleConfirmationAcknowledgement(null, 'OK')
   }
 
-  Subscription.prototype.unDeleteItemById = async function(
+  Subscription.prototype.unDeleteItemById = async function (
     options,
     unsubscriptionCode
   ) {
@@ -658,11 +658,11 @@ module.exports = function(Subscription) {
           throw error
         }
       }
-      let revertItems = async query => {
+      let revertItems = async (query) => {
         let res = await Subscription.updateAll(
           query,
           {
-            state: 'confirmed'
+            state: 'confirmed',
           },
           options
         )
@@ -679,7 +679,7 @@ module.exports = function(Subscription) {
       }
       if (!this.unsubscribedAdditionalServices) {
         return await revertItems({
-          id: this.id
+          id: this.id,
         })
       }
       let unsubscribedAdditionalServicesIds = this.unsubscribedAdditionalServices.ids.slice()
@@ -689,13 +689,13 @@ module.exports = function(Subscription) {
         or: [
           {
             id: {
-              inq: unsubscribedAdditionalServicesIds
-            }
+              inq: unsubscribedAdditionalServicesIds,
+            },
           },
           {
-            id: this.id
-          }
-        ]
+            id: this.id,
+          },
+        ],
       })
     } catch (err) {
       if (anonymousUndoUnsubscription.redirectUrl) {
@@ -713,7 +713,7 @@ module.exports = function(Subscription) {
     }
   }
 
-  Subscription.getSubscribedServiceNames = function(options, cb) {
+  Subscription.getSubscribedServiceNames = function (options, cb) {
     if (!Subscription.isAdminReq(options.httpContext)) {
       let error = new Error('Forbidden')
       error.status = 403
@@ -727,7 +727,7 @@ module.exports = function(Subscription) {
       subscriptionCollection.distinct(
         'serviceName',
         {
-          state: 'confirmed'
+          state: 'confirmed',
         },
         cb
       )
@@ -736,12 +736,12 @@ module.exports = function(Subscription) {
     Subscription.find(
       {
         fields: {
-          serviceName: true
+          serviceName: true,
         },
         where: {
-          state: 'confirmed'
+          state: 'confirmed',
         },
-        order: 'serviceName ASC'
+        order: 'serviceName ASC',
       },
       (err, data) => {
         if (err) {
