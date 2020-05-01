@@ -223,6 +223,30 @@
           "verb": "get"
         }
       ]
+    },
+    "handleSwiftUnsubscription": {
+      "accepts": [
+        {
+          "arg": "options",
+          "type": "object",
+          "http": "optionsFromRequest"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "string",
+          "root": true,
+          "description": "operation outcome"
+        }
+      ],
+      "description": "handle unsubscription from Swift keyword redirect",
+      "http": [
+        {
+          "path": "/swift",
+          "verb": "post"
+        }
+      ]
     }
   }
 }
