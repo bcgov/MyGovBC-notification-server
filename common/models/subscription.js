@@ -16,6 +16,7 @@ module.exports = function (Subscription) {
     'verify',
     'count',
     'getSubscribedServiceNames',
+    'handleSwiftUnsubscription',
   ])
 
   function accessCheckForGetRequest() {
@@ -759,5 +760,8 @@ module.exports = function (Subscription) {
         return cb(null, uniq)
       }
     )
+  }
+  Subscription.handleSwiftUnsubscription = function (options, cb) {
+    console.log(options.httpContext.req.body)
   }
 }
