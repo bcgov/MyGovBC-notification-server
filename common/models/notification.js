@@ -4,7 +4,7 @@ const disableAllMethods = require('../helpers.js').disableAllMethods
 const _ = require('lodash')
 const jmespath = require('jmespath')
 
-module.exports = function(Notification) {
+module.exports = function (Notification) {
   Notification.request = require('axios')
   disableAllMethods(Notification, [
     'find',
@@ -12,10 +12,10 @@ module.exports = function(Notification) {
     'patchAttributes',
     'replaceById',
     'deleteItemById',
-    'count'
+    'count',
   ])
 
-  Notification.observe('access', function(ctx, next) {
+  Notification.observe('access', function (ctx, next) {
     var httpCtx = ctx.options.httpContext
     ctx.query.where = ctx.query.where || {}
     var currUser = Notification.getCurrentUser(httpCtx)
@@ -23,10 +23,10 @@ module.exports = function(Notification) {
       ctx.query.where.channel = 'inApp'
       ctx.query.where.or = []
       ctx.query.where.or.push({
-        isBroadcast: true
+        isBroadcast: true,
       })
       ctx.query.where.or.push({
-        userChannelId: currUser
+        userChannelId: currUser,
       })
     } else if (!Notification.isAdminReq(httpCtx)) {
       var error = new Error('Forbidden')
@@ -36,13 +36,13 @@ module.exports = function(Notification) {
     next()
   })
 
-  Notification.afterRemote('find', function(ctx, res, next) {
+  Notification.afterRemote('find', function (ctx, res, next) {
     if (!res) {
       return
     }
     var currUser = Notification.getCurrentUser(ctx)
     if (currUser) {
-      ctx.result = res.reduce(function(p, e, i) {
+      ctx.result = res.reduce(function (p, e, i) {
         if (e.validTill && Date.parse(e.validTill) < new Date()) {
           return p
         }
@@ -68,7 +68,7 @@ module.exports = function(Notification) {
     next()
   })
 
-  Notification.preCreationValidation = function() {
+  Notification.preCreationValidation = function () {
     let ctx = arguments[0]
     let next = arguments[arguments.length - 1]
     let error
@@ -104,7 +104,7 @@ module.exports = function(Notification) {
     var whereClause = {
       serviceName: data.serviceName,
       state: 'confirmed',
-      channel: data.channel
+      channel: data.channel,
     }
     if (data.userChannelId) {
       // email address check should be case insensitive
@@ -114,7 +114,7 @@ module.exports = function(Notification) {
       )
       var escapedUserChannelIdRegExp = new RegExp(escapedUserChannelId, 'i')
       whereClause.userChannelId = {
-        regexp: escapedUserChannelIdRegExp
+        regexp: escapedUserChannelIdRegExp,
       }
     }
     if (data.userId) {
@@ -123,9 +123,9 @@ module.exports = function(Notification) {
 
     Notification.app.models.Subscription.findOne(
       {
-        where: whereClause
+        where: whereClause,
       },
-      function(err, subscription) {
+      function (err, subscription) {
         if (err || !subscription) {
           var error = new Error('invalid user')
           error.status = 403
@@ -143,7 +143,7 @@ module.exports = function(Notification) {
   Notification.beforeRemote('create', Notification.preCreationValidation)
   Notification.beforeRemote('replaceById', Notification.preCreationValidation)
 
-  Notification.dispatchNotification = function(ctx, res, next) {
+  Notification.dispatchNotification = function (ctx, res, next) {
     // send non-inApp notifications immediately
     switch (res.channel) {
       case 'email':
@@ -157,7 +157,7 @@ module.exports = function(Notification) {
             res.httpHost = ctx.req.protocol + '://' + ctx.req.get('host')
           }
         }
-        sendPushNotification(ctx, res, function(errSend) {
+        sendPushNotification(ctx, res, function (errSend) {
           if (errSend) {
             res.state = 'error'
           } else if (res.isBroadcast && res.asyncBroadcastPushNotification) {
@@ -167,9 +167,9 @@ module.exports = function(Notification) {
           }
           res.save(
             {
-              httpContext: ctx
+              httpContext: ctx,
             },
-            function(errSave) {
+            function (errSave) {
               next(errSend || errSave)
             }
           )
@@ -188,7 +188,7 @@ module.exports = function(Notification) {
     var next = arguments[arguments.length - 1]
     if (ctx.method.name === 'deleteItemById') {
       ctx.args.data = {
-        state: 'deleted'
+        state: 'deleted',
       }
     }
     // only allow changing state for non-admin requests
@@ -201,7 +201,7 @@ module.exports = function(Notification) {
       }
       ctx.args.data = ctx.args.data.state
         ? {
-            state: ctx.args.data.state
+            state: ctx.args.data.state,
           }
         : null
       if (ctx.instance.isBroadcast) {
@@ -237,7 +237,7 @@ module.exports = function(Notification) {
   Notification.afterRemote('prototype.patchAttributes', afterPatchAttributes)
   Notification.beforeRemote('prototype.deleteItemById', beforePatchAttributes)
   Notification.afterRemote('prototype.deleteItemById', afterPatchAttributes)
-  Notification.prototype.deleteItemById = function(options, callback) {
+  Notification.prototype.deleteItemById = function (options, callback) {
     this.patchAttributes(options.httpContext.args.data, options, callback)
   }
 
@@ -256,7 +256,7 @@ module.exports = function(Notification) {
       let userChannelIdQry = userChannelIds
       if (userChannelIds instanceof Array) {
         userChannelIdQry = {
-          inq: userChannelIds
+          inq: userChannelIds,
         }
       }
       Notification.app.models.Bounce.updateAll(
@@ -266,18 +266,18 @@ module.exports = function(Notification) {
           userChannelId: userChannelIdQry,
           or: [
             {
-              latestNotificationStarted: undefined
+              latestNotificationStarted: undefined,
             },
             {
               latestNotificationStarted: {
-                lt: data.updated
-              }
-            }
-          ]
+                lt: data.updated,
+              },
+            },
+          ],
         },
         {
           latestNotificationStarted: data.updated,
-          latestNotificationEnded: Date.now()
+          latestNotificationEnded: Date.now(),
         },
         cb
       )
@@ -286,7 +286,7 @@ module.exports = function(Notification) {
     switch (data.isBroadcast) {
       case false: {
         let tokenData = _.assignIn({}, ctx.subscription, {
-          data: data.data
+          data: data.data,
         })
         var textBody =
           data.message.textBody &&
@@ -327,8 +327,8 @@ module.exports = function(Notification) {
                 list: {
                   id:
                     data.httpHost + '/' + encodeURIComponent(data.serviceName),
-                  unsubscribe: listUnsub
-                }
+                  unsubscribe: listUnsub,
+                },
               }
               if (handleBounce && inboundSmtpServerDomain) {
                 let bounceEmail = Notification.mailMerge(
@@ -338,10 +338,10 @@ module.exports = function(Notification) {
                 )
                 mailOptions.envelope = {
                   from: bounceEmail,
-                  to: data.userChannelId
+                  to: data.userChannelId,
                 }
               }
-              Notification.sendEmail(mailOptions, err => {
+              Notification.sendEmail(mailOptions, (err) => {
                 if (err) {
                   return cb(err)
                 }
@@ -363,19 +363,19 @@ module.exports = function(Notification) {
           'notification'
         ).logSuccessfulBroadcastDispatches
         let startIdx = ctx.args.start
-        let broadcastToChunkSubscribers = broadcastToChunkSubscribersCB => {
+        let broadcastToChunkSubscribers = (broadcastToChunkSubscribersCB) => {
           Notification.app.models.Subscription.find(
             {
               where: {
                 serviceName: data.serviceName,
                 state: 'confirmed',
-                channel: data.channel
+                channel: data.channel,
               },
               order: 'created ASC',
               skip: startIdx,
-              limit: broadcastSubscriberChunkSize
+              limit: broadcastSubscriberChunkSize,
             },
-            async function(err, subscribers) {
+            async function (err, subscribers) {
               let jmespathSearchOpts = {}
               const ft = Notification.app.get('notification')
                 .broadcastCustomFilterFunctions
@@ -384,7 +384,7 @@ module.exports = function(Notification) {
               }
               let tasks = []
               await Promise.all(
-                subscribers.map(async e => {
+                subscribers.map(async (e) => {
                   if (e.broadcastPushNotificationFilter && data.data) {
                     let match
                     try {
@@ -398,14 +398,14 @@ module.exports = function(Notification) {
                       return
                     }
                   }
-                  tasks.push(function(cb) {
-                    var notificationMsgCB = function(err) {
+                  tasks.push(function (cb) {
+                    var notificationMsgCB = function (err) {
                       let res = {}
                       if (err) {
                         res.fail = {
                           subscriptionId: e.id,
                           userChannelId: e.userChannelId,
-                          error: err
+                          error: err,
                         }
                       } else if (
                         logSuccessfulBroadcastDispatches ||
@@ -416,7 +416,7 @@ module.exports = function(Notification) {
                       return cb(null, res)
                     }
                     let tokenData = _.assignIn({}, e, {
-                      data: data.data
+                      data: data.data,
                     })
                     var textBody =
                       data.message.textBody &&
@@ -478,8 +478,8 @@ module.exports = function(Notification) {
                               data.httpHost +
                               '/' +
                               encodeURIComponent(data.serviceName),
-                            unsubscribe: listUnsub
-                          }
+                            unsubscribe: listUnsub,
+                          },
                         }
                         if (handleBounce && inboundSmtpServerDomain) {
                           let bounceEmail = Notification.mailMerge(
@@ -489,7 +489,7 @@ module.exports = function(Notification) {
                           )
                           mailOptions.envelope = {
                             from: bounceEmail,
-                            to: e.userChannelId
+                            to: e.userChannelId,
                           }
                         }
                         Notification.sendEmail(mailOptions, notificationMsgCB)
@@ -498,10 +498,10 @@ module.exports = function(Notification) {
                   })
                 })
               )
-              parallel(tasks, function(err, resArr) {
+              parallel(tasks, function (err, resArr) {
                 let ret = {
                   fail: [],
-                  success: []
+                  success: [],
                 }
                 for (res of resArr) {
                   if (res.fail) {
@@ -516,29 +516,29 @@ module.exports = function(Notification) {
           )
         }
         if (typeof startIdx !== 'number') {
-          let postBroadcastProcessing = function(postBroadcastProcessingCb) {
+          let postBroadcastProcessing = function (postBroadcastProcessingCb) {
             Notification.app.models.Subscription.find(
               {
                 fields: {
-                  userChannelId: true
+                  userChannelId: true,
                 },
                 where: {
                   id: {
-                    inq: data.successfulDispatches
-                  }
-                }
+                    inq: data.successfulDispatches,
+                  },
+                },
               },
               (err, res) => {
-                let userChannelIds = res.map(e => e.userChannelId)
+                let userChannelIds = res.map((e) => e.userChannelId)
                 const errUserChannelIds = (data.failedDispatches || []).map(
-                  e => e.userChannelId
+                  (e) => e.userChannelId
                 )
                 _.pullAll(userChannelIds, errUserChannelIds)
                 updateBounces(userChannelIds, data, postBroadcastProcessingCb)
               }
             )
           }
-          let postBroadcastProcessingCb = function(err, res) {
+          let postBroadcastProcessingCb = function (err, res) {
             if (!logSuccessfulBroadcastDispatches) {
               delete data.successfulDispatches
             }
@@ -550,16 +550,16 @@ module.exports = function(Notification) {
               }
               data.save(
                 {
-                  httpContext: ctx
+                  httpContext: ctx,
                 },
-                function(errSave) {
+                function (errSave) {
                   if (typeof data.asyncBroadcastPushNotification === 'string') {
                     let options = {
                       url: data.asyncBroadcastPushNotification,
                       headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                       },
-                      data: data
+                      data: data,
                     }
                     Notification.request.post(options)
                   }
@@ -571,9 +571,9 @@ module.exports = function(Notification) {
             {
               serviceName: data.serviceName,
               state: 'confirmed',
-              channel: data.channel
+              channel: data.channel,
             },
-            function(err, count) {
+            function (err, count) {
               if (count <= broadcastSubscriberChunkSize) {
                 startIdx = 0
                 broadcastToChunkSubscribers((err, res) => {
@@ -596,7 +596,7 @@ module.exports = function(Notification) {
                     ctx.req.protocol + '://' + ctx.req.get('host')
                 }
 
-                let q = queue(function(task, cb) {
+                let q = queue(function (task, cb) {
                   let uri =
                     httpHost +
                     restApiRoot +
@@ -606,49 +606,49 @@ module.exports = function(Notification) {
                     task.startIdx
                   Notification.request
                     .get(uri)
-                    .then(function(response) {
+                    .then(function (response) {
                       const body = response.data
                       if (response.statusCode === 200) {
                         return cb && cb(null, body)
                       }
                       throw new Error(statusCode)
                     })
-                    .catch(function(error) {
+                    .catch(function (error) {
                       Notification.app.models.Subscription.find(
                         {
                           where: {
                             serviceName: data.serviceName,
                             state: 'confirmed',
-                            channel: data.channel
+                            channel: data.channel,
                           },
                           order: 'created ASC',
                           skip: task.startIdx,
                           limit: broadcastSubscriberChunkSize,
                           fields: {
-                            userChannelId: true
-                          }
+                            userChannelId: true,
+                          },
                         },
-                        function(err, subs) {
+                        function (err, subs) {
                           return (
                             cb &&
-                            cb(err, subs && subs.map(e => e.userChannelId))
+                            cb(err, subs && subs.map((e) => e.userChannelId))
                           )
                         }
                       )
                     })
                 }, broadcastSubRequestBatchSize)
-                q.drain(function() {
+                q.drain(function () {
                   postBroadcastProcessing(postBroadcastProcessingCb)
                 })
                 let queuedTasks = [],
                   i = 0
                 while (i < chunks) {
                   queuedTasks.push({
-                    startIdx: i * broadcastSubscriberChunkSize
+                    startIdx: i * broadcastSubscriberChunkSize,
                   })
                   i++
                 }
-                q.push(queuedTasks, function(err, res) {
+                q.push(queuedTasks, function (err, res) {
                   if (err) {
                     data.state = 'error'
                     return
@@ -690,7 +690,7 @@ module.exports = function(Notification) {
    * @param {Function(Error, array)} callback
    */
 
-  Notification.prototype.broadcastToChunkSubscribers = function(
+  Notification.prototype.broadcastToChunkSubscribers = function (
     options,
     start,
     callback
