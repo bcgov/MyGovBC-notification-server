@@ -190,7 +190,7 @@ module.exports = function (Subscription) {
     }
     switch (data.channel) {
       case 'sms':
-        Subscription.sendSMS(data.userChannelId, textBody, cb)
+        Subscription.sendSMS(data.userChannelId, textBody, null, cb)
         break
       default: {
         let mailOptions = {
