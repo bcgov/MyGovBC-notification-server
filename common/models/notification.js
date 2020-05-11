@@ -293,7 +293,7 @@ module.exports = function(Notification) {
           Notification.mailMerge(data.message.textBody, tokenData, ctx)
         switch (data.channel) {
           case 'sms':
-            Notification.sendSMS(data.userChannelId, textBody, cb)
+            Notification.sendSMS(data.userChannelId, textBody, tokenData, cb)
             break
           default:
             {
@@ -430,6 +430,7 @@ module.exports = function(Notification) {
                         Notification.sendSMS(
                           e.userChannelId,
                           textBody,
+                          tokenData,
                           notificationMsgCB
                         )
                         break

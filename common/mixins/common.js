@@ -1,16 +1,16 @@
 let axios = require('axios')
-module.exports = function(Model, options) {
+module.exports = function (Model, options) {
   var ipRangeCheck = require('ip-range-check')
   var _ = require('lodash')
   var toSentence = require('underscore.string/toSentence')
   var pluralize = require('pluralize')
-  Model.createOptionsFromRemotingContext = function(ctx) {
+  Model.createOptionsFromRemotingContext = function (ctx) {
     var base = this.base.createOptionsFromRemotingContext(ctx)
     base.httpContext = ctx
     return base
   }
 
-  Model.isAdminReq = function(httpCtx, ignoreAccessToken, ignoreSurrogate) {
+  Model.isAdminReq = function (httpCtx, ignoreAccessToken, ignoreSurrogate) {
     // internal requests
     if (!httpCtx || !httpCtx.req) {
       return true
@@ -36,14 +36,14 @@ module.exports = function(Model, options) {
 
     var adminIps = Model.app.get('adminIps') || Model.app.get('defaultAdminIps')
     if (adminIps) {
-      return adminIps.some(function(e, i) {
+      return adminIps.some(function (e, i) {
         return ipRangeCheck(httpCtx.req.ip, e)
       })
     }
     return false
   }
 
-  Model.getCurrentUser = function(httpCtx) {
+  Model.getCurrentUser = function (httpCtx) {
     // internal requests
     if (!httpCtx) return null
 
@@ -65,7 +65,7 @@ module.exports = function(Model, options) {
     }
     // rely on express 'trust proxy' settings to obtain real ip
     var realIp = httpCtx.req.ip
-    var isFromSM = siteMinderReverseProxyIps.some(function(e) {
+    var isFromSM = siteMinderReverseProxyIps.some(function (e) {
       return ipRangeCheck(realIp, e)
     })
     return isFromSM ? currUser : null
@@ -73,7 +73,7 @@ module.exports = function(Model, options) {
 
   let smsClient
   const Twillio = require('twilio')
-  Model.sendSMS = async function(to, textBody, cb) {
+  Model.sendSMS = async function (to, textBody, data, cb) {
     let smsServiceProvider = Model.app.get('smsServiceProvider')
     let smsConfig = Model.app.get('sms')[smsServiceProvider]
     switch (smsServiceProvider) {
@@ -82,17 +82,17 @@ module.exports = function(Model, options) {
           let url = `${smsConfig['apiUrlPrefix']}${
             smsConfig['accountKey']
           }/${encodeURIComponent(to)}`
-          await axios.post(
-            url,
-            {
-              MessageBody: textBody
+          let body = {
+            MessageBody: textBody,
+          }
+          if (data && data.id) {
+            body.Reference = data.id
+          }
+          await axios.post(url, body, {
+            headers: {
+              'Content-Type': 'application/json;charset=UTF-8',
             },
-            {
-              headers: {
-                'Content-Type': 'application/json;charset=UTF-8'
-              }
-            }
-          )
+          })
         } catch (ex) {
           return cb && cb(ex)
         }
@@ -110,9 +110,9 @@ module.exports = function(Model, options) {
           {
             to: to,
             from: smsConfig.fromNumber,
-            body: textBody
+            body: textBody,
           },
-          function(err, message) {
+          function (err, message) {
             cb && cb(err, message)
           }
         )
@@ -122,7 +122,7 @@ module.exports = function(Model, options) {
   let nodemailer = require('nodemailer')
   const directTransport = require('nodemailer-direct-transport')
   let transporter
-  Model.sendEmail = function(mailOptions, cb) {
+  Model.sendEmail = function (mailOptions, cb) {
     return new Promise((resolve, reject) => {
       if (!transporter) {
         let smtpCfg = Model.app.get('smtp') || Model.app.get('defaultSmtp')
@@ -132,7 +132,7 @@ module.exports = function(Model, options) {
           transporter = nodemailer.createTransport(smtpCfg)
         }
       }
-      transporter.sendMail(mailOptions, function(error, info) {
+      transporter.sendMail(mailOptions, function (error, info) {
         try {
           if (!error && info.accepted.length < 1) {
             error = new Error('delivery failed')
@@ -151,7 +151,7 @@ module.exports = function(Model, options) {
     })
   }
 
-  Model.mailMerge = function(srcTxt, data, httpCtx) {
+  Model.mailMerge = function (srcTxt, data, httpCtx) {
     let output = srcTxt
     try {
       output = output.replace(
@@ -281,7 +281,7 @@ module.exports = function(Model, options) {
         // substitute all other tokens with matching data.data properties
         let matches = output.match(/{.+?}/g)
         if (matches) {
-          matches.forEach(function(e) {
+          matches.forEach(function (e) {
             try {
               let token = e.match(/{(.+)}/)[1]
               let val = _.get(data.data, token)
@@ -296,7 +296,7 @@ module.exports = function(Model, options) {
     return output
   }
 
-  Model.updateTimestamp = function(ctx, next) {
+  Model.updateTimestamp = function (ctx, next) {
     let token
     try {
       token =
@@ -308,14 +308,14 @@ module.exports = function(Model, options) {
         ctx.instance.updated = new Date()
         ctx.instance.updatedBy = {
           ip: ctx.options.httpContext && ctx.options.httpContext.req.ip,
-          eventSrc: ctx.options.eventSrc
+          eventSrc: ctx.options.eventSrc,
         }
         if (token && token.userId) {
           ctx.instance.updatedBy.adminUser = token.userId
         }
         if (ctx.isNewInstance) {
           ctx.instance.createdBy = {
-            ip: ctx.options.httpContext.req.ip
+            ip: ctx.options.httpContext.req.ip,
           }
           if (token && token.userId) {
             ctx.instance.createdBy.adminUser = token.userId
@@ -325,14 +325,14 @@ module.exports = function(Model, options) {
         ctx.data.updated = new Date()
         ctx.data.updatedBy = {
           ip: ctx.options.httpContext && ctx.options.httpContext.req.ip,
-          eventSrc: ctx.options.eventSrc
+          eventSrc: ctx.options.eventSrc,
         }
         if (token && token.userId) {
           ctx.data.updatedBy.adminUser = token.userId
         }
         if (ctx.isNewInstance) {
           ctx.data.createdBy = {
-            ip: ctx.options.httpContext.req.ip
+            ip: ctx.options.httpContext.req.ip,
           }
           if (token && token.userId) {
             ctx.data.createdBy.adminUser = token.userId
@@ -347,14 +347,14 @@ module.exports = function(Model, options) {
     Model.updateTimestamp(ctx, next)
   })
 
-  Model.getMergedConfig = async function(configName, serviceName, next) {
+  Model.getMergedConfig = async function (configName, serviceName, next) {
     let data
     try {
       data = await Model.app.models.Configuration.findOne({
         where: {
           name: configName,
-          serviceName: serviceName
-        }
+          serviceName: serviceName,
+        },
       })
     } catch (ex) {
       if (next) {
