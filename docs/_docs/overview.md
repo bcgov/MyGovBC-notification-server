@@ -35,6 +35,7 @@ permalink: /docs/overview/
 * bulk unsubscription
 * [list-unsubscribe](http://www.list-unsubscribe.com/) by email
 * track bounces and unsubscribe the recipient from all subscriptions when hard bounce count exceeds threshold 
+* sms user can unsubscribe by replying a shortcode keyword with Swift sms provider
 
 ### mail merge
 
