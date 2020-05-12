@@ -762,6 +762,19 @@ module.exports = function (Subscription) {
     )
   }
   Subscription.handleSwiftUnsubscription = function (options, cb) {
+    /*
+    sample swift post
+    { PhoneNumber: '1250nnnnnnn',
+      ReceivedDate: '2020-05-11 19:56:52',
+      MessageBody: '<case insensitive keyword>',
+      Destination: '79438',
+      AccountKey: 'xxx',
+      Reference: '5eb9e53ac8de837a99fd214a',
+      OutgoingMessageID: '789091964',
+      MessageNumber: '59255257',
+      hash: '1111' 
+    }
+    */
     console.log(options.httpContext.req.body)
   }
 }
