@@ -773,19 +773,22 @@ module.exports = function (Subscription) {
       Reference: '5eb9e53ac8de837a99fd214a',
       OutgoingMessageID: '789091964',
       MessageNumber: '59255257',
-      hash: '1111' 
+      notifyBCSwiftKey: '1111' 
     }
     */
     let smsConfig = Subscription.app.get('sms')
-    if (smsConfig.swift && smsConfig.swift.notifyBCSwiftKey) {
-      if (
-        smsConfig.swift.notifyBCSwiftKey !==
-        options.httpContext.req.body.notifyBCSwiftKey
-      ) {
-        let error = new Error('Forbidden')
-        error.status = 403
-        throw error
-      }
+    if (!smsConfig || !smsConfig.swift || !smsConfig.swift.notifyBCSwiftKey) {
+      let error = new Error('Forbidden')
+      error.status = 403
+      throw error
+    }
+    if (
+      smsConfig.swift.notifyBCSwiftKey !==
+      options.httpContext.req.body.notifyBCSwiftKey
+    ) {
+      let error = new Error('Forbidden')
+      error.status = 403
+      throw error
     }
     let whereClause = {
       state: 'confirmed',
