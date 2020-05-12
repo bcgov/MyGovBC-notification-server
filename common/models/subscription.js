@@ -776,6 +776,17 @@ module.exports = function (Subscription) {
       hash: '1111' 
     }
     */
+    let smsConfig = Subscription.app.get('sms')
+    if (smsConfig.swift && smsConfig.swift.notifyBCSwiftKey) {
+      if (
+        smsConfig.swift.notifyBCSwiftKey !==
+        options.httpContext.req.body.notifyBCSwiftKey
+      ) {
+        let error = new Error('Forbidden')
+        error.status = 403
+        throw error
+      }
+    }
     let whereClause = {
       state: 'confirmed',
       channel: 'sms',
@@ -801,11 +812,10 @@ module.exports = function (Subscription) {
     let subscription = await Subscription.findOne({
       where: whereClause,
     })
-    if (subscription) {
-      await subscription.deleteItemById(
-        options,
-        subscription.unsubscriptionCode
-      )
+    if (!subscription) {
+      options.httpContext.res.send('ok')
+      return
     }
+    await subscription.deleteItemById(options, subscription.unsubscriptionCode)
   }
 }
