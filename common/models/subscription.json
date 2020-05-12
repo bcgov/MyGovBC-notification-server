@@ -235,7 +235,7 @@
       "returns": [
         {
           "arg": "result",
-          "type": "string",
+          "type": "any",
           "root": true,
           "description": "operation outcome"
         }

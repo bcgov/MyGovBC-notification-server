@@ -761,8 +761,9 @@ module.exports = function (Subscription) {
       }
     )
   }
-  Subscription.handleSwiftUnsubscription = function (options, cb) {
+  Subscription.handleSwiftUnsubscription = async function (options) {
     /*
+    options.httpContext.req.body
     sample swift post
     { PhoneNumber: '1250nnnnnnn',
       ReceivedDate: '2020-05-11 19:56:52',
@@ -775,6 +776,36 @@ module.exports = function (Subscription) {
       hash: '1111' 
     }
     */
-    console.log(options.httpContext.req.body)
+    let whereClause = {
+      state: 'confirmed',
+      channel: 'sms',
+    }
+    if (options.httpContext.req.body.Reference) {
+      whereClause.id = options.httpContext.req.body.Reference
+    } else {
+      if (!options.httpContext.req.body.PhoneNumber) {
+        let error = new Error('Forbidden')
+        error.status = 403
+        throw error
+      }
+      let phoneNumberArr = options.httpContext.req.body.PhoneNumber.split('')
+      // country code is optional
+      if (phoneNumberArr[0] === '1') {
+        phoneNumberArr[0] = '1?'
+      }
+      let phoneNumberRegex = new RegExp(phoneNumberArr.join('-?'))
+      whereClause.userChannelId = {
+        regexp: phoneNumberRegex,
+      }
+    }
+    let subscription = await Subscription.findOne({
+      where: whereClause,
+    })
+    if (subscription) {
+      await subscription.deleteItemById(
+        options,
+        subscription.unsubscriptionCode
+      )
+    }
   }
 }
