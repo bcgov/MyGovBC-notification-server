@@ -190,7 +190,7 @@ module.exports = function (Subscription) {
     }
     switch (data.channel) {
       case 'sms':
-        Subscription.sendSMS(data.userChannelId, textBody, null, cb)
+        Subscription.sendSMS(data.userChannelId, textBody, data, cb)
         break
       default: {
         let mailOptions = {
@@ -416,7 +416,7 @@ module.exports = function (Subscription) {
                   this,
                   options.httpContext
                 )
-                Subscription.sendSMS(this.userChannelId, textBody)
+                Subscription.sendSMS(this.userChannelId, textBody, this)
                 break
               case 'email': {
                 var subject = Subscription.mailMerge(
