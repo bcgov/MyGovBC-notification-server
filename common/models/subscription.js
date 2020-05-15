@@ -776,6 +776,11 @@ module.exports = function (Subscription) {
       notifyBCSwiftKey: '1111' 
     }
     */
+    if (Subscription.app.get('smsServiceProvider') !== 'swift') {
+      let error = new Error('Forbidden')
+      error.status = 403
+      throw error
+    }
     let smsConfig = Subscription.app.get('sms')
     if (!smsConfig || !smsConfig.swift || !smsConfig.swift.notifyBCSwiftKey) {
       let error = new Error('Forbidden')
