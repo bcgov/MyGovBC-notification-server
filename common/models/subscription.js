@@ -13,6 +13,7 @@ module.exports = function (Subscription) {
     'patchAttributes',
     'replaceById',
     'deleteItemById',
+    'unDeleteItemById',
     'verify',
     'count',
     'getSubscribedServiceNames',
