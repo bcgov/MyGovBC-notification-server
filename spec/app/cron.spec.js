@@ -317,7 +317,7 @@ describe('CRON checkRssConfigUpdates', function() {
     spyOn(cronTasks, 'request').and.callFake(async function() {
       var output = fs.createReadStream(__dirname + path.sep + 'rss.xml')
       return {
-        statusCode: 200,
+        status: 200,
         data: output
       }
     })
@@ -457,7 +457,7 @@ describe('CRON checkRssConfigUpdates', function() {
   it('should handle error', async function() {
     cronTasks.request = jasmine.createSpy().and.callFake(async function() {
       return {
-        statusCode: 300
+        status: 300
       }
     })
     try {

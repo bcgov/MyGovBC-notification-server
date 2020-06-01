@@ -281,7 +281,7 @@ module.exports.checkRssConfigUpdates = function() {
                         responseType: 'stream'
                       })
                       .then(function(res) {
-                        if (res.statusCode !== 200) {
+                        if (res.status !== 200) {
                           reject(new Error('Bad status code'))
                         } else {
                           res.data.pipe(feedparser)
