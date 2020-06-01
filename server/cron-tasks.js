@@ -391,9 +391,12 @@ module.exports.checkRssConfigUpdates = function () {
                             headers: {
                               'Content-Type': 'application/json',
                             },
-                            data: notificationObject,
                           }
-                          module.exports.request.post(url, options)
+                          module.exports.request.post(
+                            url,
+                            notificationObject,
+                            options
+                          )
                         }
                       })
                       lastSavedRssData.items = items.concat(

@@ -558,10 +558,10 @@ module.exports = function (Notification) {
                       headers: {
                         'Content-Type': 'application/json',
                       },
-                      data: data,
                     }
                     Notification.request.post(
                       data.asyncBroadcastPushNotification,
+                      data,
                       options
                     )
                   }

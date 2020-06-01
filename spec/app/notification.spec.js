@@ -568,6 +568,7 @@ describe('POST /notifications', function () {
     expect(data[0].state).toBe('sent')
     expect(app.models.Notification.request.post).toHaveBeenCalledWith(
       'http://foo.com',
+      jasmine.any(Object),
       jasmine.any(Object)
     )
   })
@@ -682,6 +683,7 @@ describe('POST /notifications', function () {
     expect(data[0].state).toBe('sent')
     expect(app.models.Notification.request.post).toHaveBeenCalledWith(
       'http://foo.com',
+      jasmine.any(Object),
       jasmine.any(Object)
     )
     expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)

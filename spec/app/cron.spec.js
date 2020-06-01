@@ -387,10 +387,9 @@ describe('CRON checkRssConfigUpdates', function () {
     expect(cronTasks.request.post).toHaveBeenCalledWith(
       'http://foo/api/notifications',
       joc({
-        data: joc({
-          httpHost: 'http://foo',
-        }),
-      })
+        httpHost: 'http://foo',
+      }),
+      jasmine.any(Object)
     )
     let results = await app.models.Rss.find()
     expect(results[0].items[0].author).toBe('foo')
