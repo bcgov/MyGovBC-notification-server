@@ -4,14 +4,14 @@ const request = require('axios')
 var _ = require('lodash')
 
 module.exports.request = request
-module.exports.purgeData = async function() {
+module.exports.purgeData = async function () {
   var app = arguments[0]
   var cronConfig = app.get('cron').purgeData || {}
 
   return new Promise((resolve, reject) => {
     parallel(
       [
-        function(cb) {
+        function (cb) {
           // delete all non-inApp old notifications
           let retentionDays =
             cronConfig.pushNotificationRetentionDays ||
@@ -19,13 +19,13 @@ module.exports.purgeData = async function() {
           app.models.Notification.destroyAll(
             {
               channel: {
-                neq: 'inApp'
+                neq: 'inApp',
               },
               created: {
-                lt: Date.now() - retentionDays * 86400000
-              }
+                lt: Date.now() - retentionDays * 86400000,
+              },
             },
-            function(err, data) {
+            function (err, data) {
               if (!err && data && data.count > 0) {
                 console.info(
                   new Date().toLocaleString() +
@@ -38,7 +38,7 @@ module.exports.purgeData = async function() {
             }
           )
         },
-        function(cb) {
+        function (cb) {
           // delete all expired inApp notifications
           let retentionDays =
             cronConfig.expiredInAppNotificationRetentionDays ||
@@ -47,10 +47,10 @@ module.exports.purgeData = async function() {
             {
               channel: 'inApp',
               validTill: {
-                lt: Date.now() - retentionDays * 86400000
-              }
+                lt: Date.now() - retentionDays * 86400000,
+              },
             },
-            function(err, data) {
+            function (err, data) {
               if (!err && data && data.count > 0) {
                 console.info(
                   new Date().toLocaleString() +
@@ -63,14 +63,14 @@ module.exports.purgeData = async function() {
             }
           )
         },
-        function(cb) {
+        function (cb) {
           // delete all deleted inApp notifications
           app.models.Notification.destroyAll(
             {
               channel: 'inApp',
-              state: 'deleted'
+              state: 'deleted',
             },
-            function(err, data) {
+            function (err, data) {
               if (!err && data && data.count > 0) {
                 console.info(
                   new Date().toLocaleString() +
@@ -83,7 +83,7 @@ module.exports.purgeData = async function() {
             }
           )
         },
-        function(cb) {
+        function (cb) {
           // delete all old non-confirmed subscriptions
           let retentionDays =
             cronConfig.nonConfirmedSubscriptionRetentionDays ||
@@ -91,13 +91,13 @@ module.exports.purgeData = async function() {
           app.models.Subscription.destroyAll(
             {
               state: {
-                neq: 'confirmed'
+                neq: 'confirmed',
               },
               updated: {
-                lt: Date.now() - retentionDays * 86400000
-              }
+                lt: Date.now() - retentionDays * 86400000,
+              },
             },
-            function(err, data) {
+            function (err, data) {
               if (!err && data && data.count > 0) {
                 console.info(
                   new Date().toLocaleString() +
@@ -110,7 +110,7 @@ module.exports.purgeData = async function() {
             }
           )
         },
-        function(cb) {
+        function (cb) {
           // purge deleted bounces
           let retentionDays =
             cronConfig.deletedBounceRetentionDays ||
@@ -119,10 +119,10 @@ module.exports.purgeData = async function() {
             {
               state: 'deleted',
               updated: {
-                lt: Date.now() - retentionDays * 86400000
-              }
+                lt: Date.now() - retentionDays * 86400000,
+              },
             },
-            function(err, data) {
+            function (err, data) {
               if (!err && data && data.count > 0) {
                 console.info(
                   new Date().toLocaleString() +
@@ -134,9 +134,9 @@ module.exports.purgeData = async function() {
               return cb(err, data)
             }
           )
-        }
+        },
       ],
-      function(err, results) {
+      function (err, results) {
         if (err) {
           reject(err)
         } else {
@@ -147,7 +147,7 @@ module.exports.purgeData = async function() {
   })
 }
 
-module.exports.dispatchLiveNotifications = function() {
+module.exports.dispatchLiveNotifications = function () {
   var app = arguments[0]
   return new Promise((resolve, reject) => {
     app.models.Notification.find(
@@ -155,14 +155,14 @@ module.exports.dispatchLiveNotifications = function() {
         where: {
           state: 'new',
           channel: {
-            neq: 'inApp'
+            neq: 'inApp',
           },
           invalidBefore: {
-            lt: Date.now()
-          }
-        }
+            lt: Date.now(),
+          },
+        },
       },
-      function(err, livePushNotifications) {
+      function (err, livePushNotifications) {
         if (
           err ||
           (livePushNotifications && livePushNotifications.length === 0)
@@ -170,24 +170,24 @@ module.exports.dispatchLiveNotifications = function() {
           err ? reject(err) : resolve(livePushNotifications)
           return
         }
-        let notificationTasks = livePushNotifications.map(function(
+        let notificationTasks = livePushNotifications.map(function (
           livePushNotification
         ) {
-          return function(cb) {
+          return function (cb) {
             livePushNotification.state = 'sending'
             if (
               livePushNotification.asyncBroadcastPushNotification === undefined
             ) {
               livePushNotification.asyncBroadcastPushNotification = true
             }
-            livePushNotification.save(function(errSave) {
+            livePushNotification.save(function (errSave) {
               if (errSave) {
                 return cb(null, errSave)
               }
               let ctx = {}
               ctx.args = {}
               ctx.args.data = livePushNotification
-              app.models.Notification.preCreationValidation(ctx, function(
+              app.models.Notification.preCreationValidation(ctx, function (
                 errPreCreationValidation
               ) {
                 if (errPreCreationValidation) {
@@ -196,7 +196,7 @@ module.exports.dispatchLiveNotifications = function() {
                 app.models.Notification.dispatchNotification(
                   ctx,
                   livePushNotification,
-                  function(errDispatchNotification) {
+                  function (errDispatchNotification) {
                     return cb(null, errDispatchNotification)
                   }
                 )
@@ -204,7 +204,7 @@ module.exports.dispatchLiveNotifications = function() {
             })
           }
         })
-        parallel(notificationTasks, function(err, results) {
+        parallel(notificationTasks, function (err, results) {
           err ? reject(err) : resolve(results)
           return
         })
@@ -215,7 +215,7 @@ module.exports.dispatchLiveNotifications = function() {
 
 var lastConfigCheck = 0
 var rssTasks = {}
-module.exports.checkRssConfigUpdates = function() {
+module.exports.checkRssConfigUpdates = function () {
   var app = arguments[0]
   var CronJob = require('cron').CronJob
   let runOnInit = false
@@ -228,18 +228,18 @@ module.exports.checkRssConfigUpdates = function() {
         where: {
           name: 'notification',
           'value.rss': {
-            neq: null
-          }
-        }
+            neq: null,
+          },
+        },
       },
-      function(err, rssNtfctnConfigItems) {
+      function (err, rssNtfctnConfigItems) {
         /*jshint loopfunc: true */
         for (var key in rssTasks) {
           if (!rssTasks.hasOwnProperty(key)) {
             continue
           }
 
-          let rssNtfctnConfigItem = rssNtfctnConfigItems.find(function(e) {
+          let rssNtfctnConfigItem = rssNtfctnConfigItems.find(function (e) {
             return e.id.toString() === key
           })
 
@@ -251,36 +251,36 @@ module.exports.checkRssConfigUpdates = function() {
             delete rssTasks[key]
           }
         }
-        rssNtfctnConfigItems.forEach(function(rssNtfctnConfigItem) {
+        rssNtfctnConfigItems.forEach(function (rssNtfctnConfigItem) {
           if (!rssTasks[rssNtfctnConfigItem.id]) {
             rssTasks[rssNtfctnConfigItem.id] = new CronJob({
               cronTime: rssNtfctnConfigItem.value.rss.timeSpec,
-              onTick: function() {
+              onTick: function () {
                 app.models.Rss.findOrCreate(
                   {
                     where: {
-                      serviceName: rssNtfctnConfigItem.serviceName
-                    }
+                      serviceName: rssNtfctnConfigItem.serviceName,
+                    },
                   },
                   {
                     serviceName: rssNtfctnConfigItem.serviceName,
-                    items: []
+                    items: [],
                   },
-                  function(err, lastSavedRssData) {
+                  function (err, lastSavedRssData) {
                     var lastSavedRssItems = []
                     try {
                       lastSavedRssItems = lastSavedRssData.items
                     } catch (ex) {}
                     const feedparser = new FeedParser({
-                      addmeta: false
+                      addmeta: false,
                     })
                     module.exports
                       .request({
                         method: 'get',
                         url: rssNtfctnConfigItem.value.rss.url,
-                        responseType: 'stream'
+                        responseType: 'stream',
                       })
-                      .then(function(res) {
+                      .then(function (res) {
                         if (res.status !== 200) {
                           reject(new Error('Bad status code'))
                         } else {
@@ -289,14 +289,14 @@ module.exports.checkRssConfigUpdates = function() {
                       })
                       .catch(reject)
 
-                    feedparser.on('error', function(error) {
+                    feedparser.on('error', function (error) {
                       // always handle errors
                       console.info(error)
                     })
 
                     var items = []
                     let ts = new Date()
-                    feedparser.on('readable', function() {
+                    feedparser.on('readable', function () {
                       // This is where the action is!
                       var stream = this // `this` is `feedparser`, which is a stream
                       var meta = this.meta // **NOTE** the "meta" is always available in the context of the feedparser instance
@@ -306,7 +306,7 @@ module.exports.checkRssConfigUpdates = function() {
                         items.push(item)
                       }
                     })
-                    feedparser.on('end', function() {
+                    feedparser.on('end', function () {
                       let itemKeyField =
                         rssNtfctnConfigItem.value.rss.itemKeyField || 'guid'
                       let fieldsToCheckForUpdate = rssNtfctnConfigItem.value.rss
@@ -314,7 +314,7 @@ module.exports.checkRssConfigUpdates = function() {
                       var newOrUpdatedItems = _.differenceWith(
                         items,
                         lastSavedRssItems,
-                        function(arrVal, othVal) {
+                        function (arrVal, othVal) {
                           if (arrVal[itemKeyField] !== othVal[itemKeyField]) {
                             return false
                           }
@@ -323,14 +323,16 @@ module.exports.checkRssConfigUpdates = function() {
                           ) {
                             return arrVal[itemKeyField] === othVal[itemKeyField]
                           }
-                          return !fieldsToCheckForUpdate.some(compareField => {
-                            return (
-                              arrVal[compareField] &&
-                              othVal[compareField] &&
-                              arrVal[compareField].toString() !==
-                                othVal[compareField].toString()
-                            )
-                          })
+                          return !fieldsToCheckForUpdate.some(
+                            (compareField) => {
+                              return (
+                                arrVal[compareField] &&
+                                othVal[compareField] &&
+                                arrVal[compareField].toString() !==
+                                  othVal[compareField].toString()
+                              )
+                            }
+                          )
                         }
                       )
                       let outdatedItemRetentionGenerations =
@@ -344,7 +346,7 @@ module.exports.checkRssConfigUpdates = function() {
                       var retainedOutdatedItems = _.differenceWith(
                         lastSavedRssItems,
                         items,
-                        function(arrVal, othVal) {
+                        function (arrVal, othVal) {
                           try {
                             let age =
                               ts.getTime() - arrVal._notifyBCLastPoll.getTime()
@@ -359,7 +361,7 @@ module.exports.checkRssConfigUpdates = function() {
                         }
                       )
                       // notify new or updated items
-                      newOrUpdatedItems.forEach(function(newOrUpdatedItem) {
+                      newOrUpdatedItems.forEach(function (newOrUpdatedItem) {
                         for (var channel in rssNtfctnConfigItem.value
                           .messageTemplates) {
                           if (
@@ -378,22 +380,20 @@ module.exports.checkRssConfigUpdates = function() {
                                 channel
                               ],
                             data: newOrUpdatedItem,
-                            httpHost: rssNtfctnConfigItem.value.httpHost
+                            httpHost: rssNtfctnConfigItem.value.httpHost,
                           }
                           let httpHost =
                             app.get('internalHttpHost') ||
                             rssNtfctnConfigItem.value.httpHost
+                          let url =
+                            httpHost + app.get('restApiRoot') + '/notifications'
                           let options = {
-                            url:
-                              httpHost +
-                              app.get('restApiRoot') +
-                              '/notifications',
                             headers: {
-                              'Content-Type': 'application/json'
+                              'Content-Type': 'application/json',
                             },
-                            data: notificationObject
+                            data: notificationObject,
                           }
-                          module.exports.request.post(options)
+                          module.exports.request.post(url, options)
                         }
                       })
                       lastSavedRssData.items = items.concat(
@@ -408,7 +408,7 @@ module.exports.checkRssConfigUpdates = function() {
                 )
               },
               start: true,
-              runOnInit: runOnInit
+              runOnInit: runOnInit,
             })
           }
         })
@@ -418,7 +418,7 @@ module.exports.checkRssConfigUpdates = function() {
   })
 }
 
-module.exports.deleteBounces = function() {
+module.exports.deleteBounces = function () {
   let app = arguments[0]
   return new Promise((resolve, reject) => {
     app.models.Bounce.find(
@@ -430,15 +430,15 @@ module.exports.deleteBounces = function() {
               Date.now() -
               app.get('cron').deleteBounces
                 .minLapsedHoursSinceLatestNotificationEnded *
-                3600000
+                3600000,
           },
           latestNotificationStarted: {
-            neq: null
+            neq: null,
           },
           bounceMessages: {
-            neq: null
-          }
-        }
+            neq: null,
+          },
+        },
       },
       (err, activeBounces) => {
         if (err) {
@@ -447,8 +447,8 @@ module.exports.deleteBounces = function() {
         }
         let deleteTasks = []
         if (activeBounces instanceof Array) {
-          deleteTasks = activeBounces.map(activeBounce => {
-            return cb => {
+          deleteTasks = activeBounces.map((activeBounce) => {
+            return (cb) => {
               let latestBounceMessageDate = activeBounce.bounceMessages[0].date
               if (
                 latestBounceMessageDate > activeBounce.latestNotificationStarted
@@ -456,7 +456,7 @@ module.exports.deleteBounces = function() {
                 return cb()
               }
               activeBounce.state = 'deleted'
-              activeBounce.save().then(res => cb(), cb)
+              activeBounce.save().then((res) => cb(), cb)
             }
           })
         }
