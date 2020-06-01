@@ -555,13 +555,15 @@ module.exports = function (Notification) {
                 function (errSave) {
                   if (typeof data.asyncBroadcastPushNotification === 'string') {
                     let options = {
-                      url: data.asyncBroadcastPushNotification,
                       headers: {
                         'Content-Type': 'application/json',
                       },
                       data: data,
                     }
-                    Notification.request.post(options)
+                    Notification.request.post(
+                      data.asyncBroadcastPushNotification,
+                      options
+                    )
                   }
                 }
               )

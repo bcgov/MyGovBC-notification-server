@@ -3,87 +3,87 @@ var request = require('supertest')
 var parallel = require('async/parallel')
 
 async function wait(ms) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, ms)
   })
 }
 
-beforeAll(done => {
-  require('../../server/server.js')(function(err, data) {
+beforeAll((done) => {
+  require('../../server/server.js')(function (err, data) {
     app = data
     done()
   })
 })
 
-describe('GET /notifications', function() {
+describe('GET /notifications', function () {
   var data
-  beforeEach(async function() {
+  beforeEach(async function () {
     data = await parallel([
-      function(cb) {
+      function (cb) {
         app.models.Notification.create(
           {
             channel: 'inApp',
             isBroadcast: true,
             message: {
               title: 'test',
-              body: 'this is a test'
+              body: 'this is a test',
             },
             serviceName: 'myService',
             validTill: '2000-01-01',
-            state: 'new'
+            state: 'new',
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Notification.create(
           {
             channel: 'inApp',
             isBroadcast: true,
             message: {
               title: 'test',
-              body: 'this is a test'
+              body: 'this is a test',
             },
             serviceName: 'myService',
             readBy: ['bar'],
-            state: 'new'
+            state: 'new',
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Notification.create(
           {
             channel: 'inApp',
             isBroadcast: true,
             message: {
               title: 'test',
-              body: 'this is a test'
+              body: 'this is a test',
             },
             serviceName: 'myService',
             deletedBy: ['bar'],
-            state: 'new'
+            state: 'new',
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Notification.create(
           {
             channel: 'inApp',
             isBroadcast: true,
             message: {
               title: 'test',
-              body: 'this is a test'
+              body: 'this is a test',
             },
             serviceName: 'myService',
             invalidBefore: '3017-05-30',
-            state: 'new'
+            state: 'new',
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Notification.create(
           {
             channel: 'email',
@@ -91,23 +91,23 @@ describe('GET /notifications', function() {
             message: {
               from: 'no_reply@invlid.local',
               subject: 'hello',
-              htmlBody: 'hello'
+              htmlBody: 'hello',
             },
             serviceName: 'myService',
-            state: 'sent'
+            state: 'sent',
           },
           cb
         )
-      }
+      },
     ])
   })
 
-  it('should be forbidden by anonymous user', async function() {
+  it('should be forbidden by anonymous user', async function () {
     let res = await request(app).get('/api/notifications')
     expect(res.statusCode).toBe(403)
   })
 
-  it('should be allowed to sm user for current, non-expired, non-deleted inApp notifications', async function() {
+  it('should be allowed to sm user for current, non-expired, non-deleted inApp notifications', async function () {
     let res = await request(app)
       .get('/api/notifications')
       .set('Accept', 'application/json')
@@ -116,10 +116,10 @@ describe('GET /notifications', function() {
     expect(res.body.length).toBe(1)
   })
 })
-describe('POST /notifications', function() {
-  beforeEach(async function() {
+describe('POST /notifications', function () {
+  beforeEach(async function () {
     data = await parallel([
-      function(cb) {
+      function (cb) {
         app.models.Subscription.create(
           {
             serviceName: 'myService',
@@ -133,74 +133,74 @@ describe('POST /notifications', function() {
               from: 'no_reply@invlid.local',
               subject: 'Subscription confirmation',
               textBody: 'enter {confirmation_code} in this email',
-              confirmationCode: '12345'
+              confirmationCode: '12345',
             },
-            unsubscriptionCode: '54321'
+            unsubscriptionCode: '54321',
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Subscription.create(
           {
             serviceName: 'myService',
             channel: 'sms',
             userChannelId: '12345',
-            state: 'confirmed'
+            state: 'confirmed',
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Subscription.create(
           {
             serviceName: 'myChunkedBroadcastService',
             channel: 'email',
             userChannelId: 'bar1@foo.com',
-            state: 'confirmed'
+            state: 'confirmed',
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Subscription.create(
           {
             serviceName: 'myChunkedBroadcastService',
             channel: 'email',
             userChannelId: 'bar2@invalid',
-            state: 'confirmed'
+            state: 'confirmed',
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Subscription.create(
           {
             serviceName: 'myFilterableBroadcastService',
             channel: 'email',
             userChannelId: 'bar2@invalid',
             state: 'confirmed',
-            broadcastPushNotificationFilter: "contains(name,'f')"
+            broadcastPushNotificationFilter: "contains(name,'f')",
           },
           cb
         )
       },
-      function(cb) {
+      function (cb) {
         app.models.Subscription.create(
           {
             serviceName: 'myInvalideEmailService',
             channel: 'email',
             userChannelId: 'bar@invalid.local',
-            state: 'confirmed'
+            state: 'confirmed',
           },
           cb
         )
-      }
+      },
     ])
   })
 
-  it('should send broadcast email notifications with proper mail merge', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should send broadcast email notifications with proper mail merge', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -213,14 +213,14 @@ describe('POST /notifications', function() {
           textBody:
             '{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}',
           htmlBody:
-            '{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}'
+            '{1}, This is a broadcast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code} {2} {1}',
         },
         data: {
           '1': 'foo',
-          '2': 'bar'
+          '2': 'bar',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
@@ -313,14 +313,14 @@ describe('POST /notifications', function() {
 
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(1)
   })
 
-  it('should send unicast email notification', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should send unicast email notification', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -333,25 +333,25 @@ describe('POST /notifications', function() {
           textBody:
             'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
           htmlBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
         },
         channel: 'email',
         userId: 'bar',
-        userChannelId: 'bar@foo.COM'
+        userChannelId: 'bar@foo.COM',
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Notification.sendEmail).toHaveBeenCalled()
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(1)
   })
 
-  it('should send unicast sms notification', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should send unicast sms notification', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -360,25 +360,25 @@ describe('POST /notifications', function() {
         serviceName: 'myService',
         message: {
           textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
         },
         channel: 'sms',
         skipSubscriptionConfirmationCheck: true,
-        userChannelId: '12345'
+        userChannelId: '12345',
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Notification.sendSMS).toHaveBeenCalled()
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(1)
   })
 
-  it('should send broadcast sms notification', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should send broadcast sms notification', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -387,24 +387,24 @@ describe('POST /notifications', function() {
         serviceName: 'myService',
         message: {
           textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
         },
         channel: 'sms',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Notification.sendSMS).toHaveBeenCalled()
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(1)
   })
 
-  it('should not send future-dated notification', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should not send future-dated notification', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -415,25 +415,25 @@ describe('POST /notifications', function() {
           from: 'no_reply@bar.com',
           subject: 'test',
           textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
         },
         channel: 'email',
         userId: 'bar',
-        invalidBefore: '3017-06-01'
+        invalidBefore: '3017-06-01',
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Notification.sendEmail).not.toHaveBeenCalled()
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(1)
   })
 
-  it('should deny skipSubscriptionConfirmationCheck unicast notification missing userChannelId', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should deny skipSubscriptionConfirmationCheck unicast notification missing userChannelId', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -444,24 +444,24 @@ describe('POST /notifications', function() {
           from: 'no_reply@bar.com',
           subject: 'test',
           textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
         },
         channel: 'email',
         userId: 'bar',
-        skipSubscriptionConfirmationCheck: true
+        skipSubscriptionConfirmationCheck: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(403)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(0)
   })
 
-  it('should deny unicast notification missing both userChannelId and userId', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should deny unicast notification missing both userChannelId and userId', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -472,21 +472,21 @@ describe('POST /notifications', function() {
           from: 'no_reply@bar.com',
           subject: 'test',
           textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
         },
-        channel: 'email'
+        channel: 'email',
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(403)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(0)
   })
 
-  it('should deny anonymous user', async function() {
+  it('should deny anonymous user', async function () {
     let res = await request(app)
       .post('/api/notifications')
       .send({
@@ -494,15 +494,15 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'This is a broadcast test'
+          textBody: 'This is a broadcast test',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(403)
   })
-  it('should deny sm user', async function() {
+  it('should deny sm user', async function () {
     let res = await request(app)
       .post('/api/notifications')
       .send({
@@ -510,26 +510,26 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'This is a broadcast test'
+          textBody: 'This is a broadcast test',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
     expect(res.statusCode).toBe(403)
   })
 
-  it('should perform async callback for broadcast push notification if asyncBroadcastPushNotification is set', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should perform async callback for broadcast push notification if asyncBroadcastPushNotification is set', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     app.models.Notification.sendEmail = jasmine
       .createSpy()
-      .and.callFake(function() {
+      .and.callFake(function () {
         let cb = arguments[arguments.length - 1]
         console.log('faking delayed sendEmail')
-        setTimeout(function() {
+        setTimeout(function () {
           return cb(null, null)
         }, 1000)
       })
@@ -543,42 +543,45 @@ describe('POST /notifications', function() {
           from: 'no_reply@bar.com',
           subject: 'test',
           textBody:
-            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}'
+            'This is a unicast test {confirmation_code} {service_name} {http_host} {rest_api_root} {subscription_id} {unsubscription_code}',
         },
         channel: 'email',
         isBroadcast: true,
-        asyncBroadcastPushNotification: 'http://foo.com'
+        asyncBroadcastPushNotification: 'http://foo.com',
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('new')
     await wait(3000)
     data = await app.models.Notification.find({
       where: {
-        serviceName: 'myService'
-      }
+        serviceName: 'myService',
+      },
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('sent')
-    expect(app.models.Notification.request.post).toHaveBeenCalledWith(jasmine.any(Object))
+    expect(app.models.Notification.request.post).toHaveBeenCalledWith(
+      'http://foo.com',
+      jasmine.any(Object)
+    )
   })
 
-  it('should send chunked sync broadcast email notifications', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should send chunked sync broadcast email notifications', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let realGet = app.models.Notification.app.get
-    spyOn(app.models.Notification.app, 'get').and.callFake(function(param) {
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
       if (param === 'notification') {
         return {
           broadcastSubscriberChunkSize: 1,
-          broadcastSubRequestBatchSize: 10
+          broadcastSubRequestBatchSize: 10,
         }
       } else {
         return realGet.call(app, param)
@@ -592,39 +595,41 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myChunkedBroadcastService'
-      }
+        serviceName: 'myChunkedBroadcastService',
+      },
     })
     expect(data.length).toBe(1)
   })
 
-  it('should send chunked async broadcast email notifications', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should send chunked async broadcast email notifications', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let realGet = app.models.Notification.app.get
-    spyOn(app.models.Notification.app, 'get').and.callFake(function(param) {
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
       if (param === 'notification') {
         return {
           broadcastSubscriberChunkSize: 1,
-          broadcastSubRequestBatchSize: 10
+          broadcastSubRequestBatchSize: 10,
         }
       } else {
         return realGet.call(app, param)
       }
     })
     spyOn(app.models.Notification.request, 'post')
-    spyOn(app.models.Notification.request, 'get').and.callFake(async function(url) {
+    spyOn(app.models.Notification.request, 'get').and.callFake(async function (
+      url
+    ) {
       let uri = url.substring(url.indexOf('/api/notifications'))
       let response = await request(app)
         .get(uri)
@@ -635,7 +640,7 @@ describe('POST /notifications', function() {
     })
     app.models.Notification.sendEmail = jasmine
       .createSpy()
-      .and.callFake(function() {
+      .and.callFake(function () {
         let cb = arguments[arguments.length - 1]
         let to = arguments[0].to
         let error = null
@@ -652,42 +657,45 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         channel: 'email',
         isBroadcast: true,
-        asyncBroadcastPushNotification: 'http://foo.com'
+        asyncBroadcastPushNotification: 'http://foo.com',
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myChunkedBroadcastService'
-      }
+        serviceName: 'myChunkedBroadcastService',
+      },
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('new')
     await wait(3000)
     data = await app.models.Notification.find({
       where: {
-        serviceName: 'myChunkedBroadcastService'
-      }
+        serviceName: 'myChunkedBroadcastService',
+      },
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('sent')
-    expect(app.models.Notification.request.post).toHaveBeenCalledWith(jasmine.any(Object))
+    expect(app.models.Notification.request.post).toHaveBeenCalledWith(
+      'http://foo.com',
+      jasmine.any(Object)
+    )
     expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(2)
     expect(data[0].failedDispatches.length).toBe(1)
     expect(data[0].failedDispatches[0]).toEqual(
       jasmine.objectContaining({
         userChannelId: 'bar2@invalid',
-        error: 'bar2@invalid'
+        error: 'bar2@invalid',
       })
     )
   })
 
-  it('should send broadcast email notification with matching filter', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should send broadcast email notification with matching filter', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -697,27 +705,27 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         data: {
-          name: 'foo'
+          name: 'foo',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myFilterableBroadcastService'
-      }
+        serviceName: 'myFilterableBroadcastService',
+      },
     })
     expect(data.length).toBe(1)
   })
 
-  it('should skip broadcast email notification with unmatching filter', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should skip broadcast email notification with unmatching filter', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -727,39 +735,39 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         data: {
-          name: 'Foo'
+          name: 'Foo',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(0)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myFilterableBroadcastService'
-      }
+        serviceName: 'myFilterableBroadcastService',
+      },
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('sent')
   })
 
-  xit('should unsubscribe recipients of invalid emails', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  xit('should unsubscribe recipients of invalid emails', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     app.models.Notification.sendEmail = jasmine
       .createSpy()
-      .and.callFake(function() {
+      .and.callFake(function () {
         let cb = arguments[arguments.length - 1]
         let to = arguments[0].to
         let error = null
         if (to.indexOf('invalid') >= 0) {
           error = {
-            responseCode: 550
+            responseCode: 550,
           }
         }
         console.log('faking sendEmail with error for invalid recipient')
@@ -772,17 +780,17 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@invalid.local',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'myInvalideEmailService'
-      }
+        serviceName: 'myInvalideEmailService',
+      },
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('sent')
@@ -792,29 +800,29 @@ describe('POST /notifications', function() {
       jasmine.objectContaining({
         userChannelId: 'bar@invalid.local',
         error: {
-          responseCode: 550
-        }
+          responseCode: 550,
+        },
       })
     )
     data = await app.models.Subscription.find({
       where: {
-        serviceName: 'myInvalideEmailService'
-      }
+        serviceName: 'myInvalideEmailService',
+      },
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('deleted')
   })
 
-  xit('should unsubscribe recipients of invalid emails when sending async broadcast email notifications', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  xit('should unsubscribe recipients of invalid emails when sending async broadcast email notifications', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let realGet = app.models.Notification.app.get
-    spyOn(app.models.Notification.app, 'get').and.callFake(function(param) {
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
       if (param === 'notification') {
         return {
           broadcastSubscriberChunkSize: 100,
-          broadcastSubRequestBatchSize: 10
+          broadcastSubRequestBatchSize: 10,
         }
       } else {
         return realGet.call(app, param)
@@ -822,13 +830,13 @@ describe('POST /notifications', function() {
     })
     app.models.Notification.sendEmail = jasmine
       .createSpy()
-      .and.callFake(function() {
+      .and.callFake(function () {
         let cb = arguments[arguments.length - 1]
         let to = arguments[0].to
         let error = null
         if (to.indexOf('invalid') >= 0) {
           error = {
-            responseCode: 550
+            responseCode: 550,
           }
         }
         console.log('faking sendEmail with error for invalid recipient')
@@ -841,34 +849,34 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         channel: 'email',
         isBroadcast: true,
-        asyncBroadcastPushNotification: true
+        asyncBroadcastPushNotification: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     await wait(3000)
     let data = await app.models.Subscription.find({
       where: {
-        serviceName: 'myInvalideEmailService'
-      }
+        serviceName: 'myInvalideEmailService',
+      },
     })
     expect(data.length).toBe(1)
     expect(data[0].state).toBe('deleted')
     expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
   })
 
-  it('should update bounce record after sending unicast email notification', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should update bounce record after sending unicast email notification', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     await app.models.Bounce.create({
       channel: 'email',
       userChannelId: 'bar@foo.com',
       hardBounceCount: 1,
-      state: 'active'
+      state: 'active',
     })
     let res = await request(app)
       .post('/api/notifications')
@@ -877,11 +885,11 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         channel: 'email',
         userId: 'bar',
-        userChannelId: 'bar@foo.COM'
+        userChannelId: 'bar@foo.COM',
       })
       .set('Accept', 'application/json')
     let data = await app.models.Bounce.findById(1)
@@ -892,15 +900,15 @@ describe('POST /notifications', function() {
     )
   })
 
-  it('should update bounce record after sending broadcast email notification', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should update bounce record after sending broadcast email notification', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     await app.models.Bounce.create({
       channel: 'email',
       userChannelId: 'bar@foo.com',
       hardBounceCount: 1,
-      state: 'active'
+      state: 'active',
     })
     let res = await request(app)
       .post('/api/notifications')
@@ -910,9 +918,9 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@local.invalid',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     let data = await app.models.Bounce.findById(1)
@@ -923,12 +931,12 @@ describe('POST /notifications', function() {
     )
   })
 
-  it('should log successful dispatches after sending broadcast email notification if configured so', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should log successful dispatches after sending broadcast email notification if configured so', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     const realGet = app.models.Notification.app.get
-    spyOn(app.models.Notification.app, 'get').and.callFake(function(param) {
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
       if (param === 'notification') {
         let val = Object.create(realGet.call(app, param))
         val.logSuccessfulBroadcastDispatches = true
@@ -945,17 +953,17 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@local.invalid',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(res.body.successfulDispatches[0]).toEqual(1)
   })
 
-  it('should not log successful dispatches after sending broadcast email notification if configured so', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should not log successful dispatches after sending broadcast email notification if configured so', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -966,17 +974,17 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@local.invalid',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(res.body.successfulDispatches).toBeUndefined()
   })
 
-  it('should set envelope address when bounce is enabled and inboundSmtpServer.domain is defined', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should set envelope address when bounce is enabled and inboundSmtpServer.domain is defined', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -987,9 +995,9 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@local.invalid',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
@@ -998,12 +1006,12 @@ describe('POST /notifications', function() {
     ).toBe('bn-1-54321@invalid.local')
   })
 
-  it('should not set envelope address when bounce is disabled', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should not set envelope address when bounce is disabled', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     const realGet = app.models.Notification.app.get
-    spyOn(app.models.Notification.app, 'get').and.callFake(function(param) {
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
       if (param === 'notification') {
         let val = Object.create(realGet.call(app, param))
         val.handleBounce = false
@@ -1021,9 +1029,9 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@local.invalid',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
@@ -1032,12 +1040,12 @@ describe('POST /notifications', function() {
     ).toBeUndefined()
   })
 
-  it('should not set envelope address when inboundSmtpServer.domain is undefined', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should not set envelope address when inboundSmtpServer.domain is undefined', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     const realGet = app.models.Notification.app.get
-    spyOn(app.models.Notification.app, 'get').and.callFake(function(param) {
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
       if (param === 'inboundSmtpServer') {
         let val = Object.create(realGet.call(app, param))
         val.domain = undefined
@@ -1055,9 +1063,9 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@local.invalid',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
@@ -1066,12 +1074,12 @@ describe('POST /notifications', function() {
     ).toBeUndefined()
   })
 
-  it('should handle batch broadcast request error', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should handle batch broadcast request error', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     const realGet = app.models.Notification.app.get
-    spyOn(app.models.Notification.app, 'get').and.callFake(function(param) {
+    spyOn(app.models.Notification.app, 'get').and.callFake(function (param) {
       if (param === 'notification') {
         let val = Object.create(realGet.call(app, param))
         val.broadcastSubscriberChunkSize = 1
@@ -1083,7 +1091,7 @@ describe('POST /notifications', function() {
     })
 
     spyOn(app.models.Notification.request, 'get').and.callFake(
-      async function() {
+      async function () {
         throw 'error'
       }
     )
@@ -1095,10 +1103,10 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
@@ -1110,8 +1118,8 @@ describe('POST /notifications', function() {
     ).toBeGreaterThanOrEqual(0)
   })
 
-  it('should handle async broadcastCustomFilterFunctions', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should handle async broadcastCustomFilterFunctions', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     await app.models.Subscription.create({
@@ -1119,7 +1127,7 @@ describe('POST /notifications', function() {
       channel: 'email',
       userChannelId: 'bar2@invalid',
       state: 'confirmed',
-      broadcastPushNotificationFilter: "contains_ci(name,'FOO')"
+      broadcastPushNotificationFilter: "contains_ci(name,'FOO')",
     })
 
     let res = await request(app)
@@ -1129,44 +1137,44 @@ describe('POST /notifications', function() {
         message: {
           from: 'no_reply@bar.com',
           subject: 'test',
-          textBody: 'test'
+          textBody: 'test',
         },
         data: {
-          name: 'foo'
+          name: 'foo',
         },
         channel: 'email',
-        isBroadcast: true
+        isBroadcast: true,
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     expect(app.models.Notification.sendEmail).toHaveBeenCalledTimes(1)
     let data = await app.models.Notification.find({
       where: {
-        serviceName: 'broadcastCustomFilterFunctionsTest'
-      }
+        serviceName: 'broadcastCustomFilterFunctionsTest',
+      },
     })
     expect(data[0].state).toBe('sent')
   })
 })
-describe('PATCH /notifications/{id}', function() {
-  beforeEach(async function() {
+describe('PATCH /notifications/{id}', function () {
+  beforeEach(async function () {
     await app.models.Notification.create({
       channel: 'inApp',
       isBroadcast: true,
       message: {
         title: 'test',
-        body: 'this is a test'
+        body: 'this is a test',
       },
       serviceName: 'myService',
-      state: 'new'
+      state: 'new',
     })
   })
-  it('should set readBy field of broadcast inApp notifications for sm users', async function() {
+  it('should set readBy field of broadcast inApp notifications for sm users', async function () {
     let res = await request(app)
       .patch('/api/notifications/1')
       .send({
         serviceName: 'myService',
-        state: 'read'
+        state: 'read',
       })
       .set('Accept', 'application/json')
       .set('SM_USER', 'bar')
@@ -1175,45 +1183,45 @@ describe('PATCH /notifications/{id}', function() {
     expect(data.readBy).toContain('bar')
     expect(data.state).toBe('new')
   })
-  it('should set state field of broadcast inApp notifications for admin users', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should set state field of broadcast inApp notifications for admin users', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
       .patch('/api/notifications/1')
       .send({
-        state: 'deleted'
+        state: 'deleted',
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(200)
     let data = await app.models.Notification.findById(1)
     expect(data.state).toBe('deleted')
   })
-  it('should deny anonymous user', async function() {
+  it('should deny anonymous user', async function () {
     let res = await request(app)
       .patch('/api/notifications/1')
       .send({
         serviceName: 'myService',
-        state: 'read'
+        state: 'read',
       })
       .set('Accept', 'application/json')
     expect(res.statusCode).toBe(403)
   })
 })
-describe('DELETE /notifications/{id}', function() {
-  beforeEach(async function() {
+describe('DELETE /notifications/{id}', function () {
+  beforeEach(async function () {
     await app.models.Notification.create({
       channel: 'inApp',
       isBroadcast: true,
       message: {
         title: 'test',
-        body: 'this is a test'
+        body: 'this is a test',
       },
       serviceName: 'myService',
-      state: 'new'
+      state: 'new',
     })
   })
-  it('should set deletedBy field of broadcast inApp notifications for sm users', async function() {
+  it('should set deletedBy field of broadcast inApp notifications for sm users', async function () {
     let res = await request(app)
       .delete('/api/notifications/1')
       .set('Accept', 'application/json')
@@ -1223,8 +1231,8 @@ describe('DELETE /notifications/{id}', function() {
     expect(data.deletedBy).toContain('bar')
     expect(data.state).toBe('new')
   })
-  it('should set state field of broadcast inApp notifications for admin users', async function() {
-    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function() {
+  it('should set state field of broadcast inApp notifications for admin users', async function () {
+    spyOn(app.models.Notification, 'isAdminReq').and.callFake(function () {
       return true
     })
     let res = await request(app)
@@ -1234,7 +1242,7 @@ describe('DELETE /notifications/{id}', function() {
     let data = await app.models.Notification.findById(1)
     expect(data.state).toBe('deleted')
   })
-  it('should deny anonymous user', async function() {
+  it('should deny anonymous user', async function () {
     let res = await request(app)
       .delete('/api/notifications/1')
       .set('Accept', 'application/json')
