@@ -273,7 +273,7 @@ objects:
               - mongodb
             from:
               kind: ImageStreamTag
-              name: mongodb:3.4
+              name: mongodb:3.6
               namespace: openshift
           type: ImageChange
         - type: ConfigChange
