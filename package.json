@@ -25,7 +25,7 @@
     "jmespath": "f-w/jmespath.js#semver:^1.0",
     "lodash": "^4.17.11",
     "loopback": "^3.26.0",
-    "loopback-boot": "^2.6.5",
+    "loopback-boot": "^3.2.1",
     "loopback-component-explorer": "f-w/loopback-component-explorer",
     "loopback-connector-mongodb": "^5.2.2",
     "mailparser": "^2.3.2",
