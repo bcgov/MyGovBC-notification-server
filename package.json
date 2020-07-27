@@ -23,7 +23,7 @@
     "helmet": "^3.8.0",
     "ip-range-check": "0.0.2",
     "jmespath": "f-w/jmespath.js#semver:^1.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "loopback": "^3.26.0",
     "loopback-boot": "^3.2.1",
     "loopback-component-explorer": "f-w/loopback-component-explorer",
