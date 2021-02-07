@@ -1,10 +1,9 @@
-* [![Build Status](https://jenkins-gcpe-notifybc-tools.pathfinder.gov.bc.ca/buildStatus/icon?job=notify-bc-dev)](https://jenkins-gcpe-notifybc-tools.pathfinder.gov.bc.ca/job/notify-bc-dev/) deploying to OpenShift 
-* [![Build Status](https://travis-ci.org/bcgov/MyGovBC-notification-server.svg?branch=master)](https://travis-ci.org/bcgov/MyGovBC-notification-server) using latest version of NodeJS 
+[![Build Status](https://travis-ci.org/bcgov/MyGovBC-notification-server.svg?branch=master)](https://travis-ci.org/bcgov/MyGovBC-notification-server) using latest version of NodeJS 
 
 NotifyBC
 ===========
 
-A general purpose notification subscription API Server supporting multi-channel delivery. The application is designed for MyGovBC but can be used independently. See **[full documentation](https://bcgov.github.io/MyGovBC-notification-server/)**.
+A general purpose notification subscription API Server supporting multi-channel delivery. The application is designed for MyGovBC but can be used independently. See **[full documentation](https://bcgov.github.io/NotifyBC/)**.
 
 ## License
 
