@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/bcgov/MyGovBC-notification-server.svg?branch=master)](https://travis-ci.org/bcgov/MyGovBC-notification-server) using latest version of NodeJS 
-
 NotifyBC
 ===========
 
