@@ -1,7 +1,7 @@
-NotifyBC
+Archived
 ===========
 
-A general purpose notification subscription API Server supporting multi-channel delivery. The application is designed for MyGovBC but can be used independently. See **[full documentation](https://bcgov.github.io/NotifyBC/)**.
+Repo has been moved to https://github.com/bcgov/NotifyBC.
 
 ## License
 
